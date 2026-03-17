@@ -1,0 +1,320 @@
+import { useState } from 'react';
+import { useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { Clock, Info, Plus, Power, PowerOff, Shield, Trash2 } from 'lucide-react';
+import { cn } from '@remnant/frontend/lib/cn';
+import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
+import { PageError } from '@remnant/frontend/features/ui/page_error';
+import { Button } from '@remnant/frontend/features/ui/button';
+import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
+import { Dialog } from '@remnant/frontend/features/ui/dialog';
+import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
+import { useServer } from '@remnant/frontend/hooks/use_servers';
+import {
+  useFirewallRules,
+  useAddFirewallRule,
+  useRemoveFirewallRule,
+  useToggleFirewallRule,
+} from '@remnant/frontend/hooks/use_firewall';
+import { AddFirewallRuleDialog } from '@remnant/frontend/pages/app/servers/dialogs/add_firewall_rule_dialog';
+import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
+import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
+import type { Protocol } from '@remnant/frontend/pages/app/servers/features/firewall_card';
+import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+
+const PROTOCOL_BADGE_VARIANT: Record<Protocol, BadgeProps['variant']> = {
+  tcp: 'success',
+  udp: 'blue',
+  both: 'violet',
+};
+
+const PROTOCOL_LABELS: Record<Protocol, string> = {
+  tcp: 'TCP',
+  udp: 'UDP',
+  both: 'TCP+UDP',
+};
+
+type FirewallRule = {
+  id: number;
+  port: number;
+  protocol: Protocol;
+  label: string;
+  enabled: boolean;
+};
+
+export function ServerSettingsFirewallPage() {
+  const { t } = useTranslation();
+  const { id } = useParams({ strict: false });
+  const serverId = id ? parseInt(id, 10) : null;
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+
+  const { isLoading: serverLoading } = useServer(serverId || 0);
+  const { data: firewallData } = useFirewallRules(serverId);
+  const addFirewallRule = useAddFirewallRule(serverId || 0);
+  const removeFirewallRule = useRemoveFirewallRule(serverId || 0);
+  const toggleFirewallRule = useToggleFirewallRule(serverId || 0);
+
+  if (!serverId || isNaN(serverId)) {
+    return <PageError message={t('errors.generic')} />;
+  }
+
+  if (serverLoading) {
+    return <PageLoader />;
+  }
+
+  const rules: Array<FirewallRule> = firewallData?.rules ?? [];
+  const activeCount = rules.filter((r) => r.enabled).length;
+
+  return (
+    <>
+      <ServerPageHeader>
+        <ServerPageHeader.Left>
+          <ServerPageHeader.Icon icon={Shield} />
+          <ServerPageHeader.Info>
+            <ServerPageHeader.Heading>
+              <ServerPageHeader.ServerName />
+              <ServerPageHeader.PageName>{t('settings.firewall.title')}</ServerPageHeader.PageName>
+              <ServerPageHeader.Docs path={'/guide/configuration'} />
+            </ServerPageHeader.Heading>
+            <ServerPageHeader.Description>{t('settings.firewall.description')}</ServerPageHeader.Description>
+          </ServerPageHeader.Info>
+        </ServerPageHeader.Left>
+        <ServerPageHeader.Actions>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className={'size-4'} />
+            {t('settings.firewall.addRule')}
+          </Button>
+        </ServerPageHeader.Actions>
+      </ServerPageHeader>
+      <PageContent>
+        <div className={'space-y-6'}>
+          <FeatureCard>
+            <FeatureCard.Header
+              actions={
+                <div className={'flex items-center gap-1.5'}>
+                  <Button variant={'ghost'} size={'icon-sm'} onClick={() => setGuidelinesOpen(true)}>
+                    <Info className={'size-4'} />
+                  </Button>
+                </div>
+              }
+            >
+              <FeatureCard.Title count={rules.length > 0 && `${activeCount}/${rules.length}`}>
+                {t('settings.firewall.title')}
+              </FeatureCard.Title>
+              <FeatureCard.Description>{t('settings.firewall.description')}</FeatureCard.Description>
+            </FeatureCard.Header>
+            <FeatureCard.Body>
+              {rules.length === 0 ? (
+                <Empty {...{ setDialogOpen }} />
+              ) : (
+                <>
+                  {rules.map((rule) => (
+                    <RuleRow
+                      key={rule.id}
+                      onToggle={(ruleId) => toggleFirewallRule.mutateAsync(ruleId)}
+                      onDelete={(ruleId) => removeFirewallRule.mutateAsync(ruleId)}
+                      {...{ rule }}
+                    />
+                  ))}
+                </>
+              )}
+            </FeatureCard.Body>
+          </FeatureCard>
+        </div>
+      </PageContent>
+      <AddFirewallRuleDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAdd={(rule) => {
+          addFirewallRule.mutateAsync(rule);
+          setDialogOpen(false);
+        }}
+      />
+      <GuidelinesDialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen} />
+    </>
+  );
+}
+
+type RuleRowProps = {
+  rule: FirewallRule;
+  onToggle: (id: number) => void | Promise<unknown>;
+  onDelete: (id: number) => void | Promise<unknown>;
+};
+
+function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
+  const { t } = useTranslation();
+  const [toggleConfirm, setToggleConfirm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  return (
+    <FeatureCard.Row interactive className={'items-center gap-8 py-3'}>
+      <div className={cn('flex items-center gap-3', !rule.enabled && 'opacity-50')}>
+        <div
+          className={cn(
+            'flex size-8 shrink-0 items-center justify-center rounded-lg transition-opacity',
+            rule.enabled ? 'bg-green-600 text-white' : 'bg-zinc-300'
+          )}
+        >
+          <Shield className={'size-4'} strokeWidth={2} />
+        </div>
+        <div className={'min-w-0'}>
+          <div className={'flex items-center gap-2'}>
+            <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums'}>{rule.port}</span>
+            <Badge variant={PROTOCOL_BADGE_VARIANT[rule.protocol]} className={'font-semibold'}>
+              {PROTOCOL_LABELS[rule.protocol]}
+            </Badge>
+            <span className={'text-sm text-zinc-600'}>{rule.label}</span>
+            {!rule.enabled && (
+              <Badge variant={'muted'} size={'xs'}>
+                {t('settings.firewall.disabled')}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+      <FeatureCard.RowControl>
+        {toggleConfirm ? (
+          <div className={'flex items-center gap-1.5'}>
+            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <Button
+              variant={rule.enabled ? 'secondary' : 'success'}
+              size={'xs'}
+              onClick={() => {
+                onToggle(rule.id);
+                setToggleConfirm(false);
+              }}
+            >
+              {t('common.yes')}
+            </Button>
+            <Button variant={'ghost'} size={'xs'} onClick={() => setToggleConfirm(false)}>
+              {t('common.no')}
+            </Button>
+          </div>
+        ) : deleteConfirm ? (
+          <div className={'flex items-center gap-1.5'}>
+            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <Button variant={'danger'} size={'xs'} onClick={() => onDelete(rule.id)}>
+              {t('common.yes')}
+            </Button>
+            <Button variant={'ghost'} size={'xs'} onClick={() => setDeleteConfirm(false)}>
+              {t('common.no')}
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Tooltip.Provider delayDuration={300}>
+              <Tooltip>
+                <Tooltip.Trigger asChild>
+                  <Button
+                    variant={rule.enabled ? 'ghost' : 'success'}
+                    size={rule.enabled ? 'icon-sm' : 'sm'}
+                    onClick={() => setToggleConfirm(true)}
+                    className={cn(rule.enabled && 'text-zinc-600 hover:text-zinc-600')}
+                  >
+                    {rule.enabled ? (
+                      <PowerOff className={'size-4'} />
+                    ) : (
+                      <>
+                        <Power className={'size-4'} />
+                        {t('settings.firewall.enable')}
+                      </>
+                    )}
+                  </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  {rule.enabled ? t('rules.tooltipDisable') : t('rules.tooltipEnable')}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger asChild>
+                  <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+                    <Trash2 className={'size-3.5'} />
+                  </Button>
+                </Tooltip.Trigger>
+                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('rules.tooltipDelete')}</Tooltip.Content>
+              </Tooltip>
+            </Tooltip.Provider>
+          </>
+        )}
+      </FeatureCard.RowControl>
+    </FeatureCard.Row>
+  );
+}
+
+type EmptyProps = {
+  setDialogOpen: (open: boolean) => void;
+};
+
+function Empty({ setDialogOpen }: EmptyProps) {
+  const { t } = useTranslation();
+
+  return (
+    <FeatureCard.Row className={'relative overflow-hidden'}>
+      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
+      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
+          <Clock className={'size-6 text-zinc-600'} strokeWidth={1.5} />
+        </div>
+        <p className={'mt-6 font-medium'}>{t('settings.firewall.noRules')}</p>
+        <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.noRulesHint')}</p>
+        <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={() => setDialogOpen(true)}>
+          <Plus className={'size-3.5'} />
+          {t('settings.firewall.addRule')}
+        </Button>
+      </FeatureCard.Stack>
+    </FeatureCard.Row>
+  );
+}
+
+type GuidelinesDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+function GuidelinesDialog({ open, onOpenChange }: GuidelinesDialogProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Dialog {...{ open, onOpenChange }}>
+      <Dialog.Content>
+        <Dialog.Header>
+          <Dialog.Icon className={'bg-blue-600/10 text-blue-600'}>
+            <Info className={'size-5'} strokeWidth={1.75} />
+          </Dialog.Icon>
+          <div>
+            <Dialog.Title>{t('settings.firewall.infoTitle')}</Dialog.Title>
+          </div>
+        </Dialog.Header>
+        <Dialog.Body>
+          <div className={'divide-y divide-black/4'}>
+            <div className={'pb-3'}>
+              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoPortRangeLabel')}</p>
+              <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoPortRangeDesc')}</p>
+            </div>
+            <div className={'py-3'}>
+              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoReservedPortsLabel')}</p>
+              <div className={'mt-1.5 flex flex-wrap gap-1.5'}>
+                {[22, 80, 443, 3000, 3001].map((port) => (
+                  <Badge key={port} variant={'muted'} className={'font-jetbrains'}>
+                    {port}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className={'py-3'}>
+              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoProtocolLabel')}</p>
+              <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoProtocolDesc')}</p>
+            </div>
+          </div>
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Close asChild>
+            <Button variant={'secondary'}>{t('common.close')}</Button>
+          </Dialog.Close>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog>
+  );
+}

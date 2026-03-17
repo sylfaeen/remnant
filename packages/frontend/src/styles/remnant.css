@@ -1,0 +1,286 @@
+.remnant {
+  @apply flex h-svh w-full flex-col;
+
+  &.new-version {
+    .sidebar {
+      @apply top-10;
+    }
+  }
+
+  .sidebar {
+    transform: translate(-100%);
+    left: 0;
+    top: 0;
+    z-index: 25;
+    background-color: #f6f6f7;
+    opacity: 0;
+    width: calc(100vw - 64px);
+    max-width: 320px;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    transition:
+      opacity 0.5s,
+      transform 0.25s;
+    position: fixed;
+    bottom: 0;
+    overflow: hidden;
+
+    &.open {
+      transform: translate(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (min-width: 960px) {
+      width: 272px;
+      background-color: #f6f6f7;
+      opacity: 1;
+      visibility: visible;
+      max-width: 100%;
+      transform: translate(0);
+    }
+
+    @media (min-width: 1440px) {
+      padding-left: max(32px, calc((100% - (1440px - 64px)) / 2));
+      width: calc((100% - (1440px - 64px)) / 2 + 272px - 32px);
+    }
+  }
+
+  .page {
+    margin: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    width: 100%;
+
+    @media (min-width: 960px) {
+      padding-left: 272px;
+    }
+
+    @media (min-width: 1440px) {
+      padding-right: calc((100% - 1440px) / 2);
+      padding-left: calc((100% - 1440px) / 2 + 272px);
+    }
+
+    .page-wrapper {
+      width: 100%;
+      padding: 32px 24px 96px;
+
+      @media (min-width: 768px) {
+        padding: 48px 32px 128px;
+      }
+
+      @media (min-width: 960px) {
+        padding: 48px 32px 0;
+      }
+
+      .page-container {
+        width: 100%;
+        margin: 0 auto;
+
+        @media (min-width: 1280px) {
+          justify-content: center;
+          display: flex;
+        }
+      }
+    }
+
+    &.layout-panel {
+      &.layout-server {
+        .page-wrapper {
+          padding-top: 0;
+          padding-left: 0;
+          padding-right: 0;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+
+          .page-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+
+            .content {
+              width: 100%;
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+              margin: 0 auto;
+              padding: 0 16px;
+              position: relative;
+
+              @media (min-width: 960px) {
+                padding: 10px 32px 16px;
+              }
+
+              @media (min-width: 1280px) {
+                order: 1;
+                margin: 0;
+              }
+
+              .content-container {
+                margin: 0 auto;
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+              }
+            }
+
+            .header {
+              background-color: #ffffff;
+              border-bottom: 1px solid transparent;
+              padding: 16px;
+              width: 100%;
+              max-width: 100%;
+
+              &.scrolled {
+                @apply border-black/6;
+              }
+
+              @media (min-width: 1280px) {
+                position: sticky;
+                top: 0;
+                z-index: 30;
+                padding: 32px 32px 16px;
+              }
+            }
+          }
+        }
+      }
+
+      &.layout-main {
+        .page-wrapper {
+          padding-top: 0;
+          padding-left: 0;
+          padding-right: 0;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+
+          .page-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+
+            .content {
+              width: 100%;
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+              margin: 0 auto;
+              position: relative;
+
+              @media (min-width: 960px) {
+                padding: 32px;
+              }
+
+              @media (min-width: 1280px) {
+                order: 1;
+                margin: 0;
+              }
+
+              .content-container {
+                margin: 0 auto;
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+              }
+            }
+
+            .header {
+              position: sticky;
+              top: 0;
+              z-index: 30;
+              background-color: #ffffff;
+              border-bottom: 1px solid transparent;
+              padding: 32px 32px 16px;
+              width: 100%;
+              max-width: 100%;
+
+              &.scrolled {
+                @apply border-black/6;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    &.layout-doc {
+      .page-wrapper {
+        .page-container {
+          .content {
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+
+            @media (min-width: 960px) {
+              padding: 0 32px 128px;
+            }
+
+            @media (min-width: 1280px) {
+              order: 1;
+              min-width: 640px;
+              margin: 0;
+            }
+
+            .content-container {
+              margin: 0 auto;
+              max-width: 688px;
+            }
+          }
+
+          .aside {
+            flex-grow: 1;
+            order: 2;
+            width: 100%;
+            max-width: 256px;
+            display: none;
+            position: relative;
+            padding-left: 32px;
+
+            @media (min-width: 1280px) {
+              display: block;
+            }
+
+            .aside-curtain {
+              z-index: 10;
+              background: linear-gradient(transparent, #ffffff 70%);
+              pointer-events: none;
+              width: 224px;
+              height: 32px;
+              position: fixed;
+              bottom: 0;
+            }
+
+            .aside-container {
+              padding-top: 48px;
+              scrollbar-width: none;
+              width: 224px;
+              height: 100vh;
+              position: fixed;
+              top: 0;
+              overflow: hidden auto;
+
+              .aside-content {
+                min-height: calc(100vh - 48px);
+                flex-direction: column;
+                padding-bottom: 32px;
+                display: flex;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

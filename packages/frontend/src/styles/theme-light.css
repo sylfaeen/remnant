@@ -1,0 +1,26 @@
+:root {
+  color-scheme: light;
+
+  --glow-primary: rgba(61, 168, 99, 0.12);
+  --glow-primary-strong: rgba(61, 168, 99, 0.2);
+  --glow-secondary: rgba(217, 163, 26, 0.1);
+  --glow-success: rgba(61, 168, 99, 0.15);
+  --glow-danger: rgba(220, 38, 38, 0.15);
+
+  --shadow-glow: 0 0 20px var(--glow-primary);
+  --shadow-glow-sm: 0 0 10px var(--glow-primary);
+  --shadow-glow-success: 0 0 20px var(--glow-success);
+  --shadow-glow-danger: 0 0 20px var(--glow-danger);
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-inner: 0 0 1.5px 0.5px #0000001f inset;
+  --shadow-inner-xs: 0 0 0 1px #001a0026, 0 0 1px 0 #00000008, 0 1px 2px 0 #0000000f;
+
+  --status-online: #3da863;
+  --status-online-glow: rgba(61, 168, 99, 0.3);
+  --status-offline: #8b8b8e;
+  --status-warning: #d9a31a;
+  --status-warning-glow: rgba(217, 163, 26, 0.3);
+  --status-error: #dc2626;
+  --status-error-glow: rgba(220, 38, 38, 0.3);
+}

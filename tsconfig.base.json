@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@remnant/shared": ["packages/shared/src"],
+      "@remnant/shared/*": ["packages/shared/src/*"],
+      "@remnant/backend/*": ["packages/backend/src/*"],
+      "@remnant/frontend/*": ["packages/frontend/src/*"]
+    }
+  }
+}

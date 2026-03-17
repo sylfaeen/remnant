@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+@import './styles/design-tokens.css';
+@import './styles/theme-light.css';
+@import './styles/remnant.css';
+@import './styles/prose-doc.css';
+
+@theme {
+  --color-glow-primary: var(--glow-primary);
+  --color-glow-primary-strong: var(--glow-primary-strong);
+  --color-glow-secondary: var(--glow-secondary);
+  --color-glow-success: var(--glow-success);
+  --color-glow-danger: var(--glow-danger);
+
+  --color-status-online: var(--status-online);
+  --color-status-offline: var(--status-offline);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+
+  --color-minecraft-darkBlue: #0000aa;
+  --color-minecraft-darkGreen: #00aa00;
+  --color-minecraft-darkAqua: #00aaaa;
+  --color-minecraft-darkRed: #aa0000;
+  --color-minecraft-darkPurple: #aa00aa;
+  --color-minecraft-darkGray: #555555;
+  --color-minecraft-blue: #5555ff;
+  --color-minecraft-green: #36b14a;
+  --color-minecraft-purple: #ff55ff;
+  --color-minecraft-yellow: #ffff55;
+  --color-minecraft-gold: #ffaa00;
+  --color-minecraft-gray: #aaaaaa;
+  --color-minecraft-red: #b95555;
+  --color-minecraft-aqua: #55ffff;
+
+  --font-family-body: var(--font-inter);
+  --font-family-mono: var(--font-jetbrains);
+
+  --shadow-glow: var(--shadow-glow);
+  --shadow-glow-sm: var(--shadow-glow-sm);
+  --shadow-glow-success: var(--shadow-glow-success);
+  --shadow-glow-danger: var(--shadow-glow-danger);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-inner: var(--shadow-inner);
+  --shadow-inner-xs: var(--shadow-inner-xs);
+
+  --animate-fade-in: fade-in var(--duration-normal) var(--ease-out);
+  --animate-fade-out: fade-out var(--duration-normal) var(--ease-out);
+  --animate-slide-up: slide-up var(--duration-slow) var(--ease-out);
+  --animate-slide-down: slide-down var(--duration-slow) var(--ease-out);
+  --animate-slide-in-right: slide-in-right var(--duration-slow) var(--ease-out);
+  --animate-scale-in: scale-in var(--duration-normal) var(--ease-out);
+  --animate-scale-out: scale-out var(--duration-normal) var(--ease-out);
+  --animate-breathe: breathe 4s var(--ease-in-out) infinite;
+  --animate-pulse-soft: pulse-soft 2s var(--ease-in-out) infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-float: float 6s var(--ease-in-out) infinite;
+  --animate-spin: spin 1s linear infinite;
+  --animate-wiggle: wiggle 0.3s var(--ease-out);
+  --animate-expand: expand var(--duration-normal) var(--ease-spring);
+  --animate-collapse: collapse var(--duration-fast) var(--ease-out);
+  --animate-slide-in-from-right: slide-in-from-right var(--duration-normal) var(--ease-out);
+  --animate-slide-out-to-right: slide-out-to-right var(--duration-fast) var(--ease-in);
+  --animate-slide-in-from-top: slide-in-from-top var(--duration-normal) var(--ease-out);
+  --animate-shake: shake 0.5s var(--ease-out);
+  --animate-skeleton: skeleton-pulse 2s var(--ease-in-out) infinite;
+  --animate-ripple: ripple 0.6s linear;
+  --animate-toast-slide-in: toast-slide-in var(--duration-slow) var(--ease-out);
+  --animate-toast-slide-out: toast-slide-out var(--duration-fast) var(--ease-in) forwards;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
+}
+
+html {
+  font-family: var(--font-inter), serif;
+  color: #1a1a1b;
+  font-size: 14px;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scrollbar-gutter: stable;
+}
+
+body {
+  min-height: 100vh;
+}
+
+::selection {
+  background-color: rgba(5, 150, 105, 0.1);
+  color: #1a1a1b;
+}
+
+.font-inter {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-jetbrains {
+  font-family: var(--font-jetbrains), 'Fira Code', monospace;
+}
+
+.font-quattrocento {
+  font-family: var(--font-quattrocento), serif;
+}
+
+.bg-gradient-ambient {
+  background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(5, 150, 105, 0.04) 0%, transparent 60%);
+}
+
+.bg-gradient-mesh {
+  background-image:
+    radial-gradient(at 30% 20%, rgba(5, 150, 105, 0.04) 0px, transparent 50%),
+    radial-gradient(at 70% 10%, rgba(20, 184, 166, 0.03) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(245, 158, 11, 0.02) 0px, transparent 50%);
+}
+
+.bg-gradient-surface {
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.01) 0%, transparent 100%);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.transition-colors-opacity {
+  transition-property: color, background-color, border-color, opacity;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--duration-fast);
+}
+
+.transition-transform-shadow {
+  transition-property: transform, box-shadow;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--duration-normal);
+}
+
+.transition-all-smooth {
+  transition-property: all;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--duration-normal);
+}
+
+button,
+a {
+  @apply cursor-pointer;
+}
