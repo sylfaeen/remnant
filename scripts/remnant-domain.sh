@@ -273,8 +273,14 @@ action_enable_ssl() {
   local vhost_path
   vhost_path=$(safe_vhost_path "$domain")
 
+  # Check domain-specific vhost first, then panel vhost
   if [ ! -f "$vhost_path" ]; then
-    json_error "No vhost found for ${domain}. Add the domain first."
+    # Check if this domain is configured in the panel vhost
+    if grep -q "server_name ${domain}" "${SITES_AVAILABLE}/remnant" 2>/dev/null; then
+      vhost_path="${SITES_AVAILABLE}/remnant"
+    else
+      json_error "No vhost found for ${domain}. Add the domain first."
+    fi
   fi
 
   # Verify DNS points to this server

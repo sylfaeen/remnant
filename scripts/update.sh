@@ -239,6 +239,12 @@ download_and_replace() {
 restart_services() {
     print_step 4 5 "Restarting services"
 
+    # Update systemd service ReadWritePaths for domain/SSL management
+    if grep -q "ReadWritePaths=" /etc/systemd/system/remnant.service 2>/dev/null; then
+        sed -i 's|ReadWritePaths=.*|ReadWritePaths=/opt/remnant /etc/nginx /etc/letsencrypt /var/lib/nginx /var/log/nginx /run|' /etc/systemd/system/remnant.service
+        print_ok "Service file updated"
+    fi
+
     systemctl daemon-reload
     systemctl start remnant
     sleep 2
