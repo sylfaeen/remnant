@@ -1,7 +1,7 @@
 import { useState, type DragEvent, type ChangeEvent } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Package, Power, PowerOff, Puzzle, Trash2, Upload, UploadCloud } from 'lucide-react';
+import { AlertTriangle, Package, Power, PowerOff, Puzzle, Trash2, UploadCloud } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -20,6 +20,7 @@ import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { Badge } from '@remnant/frontend/features/ui/badge';
 import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Label } from '@remnant/frontend/features/ui/label';
 
 export function ServerPluginsPage() {
   const { t } = useTranslation();
@@ -47,9 +48,7 @@ export function ServerPluginsPage() {
               <ServerPageHeader.PageName>{t('nav.plugins')}</ServerPageHeader.PageName>
               <ServerPageHeader.Docs path={'/guide/plugins'} />
             </ServerPageHeader.Heading>
-            <ServerPageHeader.Description>
-              {t('plugins.subtitle', 'Upload and manage server plugins')}
-            </ServerPageHeader.Description>
+            <ServerPageHeader.Description>{t('plugins.subtitle')}</ServerPageHeader.Description>
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
       </ServerPageHeader>
@@ -133,7 +132,7 @@ function UploadSection({ serverId }: UploadSectionProps) {
     <FeatureCard>
       <FeatureCard.Header>
         <FeatureCard.Content>
-          <FeatureCard.Title>{t('plugins.addPlugin', 'Add plugin')}</FeatureCard.Title>
+          <FeatureCard.Title>{t('plugins.addPlugin')}</FeatureCard.Title>
           <FeatureCard.Description>{t('plugins.addPluginDescription')}</FeatureCard.Description>
         </FeatureCard.Content>
       </FeatureCard.Header>
@@ -167,16 +166,13 @@ function UploadSection({ serverId }: UploadSectionProps) {
               />
             </div>
             <p className={'font-medium'}>{t('plugins.uploadHint')}</p>
-            <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.jarOnly', '.jar files only')}</p>
-            <label className={'mt-3 inline-block cursor-pointer'}>
-              <Button asChild variant={'secondary'} size={'sm'} disabled={uploadPending} loading={uploadPending}>
-                <span>
-                  <Upload className={'size-4'} />
-                  {t('plugins.browseFiles', 'Browse files')}
-                </span>
+            <p className={'mt-3 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.or')}</p>
+            <Label className={'mt-3 mb-0! inline-block cursor-pointer'}>
+              <Button variant={'secondary'} disabled={uploadPending} loading={uploadPending}>
+                {t('plugins.browseFiles')}
               </Button>
               <input type={'file'} accept={'.jar'} multiple onChange={onFileSelect} className={'hidden'} />
-            </label>
+            </Label>
             {uploadPending && (
               <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
                 <div
@@ -219,9 +215,7 @@ function PluginListSection({ serverId }: PluginListSectionProps) {
           <FeatureCard.Title count={plugins && plugins.length > 0 && `${enabledCount}/${plugins.length}`}>
             {t('plugins.installed')}
           </FeatureCard.Title>
-          <FeatureCard.Description>
-            {t('plugins.uploadFirst', 'Upload your first plugin to extend your server')}
-          </FeatureCard.Description>
+          <FeatureCard.Description>{t('plugins.uploadFirst')}</FeatureCard.Description>
         </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>

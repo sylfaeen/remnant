@@ -59,17 +59,24 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
-  const Comp = asChild ? Slot : 'button';
   const isDisabled = disabled || loading;
 
+  if (asChild) {
+    return (
+      <Slot className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...rest}>
+        {children}
+      </Slot>
+    );
+  }
+
   return (
-    <Comp className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...rest}>
+    <button className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...rest}>
       {loading ? (
         <Loader2 className={'size-4 animate-spin'} />
       ) : IconComponent ? (
         <IconComponent className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
       ) : null}
       {children}
-    </Comp>
+    </button>
   );
 }
