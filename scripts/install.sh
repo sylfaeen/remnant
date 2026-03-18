@@ -516,7 +516,7 @@ SyslogIdentifier=remnant
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=${REMNANT_HOME} /etc/nginx /etc/letsencrypt /var/lib/nginx /var/log/nginx /run
+ReadWritePaths=${REMNANT_HOME} /etc/nginx /etc/letsencrypt /var/lib/nginx /var/log/nginx /var/log/letsencrypt /run
 
 [Install]
 WantedBy=multi-user.target
