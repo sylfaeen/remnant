@@ -15,9 +15,11 @@ import { Badge } from '@remnant/frontend/features/ui/badge';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { ApiError } from '@remnant/frontend/lib/api';
+import { useThemeStore } from '@remnant/frontend/stores/theme_store';
 
 export function ServerFileEditorPage() {
   const { t } = useTranslation();
+  const isDark = useThemeStore((s) => s.isDark);
 
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
@@ -132,7 +134,7 @@ export function ServerFileEditorPage() {
               <ServerPageHeader.ServerName />
               <ServerPageHeader.PageName>{t('nav.files')}</ServerPageHeader.PageName>
             </ServerPageHeader.Heading>
-            <div className={'font-jetbrains mt-0.5 flex items-center gap-1.5 text-sm text-zinc-600'}>
+            <div className={'font-jetbrains mt-0.5 flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
               <span className={'truncate'}>{filePath}</span>
               {hasChanges && <span className={'text-amber-500'}>*</span>}
             </div>
@@ -155,13 +157,13 @@ export function ServerFileEditorPage() {
         </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
-        <div className={'min-h-0 flex-1 overflow-hidden rounded-xl border border-black/10'}>
+        <div className={'min-h-0 flex-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10'}>
           <Editor
             height={'100%'}
             language={language}
             value={content}
             onChange={handleEditorChange}
-            theme={'vs-dark'}
+            theme={isDark ? 'vs-dark' : 'light'}
             options={{
               minimap: { enabled: true },
               fontSize: 14,
@@ -175,14 +177,14 @@ export function ServerFileEditorPage() {
             }}
           />
         </div>
-        <div className={'flex shrink-0 items-center justify-between text-sm text-zinc-600'}>
+        <div className={'flex shrink-0 items-center justify-between text-sm text-zinc-600 dark:text-zinc-400'}>
           <div className={'flex items-center gap-3'}>
             <Badge variant={'muted'} size={'sm'}>
               {language}
             </Badge>
             <span className={'font-jetbrains text-xs'}>{filename}</span>
           </div>
-          <span className={'text-xs text-zinc-400'}>{t('files.ctrlS')}</span>
+          <span className={'text-xs text-zinc-400 dark:text-zinc-500'}>{t('files.ctrlS')}</span>
         </div>
       </PageContent>
     </>

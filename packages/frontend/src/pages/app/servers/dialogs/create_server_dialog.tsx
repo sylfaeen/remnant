@@ -70,7 +70,7 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
                 placeholder={t('servers.serverNamePlaceholder')}
                 required
               />
-              <p className={'mt-1 text-sm text-zinc-600'}>
+              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
                 {t('servers.nameHint', 'The server directory and files will be created automatically')}
               </p>
             </div>
@@ -120,7 +120,7 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
             </div>
             <Label className={'flex cursor-pointer items-center gap-2'}>
               <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
-              <span className={'text-zinc-600'}>{t('servers.autoStartDesc')}</span>
+              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</span>
             </Label>
           </Dialog.Body>
         </form>

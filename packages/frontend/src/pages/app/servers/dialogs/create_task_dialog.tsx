@@ -182,7 +182,7 @@ function TaskFormFields({ serverId, onSubmit, task }: TaskFormFieldsProps) {
           />
         </div>
         <div>
-          <label className={'mb-2 block text-sm font-medium text-zinc-600'}>{t('tasks.taskType')}</label>
+          <label className={'mb-2 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>{t('tasks.taskType')}</label>
           <div className={'grid grid-cols-3 gap-2'}>
             {TASK_TYPES.map((type) => {
               const Icon = type.icon;
@@ -196,15 +196,25 @@ function TaskFormFields({ serverId, onSubmit, task }: TaskFormFieldsProps) {
                     'rounded-lg border p-3 text-left transition-all',
                     isActive
                       ? type.activeClass
-                      : 'border-black/6 bg-zinc-50/50 text-zinc-600 hover:border-black/12 hover:bg-zinc-50'
+                      : 'border-black/6 bg-zinc-50/50 text-zinc-600 hover:border-black/12 hover:bg-zinc-50 dark:border-white/6 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:border-white/12 dark:hover:bg-zinc-800'
                   )}
                 >
                   <Icon
-                    className={cn('mb-2 size-4 transition-colors', isActive ? 'text-zinc-700' : 'text-zinc-600')}
+                    className={cn(
+                      'mb-2 size-4 transition-colors',
+                      isActive ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
+                    )}
                     strokeWidth={1.75}
                   />
-                  <div className={cn('text-sm font-medium', isActive ? 'text-zinc-800' : 'text-zinc-600')}>{type.label}</div>
-                  <div className={'mt-0.5 text-[11px] text-zinc-600'}>{type.description}</div>
+                  <div
+                    className={cn(
+                      'text-sm font-medium',
+                      isActive ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'
+                    )}
+                  >
+                    {type.label}
+                  </div>
+                  <div className={'mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400'}>{type.description}</div>
                 </button>
               );
             })}
@@ -231,7 +241,7 @@ function TaskFormFields({ serverId, onSubmit, task }: TaskFormFieldsProps) {
               placeholder={'* * * * *'}
               className={'font-jetbrains'}
             />
-            <p className={'mt-1.5 text-sm text-zinc-600'}>{t('tasks.cronFormat')}</p>
+            <p className={'mt-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('tasks.cronFormat')}</p>
           </div>
         )}
         {taskType === 'command' && (
@@ -250,7 +260,7 @@ function TaskFormFields({ serverId, onSubmit, task }: TaskFormFieldsProps) {
         )}
         {taskType === 'backup' && (
           <div>
-            <Label htmlFor={'backup-paths'} className={'mb-1.5 block text-sm font-medium text-zinc-600'}>
+            <Label htmlFor={'backup-paths'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
               {t('backups.dialogDescription')}
             </Label>
             <FileTreeSelector
@@ -269,12 +279,12 @@ function TaskFormFields({ serverId, onSubmit, task }: TaskFormFieldsProps) {
                 checked={warnPlayers}
                 onCheckedChange={(checked) => setWarnPlayers(checked === true)}
               />
-              <span className={'text-zinc-600'}>{t('tasks.warnPlayers')}</span>
+              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('tasks.warnPlayers')}</span>
             </Label>
             {warnPlayers && (
               <>
                 <div>
-                  <Label htmlFor={'warn-message'} className={'mb-1.5 block text-sm font-medium text-zinc-600'}>
+                  <Label htmlFor={'warn-message'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
                     {t('tasks.warnMessage')}
                   </Label>
                   <Input

@@ -70,7 +70,7 @@ export function TotpOnboardingStep({
                 variant={'link'}
                 size={'md'}
                 onClick={onSkip}
-                className={'w-full text-zinc-500 no-underline hover:text-zinc-700'}
+                className={'w-full text-zinc-500 no-underline hover:text-zinc-700 dark:hover:text-zinc-300'}
               >
                 {t('onboarding.security.skip')}
               </Button>

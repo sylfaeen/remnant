@@ -159,7 +159,7 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
           <Button variant={'ghost'} size={'xs'} onClick={handleSelectAll} disabled={allSelected}>
             {t('backups.selectAll')}
           </Button>
-          <span className={'text-zinc-200'}>|</span>
+          <span className={'text-zinc-200 dark:text-zinc-700'}>|</span>
           <Button variant={'ghost'} size={'xs'} onClick={handleDeselectAll} disabled={selectedPaths.size === 0}>
             {t('backups.deselectAll')}
           </Button>
@@ -167,22 +167,28 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
         <span
           className={cn(
             'rounded-md px-2 py-0.5 text-sm font-medium tabular-nums transition-colors',
-            selectedPaths.size > 0 ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100 text-zinc-600'
+            selectedPaths.size > 0
+              ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+              : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800/60 dark:text-zinc-400'
           )}
         >
           {selectedPaths.size} {t('backups.itemsSelected')}
         </span>
       </div>
-      <div className={'max-h-80 overflow-y-auto rounded-lg border border-black/6 bg-zinc-50/80 p-1.5'}>
+      <div
+        className={
+          'max-h-80 overflow-y-auto rounded-lg border border-black/6 bg-zinc-50/80 p-1.5 dark:border-white/8 dark:bg-zinc-900/60'
+        }
+      >
         {loading ? (
           <div className={'flex flex-col items-center justify-center gap-2 py-12'}>
-            <Loader2 className={'size-5 animate-spin text-zinc-600'} />
-            <span className={'text-sm text-zinc-600'}>{t('common.loading')}</span>
+            <Loader2 className={'size-5 animate-spin text-zinc-600 dark:text-zinc-400'} />
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.loading')}</span>
           </div>
         ) : tree.length === 0 ? (
           <div className={'py-12 text-center'}>
-            <Folder className={'mx-auto mb-2 size-8 text-zinc-300'} strokeWidth={1.5} />
-            <span className={'text-sm text-zinc-600'}>{t('backups.noFiles')}</span>
+            <Folder className={'mx-auto mb-2 size-8 text-zinc-300 dark:text-zinc-600'} strokeWidth={1.5} />
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('backups.noFiles')}</span>
           </div>
         ) : (
           <div className={'py-0.5'}>
@@ -223,12 +229,15 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
   return (
     <div className={'relative'}>
       {depth > 0 && (
-        <div className={'absolute top-0 bottom-0 border-l border-zinc-200/70'} style={{ left: `${depth * 20 + 9}px` }} />
+        <div
+          className={'absolute top-0 bottom-0 border-l border-zinc-200/70 dark:border-zinc-700/50'}
+          style={{ left: `${depth * 20 + 9}px` }}
+        />
       )}
       <div
         className={cn(
-          'group relative flex items-center gap-2 rounded-md py-1.5 pr-2 transition-colors hover:bg-zinc-100/80',
-          isSelected && 'bg-zinc-100/60'
+          'group relative flex items-center gap-2 rounded-md py-1.5 pr-2 transition-colors hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60',
+          isSelected && 'bg-zinc-100/60 dark:bg-zinc-800/40'
         )}
         style={{ paddingLeft: `${depth * 20 + 8}px` }}
       >
@@ -236,7 +245,7 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
           <button
             type={'button'}
             className={
-              'flex size-4 shrink-0 items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-600'
+              'flex size-4 shrink-0 items-center justify-center rounded text-zinc-600 transition-colors hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300'
             }
             onClick={() => onExpand(node.path)}
           >
@@ -251,25 +260,40 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
         />
         {isDirectory ? (
           <Folder
-            className={cn('size-4 shrink-0 transition-colors', isSelected ? 'text-zinc-600' : 'text-zinc-600')}
+            className={cn(
+              'size-4 shrink-0 transition-colors',
+              isSelected ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-400 dark:text-zinc-500'
+            )}
             strokeWidth={1.75}
           />
         ) : (
           <File
-            className={cn('size-4 shrink-0 transition-colors', isSelected ? 'text-zinc-500' : 'text-zinc-300')}
+            className={cn(
+              'size-4 shrink-0 transition-colors',
+              isSelected ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'
+            )}
             strokeWidth={1.75}
           />
         )}
-        <span className={cn('truncate text-sm transition-colors', isSelected ? 'text-zinc-800' : 'text-zinc-600')}>
+        <span
+          className={cn(
+            'truncate text-sm transition-colors',
+            isSelected ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'
+          )}
+        >
           {node.name}
         </span>
         {!isDirectory && node.size > 0 && (
-          <span className={'font-jetbrains ml-auto shrink-0 text-[11px] text-zinc-300 tabular-nums group-hover:text-zinc-600'}>
+          <span
+            className={
+              'font-jetbrains ml-auto shrink-0 text-[11px] text-zinc-300 tabular-nums group-hover:text-zinc-600 dark:text-zinc-600 dark:group-hover:text-zinc-400'
+            }
+          >
             {formatFileSize(node.size)}
           </span>
         )}
         {isDirectory && !node.loaded && !node.expanded && (
-          <span className={'ml-auto shrink-0 text-[10px] tracking-wide text-zinc-300 uppercase'}>dir</span>
+          <span className={'ml-auto shrink-0 text-[10px] tracking-wide text-zinc-300 uppercase dark:text-zinc-600'}>dir</span>
         )}
       </div>
       {isDirectory && node.expanded && node.children && (
@@ -285,7 +309,10 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
             />
           ))}
           {node.children.length === 0 && (
-            <div className={'py-1.5 text-[11px] text-zinc-300 italic'} style={{ paddingLeft: `${(depth + 1) * 20 + 32}px` }}>
+            <div
+              className={'py-1.5 text-[11px] text-zinc-300 italic dark:text-zinc-600'}
+              style={{ paddingLeft: `${(depth + 1) * 20 + 32}px` }}
+            >
               (empty)
             </div>
           )}

@@ -237,38 +237,43 @@ function AddJarSection({
 
   return (
     <FeatureCard>
-      <FeatureCard.Header
-        actions={
-          <div className={'flex gap-1 rounded-lg bg-zinc-100 p-1'}>
-            <button
-              onClick={() => onTabChange('upload')}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                jarSourceTab === 'upload' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-600 hover:text-zinc-600'
-              )}
-            >
-              <Upload className={'mr-1.5 inline-block size-3.5'} />
-              {t('settings.jarUpload.tab')}
-            </button>
-            <button
-              onClick={() => onTabChange('papermc')}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                jarSourceTab === 'papermc' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-600 hover:text-zinc-600'
-              )}
-            >
-              <Download className={'mr-1.5 inline-block size-3.5'} />
-              PaperMC
-            </button>
-          </div>
-        }
-      >
-        <FeatureCard.Title>{t('settings.addJar')}</FeatureCard.Title>
+      <FeatureCard.Header>
+        <FeatureCard.Content>
+          <FeatureCard.Title>{t('settings.addJar')}</FeatureCard.Title>
+        </FeatureCard.Content>
+        <FeatureCard.Actions>
+          <button
+            onClick={() => onTabChange('upload')}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              jarSourceTab === 'upload'
+                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100'
+                : 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300'
+            )}
+          >
+            <Upload className={'mr-1.5 inline-block size-3.5'} />
+            {t('settings.jarUpload.tab')}
+          </button>
+          <button
+            onClick={() => onTabChange('papermc')}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              jarSourceTab === 'papermc'
+                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100'
+                : 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300'
+            )}
+          >
+            <Download className={'mr-1.5 inline-block size-3.5'} />
+            PaperMC
+          </button>
+        </FeatureCard.Actions>
       </FeatureCard.Header>
       <FeatureCard.Body
         className={cn(
           'rounded-xl border-2 border-dashed shadow-none transition-all',
-          isDragging ? 'border-zinc-400/40 bg-zinc-100/50' : 'border-black/10 hover:border-black/12'
+          isDragging
+            ? 'border-zinc-400/40 bg-zinc-100/50 dark:bg-zinc-800/50'
+            : 'border-black/10 hover:border-black/12 dark:border-white/10 dark:hover:border-white/12'
         )}
       >
         {jarSourceTab === 'upload' && (
@@ -280,14 +285,21 @@ function AddJarSection({
               )}
             />
             <div className={'relative flex flex-col items-center py-8'}>
-              <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors'}>
+              <div
+                className={
+                  'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors dark:bg-zinc-800'
+                }
+              >
                 <UploadCloud
-                  className={cn('size-6 transition-colors', isDragging ? 'text-zinc-600' : 'text-zinc-300')}
+                  className={cn(
+                    'size-6 transition-colors',
+                    isDragging ? 'text-zinc-600 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-500'
+                  )}
                   strokeWidth={1.5}
                 />
               </div>
               <p className={'font-medium'}>{t('settings.jarUpload.dragDrop')}</p>
-              <p className={'mt-1 text-sm text-zinc-600'}>{t('settings.jarUpload.or')}</p>
+              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.jarUpload.or')}</p>
               <label className={'mt-3 inline-block cursor-pointer'}>
                 <Button asChild variant={'secondary'} size={'sm'}>
                   <span>{t('settings.jarUpload.browse')}</span>
@@ -295,8 +307,10 @@ function AddJarSection({
                 <input type={'file'} accept={'.jar'} multiple onChange={onFileSelect} className={'hidden'} />
               </label>
               {uploadPending && (
-                <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600'}>
-                  <div className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+                <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
+                  <div
+                    className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+                  />
                   {t('settings.jarUpload.uploading')}
                 </div>
               )}
@@ -310,10 +324,12 @@ function AddJarSection({
           </div>
         )}
         {jarSourceTab === 'papermc' && (
-          <div className={'rounded-xl border border-black/6 bg-zinc-50/50 p-4'}>
+          <div className={'rounded-xl border border-black/6 bg-zinc-50/50 p-4 dark:border-white/6 dark:bg-zinc-800/50'}>
             <div className={'grid gap-3 sm:grid-cols-2 lg:grid-cols-3'}>
               <div>
-                <Label className={'mb-1.5 block text-sm text-zinc-600'}>{t('settings.minecraftVersion')}</Label>
+                <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>
+                  {t('settings.minecraftVersion')}
+                </Label>
                 <Select
                   value={selectedVersion || ''}
                   onChange={(e) => onVersionChange(e.target.value || null)}
@@ -328,7 +344,7 @@ function AddJarSection({
                 </Select>
               </div>
               <div>
-                <Label className={'mb-1.5 block text-sm text-zinc-600'}>{t('settings.buildOptional')}</Label>
+                <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.buildOptional')}</Label>
                 <Select
                   value={selectedBuild || ''}
                   onChange={(e) => onBuildChange(e.target.value ? parseInt(e.target.value) : null)}
@@ -389,32 +405,35 @@ function JarListSection({ jarsLoading, jars, activeJarFile, setActiveJar, delete
 
   return (
     <FeatureCard>
-      <FeatureCard.Header
-        actions={
-          activeJarFile && (
+      <FeatureCard.Header>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={jars && jars.length > 0 && jars.length}>{t('settings.availableJars')}</FeatureCard.Title>
+        </FeatureCard.Content>
+        {activeJarFile && (
+          <FeatureCard.Actions>
             <div className={'flex items-center gap-2'}>
-              <span className={'text-sm text-zinc-600'}>{t('settings.currentJar')}:</span>
+              <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.currentJar')}:</span>
               <Badge size={'md'} className={'font-jetbrains'}>
                 {activeJarFile}
               </Badge>
             </div>
-          )
-        }
-      >
-        <FeatureCard.Title count={jars && jars.length > 0 && jars.length}>{t('settings.availableJars')}</FeatureCard.Title>
+          </FeatureCard.Actions>
+        )}
       </FeatureCard.Header>
       {jarsLoading ? (
         <div className={'py-8 text-center'}>
-          <div className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+          <div
+            className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+          />
         </div>
       ) : !jars || jars.length === 0 ? (
         <div className={'bg-default shadow-xs-with-border relative overflow-hidden rounded-lg py-12'}>
           <div className={'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent'} />
           <div className={'relative flex flex-col items-center'}>
-            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
-              <Package className={'size-6 text-zinc-300'} strokeWidth={1.5} />
+            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+              <Package className={'size-6 text-zinc-300 dark:text-zinc-500'} strokeWidth={1.5} />
             </div>
-            <p className={'mt-2 font-medium text-zinc-600'}>{t('settings.noJarsFound')}</p>
+            <p className={'mt-2 font-medium text-zinc-600 dark:text-zinc-400'}>{t('settings.noJarsFound')}</p>
           </div>
         </div>
       ) : (
@@ -466,7 +485,7 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
         </div>
         <div>
           <div className={'flex items-center gap-2'}>
-            <span className={'font-jetbrains text-sm font-medium text-zinc-800'}>{jar.name}</span>
+            <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{jar.name}</span>
             {jar.isActive && (
               <Badge variant={'success'} size={'xs'} className={'font-semibold'}>
                 {t('settings.active')}
@@ -478,9 +497,9 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
               </Badge>
             )}
           </div>
-          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600'}>
+          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span className={'font-jetbrains tabular-nums'}>{formatJarSize(jar.size)}</span>
-            <span className={'text-zinc-200'}>&middot;</span>
+            <span className={'text-zinc-200 dark:text-zinc-700'}>&middot;</span>
             <span>{new Date(jar.modified).toLocaleDateString()}</span>
           </div>
         </div>
@@ -488,7 +507,7 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
       <div className={'flex shrink-0 items-center gap-1.5'}>
         {activateConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={'success'}
               size={'xs'}
@@ -504,7 +523,7 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
           </div>
         ) : deleteConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={'danger'}
               size={'xs'}

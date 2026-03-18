@@ -31,10 +31,10 @@ export function DeleteServerDialog({ server, isDeleting, onConfirm, onCancel }: 
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <p className={'text-zinc-600'}>{t('servers.deleteConfirmMessage', { name: server.name })}</p>
-          <p className={'text-sm text-zinc-600'}>{t('servers.deleteWarningFolder')}</p>
+          <p className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.deleteConfirmMessage', { name: server.name })}</p>
+          <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('servers.deleteWarningFolder')}</p>
           <div className={'rounded-lg border border-black/10 bg-white p-3'}>
-            <p className={'text-sm text-zinc-600'}>{t('servers.backupQuestion')}</p>
+            <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('servers.backupQuestion')}</p>
           </div>
         </Dialog.Body>
         <Dialog.Footer>

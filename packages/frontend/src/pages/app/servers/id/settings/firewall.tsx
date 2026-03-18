@@ -7,7 +7,6 @@ import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -17,6 +16,7 @@ import {
   useToggleFirewallRule,
 } from '@remnant/frontend/hooks/use_firewall';
 import { AddFirewallRuleDialog } from '@remnant/frontend/pages/app/servers/dialogs/add_firewall_rule_dialog';
+import { FirewallGuidelinesDialog } from '@remnant/frontend/pages/app/servers/dialogs/firewall_guidelines_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import type { Protocol } from '@remnant/frontend/pages/app/servers/features/firewall_card';
@@ -91,19 +91,18 @@ export function ServerSettingsFirewallPage() {
       <PageContent>
         <div className={'space-y-6'}>
           <FeatureCard>
-            <FeatureCard.Header
-              actions={
-                <div className={'flex items-center gap-1.5'}>
-                  <Button variant={'ghost'} size={'icon-sm'} onClick={() => setGuidelinesOpen(true)}>
-                    <Info className={'size-4'} />
-                  </Button>
-                </div>
-              }
-            >
-              <FeatureCard.Title count={rules.length > 0 && `${activeCount}/${rules.length}`}>
-                {t('settings.firewall.title')}
-              </FeatureCard.Title>
-              <FeatureCard.Description>{t('settings.firewall.description')}</FeatureCard.Description>
+            <FeatureCard.Header>
+              <FeatureCard.Content>
+                <FeatureCard.Title count={rules.length > 0 && `${activeCount}/${rules.length}`}>
+                  {t('settings.firewall.title')}
+                </FeatureCard.Title>
+                <FeatureCard.Description>{t('settings.firewall.description')}</FeatureCard.Description>
+              </FeatureCard.Content>
+              <FeatureCard.Actions>
+                <Button variant={'ghost'} size={'icon-sm'} onClick={() => setGuidelinesOpen(true)}>
+                  <Info className={'size-4'} />
+                </Button>
+              </FeatureCard.Actions>
             </FeatureCard.Header>
             <FeatureCard.Body>
               {rules.length === 0 ? (
@@ -132,7 +131,7 @@ export function ServerSettingsFirewallPage() {
           setDialogOpen(false);
         }}
       />
-      <GuidelinesDialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen} />
+      <FirewallGuidelinesDialog open={guidelinesOpen} onOpenChange={setGuidelinesOpen} />
     </>
   );
 }
@@ -161,11 +160,13 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
         </div>
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
-            <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums'}>{rule.port}</span>
+            <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums dark:text-zinc-200'}>
+              {rule.port}
+            </span>
             <Badge variant={PROTOCOL_BADGE_VARIANT[rule.protocol]} className={'font-semibold'}>
               {PROTOCOL_LABELS[rule.protocol]}
             </Badge>
-            <span className={'text-sm text-zinc-600'}>{rule.label}</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{rule.label}</span>
             {!rule.enabled && (
               <Badge variant={'muted'} size={'xs'}>
                 {t('settings.firewall.disabled')}
@@ -177,7 +178,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
       <FeatureCard.RowControl>
         {toggleConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={rule.enabled ? 'secondary' : 'success'}
               size={'xs'}
@@ -194,7 +195,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
           </div>
         ) : deleteConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button variant={'danger'} size={'xs'} onClick={() => onDelete(rule.id)}>
               {t('common.yes')}
             </Button>
@@ -211,7 +212,9 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
                     variant={rule.enabled ? 'ghost' : 'success'}
                     size={rule.enabled ? 'icon-sm' : 'sm'}
                     onClick={() => setToggleConfirm(true)}
-                    className={cn(rule.enabled && 'text-zinc-600 hover:text-zinc-600')}
+                    className={cn(
+                      rule.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
+                    )}
                   >
                     {rule.enabled ? (
                       <PowerOff className={'size-4'} />
@@ -254,67 +257,16 @@ function Empty({ setDialogOpen }: EmptyProps) {
     <FeatureCard.Row className={'relative overflow-hidden'}>
       <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
       <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
-          <Clock className={'size-6 text-zinc-600'} strokeWidth={1.5} />
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+          <Clock className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
         </div>
         <p className={'mt-6 font-medium'}>{t('settings.firewall.noRules')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.noRulesHint')}</p>
+        <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.firewall.noRulesHint')}</p>
         <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={() => setDialogOpen(true)}>
           <Plus className={'size-3.5'} />
           {t('settings.firewall.addRule')}
         </Button>
       </FeatureCard.Stack>
     </FeatureCard.Row>
-  );
-}
-
-type GuidelinesDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
-
-function GuidelinesDialog({ open, onOpenChange }: GuidelinesDialogProps) {
-  const { t } = useTranslation();
-
-  return (
-    <Dialog {...{ open, onOpenChange }}>
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-blue-600/10 text-blue-600'}>
-            <Info className={'size-5'} strokeWidth={1.75} />
-          </Dialog.Icon>
-          <div>
-            <Dialog.Title>{t('settings.firewall.infoTitle')}</Dialog.Title>
-          </div>
-        </Dialog.Header>
-        <Dialog.Body>
-          <div className={'divide-y divide-black/4'}>
-            <div className={'pb-3'}>
-              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoPortRangeLabel')}</p>
-              <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoPortRangeDesc')}</p>
-            </div>
-            <div className={'py-3'}>
-              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoReservedPortsLabel')}</p>
-              <div className={'mt-1.5 flex flex-wrap gap-1.5'}>
-                {[22, 80, 443, 3000, 3001].map((port) => (
-                  <Badge key={port} variant={'muted'} className={'font-jetbrains'}>
-                    {port}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div className={'py-3'}>
-              <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoProtocolLabel')}</p>
-              <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoProtocolDesc')}</p>
-            </div>
-          </div>
-        </Dialog.Body>
-        <Dialog.Footer>
-          <Dialog.Close asChild>
-            <Button variant={'secondary'}>{t('common.close')}</Button>
-          </Dialog.Close>
-        </Dialog.Footer>
-      </Dialog.Content>
-    </Dialog>
   );
 }

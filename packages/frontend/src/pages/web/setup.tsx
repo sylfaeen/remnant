@@ -63,8 +63,8 @@ export function SetupPage() {
 
   if (needsSetup.isLoading) {
     return (
-      <div className={'flex min-h-screen items-center justify-center bg-gray-100/80'}>
-        <Loader2 className={'size-5 animate-spin text-zinc-400'} />
+      <div className={'flex min-h-screen items-center justify-center bg-gray-100/80 dark:bg-zinc-900'}>
+        <Loader2 className={'size-5 animate-spin text-zinc-400 dark:text-zinc-500'} />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function SetupPage() {
   return (
     <div className={'flex min-h-screen'}>
       <BrandPanel />
-      <div className={'flex w-full flex-col items-center justify-center bg-gray-100/80 p-6 lg:w-1/2 lg:p-12'}>
+      <div className={'flex w-full flex-col items-center justify-center bg-gray-100/80 p-6 lg:w-1/2 lg:p-12 dark:bg-zinc-900'}>
         {step === 'account' && (
           <AccountStep
             onComplete={() => changeStep('security')}
@@ -207,15 +207,19 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
           >
             <span className={'text-lg font-bold text-white'}>R</span>
           </div>
-          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('onboarding.welcome.title')}</h1>
-          <p className={'mt-1 text-sm text-zinc-500'}>{t('onboarding.welcome.subtitle')}</p>
+          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>
+            {t('onboarding.welcome.title')}
+          </h1>
+          <p className={'mt-1 text-sm text-zinc-500 dark:text-zinc-400'}>{t('onboarding.welcome.subtitle')}</p>
         </div>
         <div className={'hidden lg:block'}>
-          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('onboarding.welcome.title')}</h1>
-          <p className={'mt-1 mb-8 text-sm text-zinc-500'}>{t('onboarding.welcome.subtitle')}</p>
+          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>
+            {t('onboarding.welcome.title')}
+          </h1>
+          <p className={'mt-1 mb-8 text-sm text-zinc-500 dark:text-zinc-400'}>{t('onboarding.welcome.subtitle')}</p>
         </div>
-        <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
-          <h2 className={'mb-4 text-sm font-semibold text-zinc-900'}>{t('onboarding.account.title')}</h2>
+        <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
+          <h2 className={'mb-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.account.title')}</h2>
           <form onSubmit={handleSubmit} className={'space-y-4'}>
             <InputGroup label={t('onboarding.account.username')} error={errors.username}>
               <Input
@@ -248,7 +252,9 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                   variant={'ghost'}
                   size={'icon-sm'}
                   onClick={() => setShowPassword(!showPassword)}
-                  className={'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600'}
+                  className={
+                    'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
+                  }
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
@@ -268,13 +274,17 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                     <div
                       className={cn(
                         'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'medium' ? 'bg-amber-500' : strength === 'strong' ? 'bg-emerald-500' : 'bg-zinc-200'
+                        strength === 'medium'
+                          ? 'bg-amber-500'
+                          : strength === 'strong'
+                            ? 'bg-emerald-500'
+                            : 'bg-zinc-200 dark:bg-zinc-700'
                       )}
                     />
                     <div
                       className={cn(
                         'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'strong' ? 'bg-emerald-500' : 'bg-zinc-200'
+                        strength === 'strong' ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
                       )}
                     />
                   </div>
@@ -311,15 +321,17 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                   variant={'ghost'}
                   size={'icon-sm'}
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className={'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600'}
+                  className={
+                    'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
+                  }
                   tabIndex={-1}
                 >
                   {showConfirm ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
                 </Button>
               </div>
             </InputGroup>
-            <div className={'border-t border-black/10 pt-4'}>
-              <p className={'mb-3 text-sm font-semibold text-zinc-900'}>{t('onboarding.language.title')}</p>
+            <div className={'border-t border-black/10 pt-4 dark:border-white/10'}>
+              <p className={'mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.language.title')}</p>
               <div className={'grid grid-cols-2 gap-3'}>
                 {languages.map((lang) => (
                   <button
@@ -329,17 +341,24 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                     className={cn(
                       'flex items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-(--duration-fast)',
                       lang.code === selectedLang
-                        ? 'border-zinc-900 bg-zinc-50'
-                        : 'border-black/10 hover:border-black/12 hover:bg-zinc-50/50'
+                        ? 'border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-800'
+                        : 'border-black/10 hover:border-black/12 hover:bg-zinc-50/50 dark:border-white/10 dark:hover:border-white/12 dark:hover:bg-zinc-800/50'
                     )}
                   >
                     <span className={'text-xl'}>{lang.flag}</span>
-                    <span className={cn('text-sm font-medium', lang.code === selectedLang ? 'text-zinc-900' : 'text-zinc-600')}>
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        lang.code === selectedLang ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'
+                      )}
+                    >
                       {lang.name}
                     </span>
                     {lang.code === selectedLang && (
-                      <div className={'ml-auto flex size-4.5 items-center justify-center rounded-full bg-zinc-900'}>
-                        <Check className={'size-2.5 text-white'} strokeWidth={3} />
+                      <div
+                        className={'ml-auto flex size-4.5 items-center justify-center rounded-full bg-zinc-900 dark:bg-zinc-100'}
+                      >
+                        <Check className={'size-2.5 text-white dark:text-zinc-900'} strokeWidth={3} />
                       </div>
                     )}
                   </button>
@@ -347,7 +366,9 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
               </div>
             </div>
             {setupError && (
-              <div className={'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600'}>
+              <div
+                className={'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600 dark:bg-red-950'}
+              >
                 <CircleX className={'size-4 shrink-0'} />
                 <span>{setupError}</span>
               </div>
@@ -373,13 +394,17 @@ function CompleteStep({ username }: CompleteStepProps) {
   return (
     <div className={'w-full max-w-100'}>
       <div className={'animate-fade-in'}>
-        <div className={'shadow-card rounded-xl border border-black/10 bg-white p-8'}>
+        <div className={'shadow-card rounded-xl border border-black/10 bg-white p-8 dark:border-white/10 dark:bg-zinc-800'}>
           <div className={'flex flex-col items-center text-center'}>
             <div className={'mb-5 flex size-10 items-center justify-center rounded-full bg-emerald-600'}>
               <Check className={'size-5 text-white'} strokeWidth={2.5} />
             </div>
-            <h2 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('onboarding.complete.title')}</h2>
-            <p className={'mt-1.5 text-sm text-zinc-500'}>{t('onboarding.complete.loggedInAs', { username })}</p>
+            <h2 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>
+              {t('onboarding.complete.title')}
+            </h2>
+            <p className={'mt-1.5 text-sm text-zinc-500 dark:text-zinc-400'}>
+              {t('onboarding.complete.loggedInAs', { username })}
+            </p>
             <Button size={'md'} className={'mt-6 w-full'} onClick={() => navigate({ to: '/app' }).then()}>
               {t('onboarding.goToPanel')}
               <ArrowRight className={'size-4'} />

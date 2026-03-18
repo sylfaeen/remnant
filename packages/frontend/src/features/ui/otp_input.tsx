@@ -130,7 +130,7 @@ export function OtpInput({ value, length = 6, onChange, onComplete, error, disab
                 ? 'border-red-600 focus:border-red-600 focus:ring-red-600/20'
                 : digit
                   ? 'border-zinc-900/20'
-                  : 'border-black/10 hover:border-black/12'
+                  : 'border-black/10 hover:border-black/12 dark:border-white/10 dark:hover:border-white/12'
             )}
           />
         </div>

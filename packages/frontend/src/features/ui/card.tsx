@@ -5,13 +5,13 @@ import { cn } from '@remnant/frontend/lib/cn';
 const cardVariants = cva(['rounded-xl transition-all duration-[var(--duration-normal)]'], {
   variants: {
     variant: {
-      default: 'bg-white border border-black/10 shadow-card',
-      elevated: 'bg-white border border-black/10 shadow-lg',
+      default: 'bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-card',
+      elevated: 'bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-lg',
       glass: 'bg-white/85 backdrop-blur-xl border border-black/5 shadow-lg',
       interactive:
-        'bg-white border border-black/10 shadow-card hover:border-black/10 hover:shadow-card-hover hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] cursor-pointer',
-      accent: 'bg-white border border-emerald-600/30 shadow-card hover:shadow-glow',
-      ghost: 'border border-black/10',
+        'bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-card hover:border-black/10 hover:shadow-card-hover hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] cursor-pointer',
+      accent: 'bg-white dark:bg-zinc-900 border border-emerald-600/30 shadow-card hover:shadow-glow',
+      ghost: 'border border-black/10 dark:border-white/10',
     },
     padding: {
       none: '',
@@ -33,11 +33,11 @@ export function Card({ className, variant, padding, ...props }: CardProps) {
 }
 
 Card.Header = function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('px-5 py-4', 'border-b border-black/10', className)} {...props} />;
+  return <div className={cn('px-5 py-4', 'border-b border-black/10 dark:border-white/10', className)} {...props} />;
 };
 
 Card.Title = function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('font-semibold tracking-tight text-zinc-900', className)} {...props} />;
+  return <h3 className={cn('font-semibold tracking-tight text-zinc-900 dark:text-zinc-100', className)} {...props} />;
 };
 
 Card.Content = function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -54,15 +54,15 @@ type CardStatProps = {
 Card.Stat = function CardStat({ label, value, trend, className }: CardStatProps) {
   return (
     <div className={cn('flex flex-col', className)}>
-      <span className={'mb-1 text-sm tracking-wider text-zinc-600 uppercase'}>{label}</span>
-      <span className={'text-2xl font-bold tracking-tight text-zinc-900'}>{value}</span>
+      <span className={'mb-1 text-sm tracking-wider text-zinc-600 uppercase dark:text-zinc-400'}>{label}</span>
+      <span className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>{value}</span>
       {trend && (
         <span
           className={cn(
             'mt-1 text-sm',
             trend === 'up' && 'text-emerald-600',
             trend === 'down' && 'text-red-600',
-            trend === 'neutral' && 'text-zinc-600'
+            trend === 'neutral' && 'text-zinc-600 dark:text-zinc-400'
           )}
         >
           {trend === 'up' && '↑'}

@@ -195,7 +195,9 @@ function TasksSection({
       <FeatureCard.Body>
         {tasksLoading ? (
           <div className={'py-8 text-center'}>
-            <div className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+            <div
+              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+            />
           </div>
         ) : !tasks || tasks.length === 0 ? (
           <Empty />
@@ -264,14 +266,16 @@ function TaskRow({
           <div
             className={cn(
               'mt-2 flex size-8 shrink-0 items-center justify-center rounded-lg transition-opacity',
-              task.enabled ? 'bg-green-600 text-white' : 'bg-zinc-100 text-zinc-600 opacity-40'
+              task.enabled
+                ? 'bg-green-600 text-white'
+                : 'bg-zinc-100 text-zinc-600 opacity-40 dark:bg-zinc-800 dark:text-zinc-400'
             )}
           >
             <typeConfig.icon className={'size-4'} strokeWidth={2} />
           </div>
           <div className={cn('min-w-0', !task.enabled && 'opacity-50')}>
             <div className={'flex items-center gap-2'}>
-              <span className={'font-medium text-zinc-800'}>{task.name}</span>
+              <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{task.name}</span>
               <Badge variant={typeConfig.badgeVariant} size={'xs'} className={'font-semibold'}>
                 {t(`tasks.types.${task.type}`)}
               </Badge>
@@ -280,14 +284,16 @@ function TaskRow({
                   {t('tasks.disabled')}
                 </Badge>
               )}
-              <ChevronDown className={cn('size-3.5 text-zinc-400 transition-transform', expanded && 'rotate-180')} />
+              <ChevronDown
+                className={cn('size-3.5 text-zinc-400 transition-transform dark:text-zinc-500', expanded && 'rotate-180')}
+              />
             </div>
             <div className={'flex items-center gap-2 text-sm'}>
-              <span className={'text-zinc-600'}>{formatCronExpression(task.cron_expression)}</span>
-              <span className={'font-jetbrains text-sm text-zinc-600'}>({task.cron_expression})</span>
+              <span className={'text-zinc-600 dark:text-zinc-400'}>{formatCronExpression(task.cron_expression)}</span>
+              <span className={'font-jetbrains text-sm text-zinc-600 dark:text-zinc-400'}>({task.cron_expression})</span>
             </div>
             {task.last_run && (
-              <div className={'flex items-center gap-1.5 text-sm text-zinc-600'}>
+              <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
                 <Clock className={'size-3'} strokeWidth={2} />
                 <span>
                   {t('tasks.lastRun')}: {new Date(task.last_run).toLocaleString()}
@@ -297,10 +303,10 @@ function TaskRow({
             {task.type === 'command' && task.config?.command && (
               <div
                 className={
-                  'font-jetbrains mt-2 inline-block rounded-md border border-black/10 bg-zinc-100/80 px-2.5 py-1 text-sm text-zinc-600'
+                  'font-jetbrains mt-2 inline-block rounded-md border border-black/10 bg-zinc-100/80 px-2.5 py-1 text-sm text-zinc-600 dark:border-white/10 dark:bg-zinc-800/80 dark:text-zinc-400'
                 }
               >
-                <span className={'mr-1.5 text-zinc-600'}>$</span>
+                <span className={'mr-1.5 text-zinc-600 dark:text-zinc-400'}>$</span>
                 {task.config.command}
               </div>
             )}
@@ -309,7 +315,7 @@ function TaskRow({
         <FeatureCard.RowControl>
           {toggleConfirm === task.id ? (
             <div className={'flex items-center gap-1.5'}>
-              <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+              <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
               <Button
                 variant={task.enabled ? 'secondary' : 'success'}
                 size={'xs'}
@@ -326,7 +332,7 @@ function TaskRow({
             </div>
           ) : deleteConfirm === task.id ? (
             <div className={'flex items-center gap-1.5'}>
-              <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+              <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
               <Button
                 variant={'danger'}
                 size={'xs'}
@@ -349,7 +355,9 @@ function TaskRow({
                       variant={task.enabled ? 'ghost' : 'success'}
                       size={task.enabled ? 'icon-sm' : 'sm'}
                       onClick={() => onToggleConfirm(task.id)}
-                      className={cn(task.enabled && 'text-zinc-600 hover:text-zinc-600')}
+                      className={cn(
+                        task.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
+                      )}
                     >
                       {task.enabled ? (
                         <PowerOff className={'size-4'} />
@@ -371,7 +379,7 @@ function TaskRow({
                       variant={'ghost'}
                       size={'icon-sm'}
                       onClick={() => onEdit(task)}
-                      className={'text-zinc-600 hover:text-zinc-600'}
+                      className={'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'}
                     >
                       <Pencil className={'size-3.5'} />
                     </Button>
@@ -407,20 +415,22 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
 
   return (
     <div className={'border-t border-black/6 px-5 pt-3 pb-4'}>
-      <div className={'text-sm font-medium text-zinc-600'}>{t('tasks.history')}</div>
+      <div className={'text-sm font-medium text-zinc-600 dark:text-zinc-400'}>{t('tasks.history')}</div>
       {isLoading ? (
-        <div className={'flex items-center gap-2 text-sm text-zinc-400'}>
+        <div className={'flex items-center gap-2 text-sm text-zinc-400 dark:text-zinc-500'}>
           <Loader2 className={'size-3.5 animate-spin'} />
           {t('common.loading')}
         </div>
       ) : !data || data.executions.length === 0 ? (
-        <div className={'text-sm text-zinc-400'}>{t('tasks.noHistory')}</div>
+        <div className={'text-sm text-zinc-400 dark:text-zinc-500'}>{t('tasks.noHistory')}</div>
       ) : (
         <div className={'max-h-64 overflow-y-auto'}>
           {data.executions.map((exec: TaskExecution) => (
             <div
               key={exec.id}
-              className={'flex h-5 items-center justify-between gap-2 rounded-md px-2 text-sm hover:bg-zinc-100/60'}
+              className={
+                'flex h-5 items-center justify-between gap-2 rounded-md px-2 text-sm hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60'
+              }
             >
               <div className={'flex items-center justify-start gap-2'}>
                 {exec.status === 'success' ? (
@@ -428,13 +438,13 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
                 ) : (
                   <XCircle className={'size-3.5 shrink-0 text-red-500'} />
                 )}
-                <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums'}>
+                <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums dark:text-zinc-400'}>
                   {new Date(exec.created_at).toLocaleString()}
                 </span>
               </div>
               <div className={'space-x-2'}>
                 {exec.error && <span className={'truncate text-[11px] text-red-400'}>{exec.error}</span>}
-                <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums'}>
+                <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums dark:text-zinc-400'}>
                   {t('tasks.duration', { ms: exec.duration_ms })}
                 </span>
               </div>
@@ -453,11 +463,11 @@ function Empty() {
     <FeatureCard.Row className={'relative overflow-hidden'}>
       <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
       <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
-          <Clock className={'size-6 text-zinc-600'} strokeWidth={1.5} />
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+          <Clock className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
         </div>
         <p className={'mt-6 font-medium'}>{t('tasks.noTasks')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600'}>{t('tasks.createFirst')}</p>
+        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('tasks.createFirst')}</p>
       </FeatureCard.Stack>
     </FeatureCard.Row>
   );

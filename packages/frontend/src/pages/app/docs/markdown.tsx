@@ -37,11 +37,11 @@ function DocsNotFound() {
 
   return (
     <div className={'flex flex-col items-center justify-center py-20'}>
-      <div className={'flex size-14 items-center justify-center rounded-2xl bg-zinc-100'}>
-        <FileQuestion className={'size-7 text-zinc-400'} strokeWidth={1.5} />
+      <div className={'flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+        <FileQuestion className={'size-7 text-zinc-400 dark:text-zinc-500'} strokeWidth={1.5} />
       </div>
-      <h2 className={'mt-5 text-lg font-semibold text-zinc-900'}>{t('docs.notFound')}</h2>
-      <p className={'mt-1 text-sm text-zinc-500'}>{t('docs.notFoundDescription')}</p>
+      <h2 className={'mt-5 text-lg font-semibold text-zinc-900 dark:text-zinc-100'}>{t('docs.notFound')}</h2>
+      <p className={'mt-1 text-sm text-zinc-500 dark:text-zinc-400'}>{t('docs.notFoundDescription')}</p>
     </div>
   );
 }

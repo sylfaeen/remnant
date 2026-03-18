@@ -23,4 +23,10 @@
   --status-warning-glow: rgba(217, 163, 26, 0.3);
   --status-error: #dc2626;
   --status-error-glow: rgba(220, 38, 38, 0.3);
+
+  --surface-sidebar: #f6f6f7;
+  --surface-page: #ffffff;
+  --surface-header: #ffffff;
+  --surface-curtain: #ffffff;
+  --border-header: rgba(0, 0, 0, 0.06);
 }

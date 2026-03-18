@@ -17,10 +17,10 @@ export function SettingsPage() {
       <div className={'space-y-6'}>
         <div>
           <div className={'flex items-center gap-2'}>
-            <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('appSettings.title')}</h1>
+            <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>{t('appSettings.title')}</h1>
             <DocsLink path={'/guide/configuration'} />
           </div>
-          <p className={'mt-1 text-zinc-600'}>{t('appSettings.subtitle')}</p>
+          <p className={'mt-1 text-zinc-600 dark:text-zinc-400'}>{t('appSettings.subtitle')}</p>
         </div>
         <FeatureCard.Stack>
           <JavaSection />
@@ -50,14 +50,16 @@ function JavaSection() {
           </div>
         ) : !javaVersions?.length ? (
           <FeatureCard.Row>
-            <p className={'w-full py-2 text-center text-sm text-zinc-500'}>{t('appSettings.java.noVersions')}</p>
+            <p className={'w-full py-2 text-center text-sm text-zinc-500 dark:text-zinc-400'}>
+              {t('appSettings.java.noVersions')}
+            </p>
           </FeatureCard.Row>
         ) : (
           javaVersions.map((java) => (
             <FeatureCard.Row key={java.name}>
               <FeatureCard.RowLabel description={<span className={'font-jetbrains'}>{java.path}</span>}>
                 <div className={'flex items-center gap-2'}>
-                  <Coffee className={'size-4 text-zinc-600'} strokeWidth={1.75} />
+                  <Coffee className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />
                   <span>{java.name}</span>
                   {java.isDefault && (
                     <Badge variant={'warning'} size={'xs'}>
@@ -67,7 +69,7 @@ function JavaSection() {
                 </div>
               </FeatureCard.RowLabel>
               <FeatureCard.RowControl>
-                <span className={'text-sm text-zinc-500'}>Java {java.version}</span>
+                <span className={'text-sm text-zinc-500 dark:text-zinc-400'}>Java {java.version}</span>
               </FeatureCard.RowControl>
             </FeatureCard.Row>
           ))
@@ -105,8 +107,12 @@ function SystemdSection() {
           <div className={'mt-2 space-y-1.5'}>
             {commands.map(({ label, cmd }) => (
               <div key={cmd} className={'flex items-center gap-3'}>
-                <span className={'w-14 text-sm text-zinc-500'}>{label}</span>
-                <code className={'font-jetbrains rounded border border-black/10 bg-zinc-50 px-3 py-1.5 text-sm text-zinc-700'}>
+                <span className={'w-14 text-sm text-zinc-500 dark:text-zinc-400'}>{label}</span>
+                <code
+                  className={
+                    'font-jetbrains rounded border border-black/10 bg-zinc-50 px-3 py-1.5 text-sm text-zinc-700 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-300'
+                  }
+                >
                   {cmd}
                 </code>
               </div>
@@ -142,7 +148,9 @@ function ServiceFileBlock() {
       <button
         type={'button'}
         onClick={() => setExpanded(!expanded)}
-        className={'flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-700'}
+        className={
+          'flex items-center gap-1.5 text-sm text-zinc-500 transition-colors hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
+        }
       >
         {expanded ? <ChevronDown className={'size-4'} /> : <ChevronRight className={'size-4'} />}
         {t('appSettings.systemd.viewServiceFile')}
@@ -155,7 +163,7 @@ function ServiceFileBlock() {
           <Button
             variant={'ghost'}
             size={'icon-sm'}
-            className={'absolute top-2 right-2 text-zinc-600 hover:bg-zinc-700 hover:text-white'}
+            className={'absolute top-2 right-2 text-zinc-600 hover:bg-zinc-700 hover:text-white dark:text-zinc-400'}
             onClick={handleCopy}
           >
             {copied ? <Check className={'size-4 text-emerald-400'} /> : <Copy className={'size-4'} />}

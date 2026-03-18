@@ -15,8 +15,8 @@ export function AccountPage() {
     <PageContent>
       <div className={'space-y-6'}>
         <div>
-          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('account.title')}</h1>
-          <p className={'mt-1 text-zinc-600'}>{t('account.subtitle', { username: user?.username })}</p>
+          <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>{t('account.title')}</h1>
+          <p className={'mt-1 text-zinc-600 dark:text-zinc-400'}>{t('account.subtitle', { username: user?.username })}</p>
         </div>
         <TwoFactorSection />
       </div>

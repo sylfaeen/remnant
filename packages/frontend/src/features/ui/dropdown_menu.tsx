@@ -36,7 +36,7 @@ DropdownMenu.Item = function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        'flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors outline-none data-[highlighted]:bg-zinc-100',
+        'flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-zinc-700 transition-colors outline-none data-[highlighted]:bg-zinc-100 dark:text-zinc-300 dark:data-[highlighted]:bg-zinc-800',
         className
       )}
       {...props}

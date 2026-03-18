@@ -281,31 +281,33 @@ function JvmConfigSection({
         <FeatureCard.Row>
           <FeatureCard.Stack>
             <div>
-              <h3 className={'mb-3 text-sm font-medium text-zinc-700'}>{t('settings.memorySettings')}</h3>
+              <h3 className={'mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.memorySettings')}</h3>
               <div className={'grid gap-4 sm:grid-cols-2'}>
                 <div>
-                  <Label className={'mb-1.5 block text-sm text-zinc-600'}>{t('settings.minRam')}</Label>
+                  <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.minRam')}</Label>
                   <Input type={'text'} value={minRam} onChange={(e) => onMinRamChange(e.target.value)} placeholder={'2G'} />
-                  <p className={'mt-1 text-sm text-zinc-600'}>{t('settings.ramHint')}</p>
+                  <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
                 </div>
                 <div>
-                  <Label className={'mb-1.5 block text-sm text-zinc-600'}>{t('settings.maxRam')}</Label>
+                  <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.maxRam')}</Label>
                   <Input type={'text'} value={maxRam} onChange={(e) => onMaxRamChange(e.target.value)} placeholder={'4G'} />
-                  <p className={'mt-1 text-sm text-zinc-600'}>{t('settings.ramHint')}</p>
+                  <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
                 </div>
               </div>
             </div>
-            <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-4'}>
+            <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-4 dark:border-white/6 dark:bg-zinc-800/50'}>
               <Label className={'flex cursor-pointer items-center gap-3'}>
                 <Checkbox checked={hasAikarFlags} onCheckedChange={(checked) => onToggleAikarFlags(checked === true)} />
-                <span className={'text-sm font-medium text-zinc-700'}>{t('settings.useAikarFlags')}</span>
+                <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.useAikarFlags')}</span>
               </Label>
-              <p className={'pl-8 text-sm text-zinc-600'}>{t('settings.aikarDescription')}</p>
+              <p className={'pl-8 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.aikarDescription')}</p>
             </div>
             <div>
-              <Label className={'mb-1.5 block text-sm text-zinc-600'}>
+              <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>
                 {t('settings.customJvmFlags')}
-                {hasAikarFlags && <span className={'ml-1 text-zinc-600'}>{t('settings.inAdditionToAikar')}</span>}
+                {hasAikarFlags && (
+                  <span className={'ml-1 text-zinc-600 dark:text-zinc-400'}>{t('settings.inAdditionToAikar')}</span>
+                )}
               </Label>
               <Textarea
                 value={jvmFlags}
@@ -328,7 +330,7 @@ function JvmConfigSection({
                 max={65535}
                 className={'w-full sm:w-48'}
               />
-              <p className={'mt-1 text-sm text-zinc-600'}>{t('settings.defaultPort')}</p>
+              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.defaultPort')}</p>
             </div>
           </FeatureCard.Stack>
         </FeatureCard.Row>
@@ -366,7 +368,7 @@ function JvmConfigSection({
                   onChange={(e) => onCustomPathChange(e.target.value)}
                   placeholder={t('settings.customJavaPathPlaceholder')}
                 />
-                <p className={'mt-1 text-sm text-zinc-600'}>{t('settings.customJavaPathHint')}</p>
+                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.customJavaPathHint')}</p>
               </div>
             )}
           </FeatureCard.Stack>
@@ -378,8 +380,8 @@ function JvmConfigSection({
               <Label className={'flex cursor-pointer items-center gap-3'}>
                 <Checkbox checked={autoStart} onCheckedChange={(checked) => onAutoStartChange(checked === true)} />
                 <div>
-                  <span className={'text-sm font-medium text-zinc-700'}>{t('settings.enableAutoStart')}</span>
-                  <p className={'text-sm text-zinc-600'}>{t('settings.autoStartDescription')}</p>
+                  <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.enableAutoStart')}</span>
+                  <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.autoStartDescription')}</p>
                 </div>
               </Label>
             </div>
@@ -388,7 +390,7 @@ function JvmConfigSection({
       </FeatureCard.Body>
       <FeatureCard.Footer>
         <div className={'flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3'}>
-          <div className={'flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10'}>
+          <div className={'flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-400/10'}>
             <AlertTriangle className={'size-4 text-amber-600'} strokeWidth={1.75} />
           </div>
           <p className={'text-sm text-amber-700'}>{t('settings.restartRequired')}</p>
@@ -409,8 +411,8 @@ function FloatingSaveBar({ saveStatus, saveError, onSave, onDiscard }: FloatingS
   const { t } = useTranslation();
 
   return (
-    <div className={'fixed inset-x-0 bottom-0 z-50 md:left-[272px]'}>
-      <div className={'border-t border-black/6 bg-white/95 backdrop-blur-sm'}>
+    <div className={'fixed inset-x-0 bottom-0 z-50 md:left-68'}>
+      <div className={'border-t border-black/6 bg-white/95 backdrop-blur-sm dark:border-white/6 dark:bg-zinc-900/95'}>
         <div className={'flex items-center justify-between p-4 sm:px-6 lg:px-10'}>
           <div className={'flex items-center gap-3'}>
             {saveStatus === 'saved' ? (
@@ -421,7 +423,7 @@ function FloatingSaveBar({ saveStatus, saveError, onSave, onDiscard }: FloatingS
             ) : saveStatus === 'error' && saveError ? (
               <span className={'text-sm text-red-600'}>{saveError}</span>
             ) : (
-              <span className={'text-sm text-zinc-600'}>{t('settings.unsavedChanges')}</span>
+              <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.unsavedChanges')}</span>
             )}
           </div>
           <div className={'flex items-center gap-2'}>

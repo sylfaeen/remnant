@@ -60,7 +60,7 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
     >
       <Dialog.Content>
         <Dialog.Header>
-          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600'}>
+          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
             <Pencil className={'size-5'} strokeWidth={1.75} />
           </Dialog.Icon>
           <div>
@@ -97,12 +97,16 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
               />
             </div>
             <div>
-              <span className={'mb-1.5 block text-sm font-medium text-zinc-600'}>{t('users.permissions')}</span>
+              <span className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
+                {t('users.permissions')}
+              </span>
               <div className={'space-y-2'}>
                 {AVAILABLE_PERMISSIONS.map((permission) => (
                   <Label key={permission} className={'flex cursor-pointer items-center gap-2'}>
                     <Checkbox checked={permissions.includes(permission)} onCheckedChange={() => togglePermission(permission)} />
-                    <span className={'text-zinc-600'}>{permission === '*' ? t('users.allPermissions') : permission}</span>
+                    <span className={'text-zinc-600 dark:text-zinc-400'}>
+                      {permission === '*' ? t('users.allPermissions') : permission}
+                    </span>
                   </Label>
                 ))}
               </div>

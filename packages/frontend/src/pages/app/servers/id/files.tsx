@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, type DragEvent } from 'react';
 import { useParams, useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,7 +14,6 @@ import {
   TextCursorInput,
   Trash2,
   Upload,
-  X,
 } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
@@ -33,8 +32,8 @@ import {
 } from '@remnant/frontend/hooks/use_files';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { Input } from '@remnant/frontend/features/ui/input';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
 import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { UploadFileDialog } from '@remnant/frontend/pages/app/servers/dialogs/upload_file_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 
@@ -171,7 +170,7 @@ export function ServerFilesPage() {
             onShowNewFolderInput={setShowNewFolderInput}
             {...{ files, error, currentPath, newFolderName, filesLoading, isDragging, showNewFolderInput }}
           />
-          <UploadDialog
+          <UploadFileDialog
             open={showUploadDialog}
             isPending={uploadMutation.isPending}
             onUpload={(files, targetPath) => {
@@ -246,31 +245,37 @@ function FilesSection({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-xl border bg-white transition-colors',
-        isDragging ? 'border-zinc-400/40 ring-2 ring-zinc-400/10' : 'border-black/10'
+        'relative overflow-hidden rounded-xl border bg-white transition-colors dark:bg-zinc-900',
+        isDragging ? 'border-zinc-400/40 ring-2 ring-zinc-400/10' : 'border-black/10 dark:border-white/10'
       )}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
       {isDragging && (
-        <div className={'pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/90'}>
+        <div
+          className={'pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/90 dark:bg-zinc-900/90'}
+        >
           <div className={'flex flex-col items-center'}>
-            <div className={'mb-3 flex size-14 items-center justify-center rounded-2xl bg-zinc-100'}>
-              <Upload className={'size-7 text-zinc-600'} strokeWidth={1.5} />
+            <div className={'mb-3 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+              <Upload className={'size-7 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
             </div>
-            <p className={'font-medium text-zinc-700'}>{t('files.dropFilesHere')}</p>
+            <p className={'font-medium text-zinc-700 dark:text-zinc-300'}>{t('files.dropFilesHere')}</p>
           </div>
         </div>
       )}
-      <div className={'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4'}>
+      <div
+        className={
+          'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4 dark:border-white/10'
+        }
+      >
         <div className={'flex items-center gap-2 sm:gap-3'}>
           <Button variant={'secondary'} size={'sm'} onClick={onGoUp} disabled={currentPath === '/'}>
             <ArrowUp className={'size-4'} />
             {t('files.parentFolder')}
           </Button>
           {files && files.length > 0 && (
-            <div className={'flex items-center gap-1.5 text-sm text-zinc-600'}>
+            <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
               {dirCount > 0 && (
                 <Badge size={'md'}>
                   {dirCount} {dirCount === 1 ? t('files.folder', 'folder') : t('files.folders', 'folders')}
@@ -331,7 +336,9 @@ function FilesSection({
       <div>
         {filesLoading ? (
           <div className={'py-12 text-center'}>
-            <div className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+            <div
+              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+            />
           </div>
         ) : error ? (
           <div className={'py-12 text-center text-sm text-red-600'}>{t('files.loadError')}</div>
@@ -345,151 +352,18 @@ function FilesSection({
           <div className={'relative overflow-hidden py-14'}>
             <div className={'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent'} />
             <div className={'relative flex flex-col items-center'}>
-              <div className={'mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100'}>
-                <FolderOpen className={'size-7 text-zinc-300'} strokeWidth={1.5} />
+              <div className={'mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+                <FolderOpen className={'size-7 text-zinc-300 dark:text-zinc-500'} strokeWidth={1.5} />
               </div>
-              <p className={'font-medium text-zinc-600'}>{t('files.emptyFolder')}</p>
-              <p className={'mt-1 text-sm text-zinc-600'}>{t('files.dropOrCreate', 'Drop files here or create a new folder')}</p>
+              <p className={'font-medium text-zinc-600 dark:text-zinc-400'}>{t('files.emptyFolder')}</p>
+              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
+                {t('files.dropOrCreate', 'Drop files here or create a new folder')}
+              </p>
             </div>
           </div>
         )}
       </div>
     </div>
-  );
-}
-
-type UploadDialogProps = {
-  open: boolean;
-  currentPath: string;
-  isPending: boolean;
-  onUpload: (files: Array<globalThis.File>, targetPath: string) => void;
-  onClose: () => void;
-};
-
-function UploadDialog({ open, currentPath, isPending, onUpload, onClose }: UploadDialogProps) {
-  const { t } = useTranslation();
-  const [targetPath, setTargetPath] = useState(currentPath);
-  const [selectedFiles, setSelectedFiles] = useState<Array<globalThis.File>>([]);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      setTargetPath(currentPath);
-      setSelectedFiles([]);
-    }
-  }, [open, currentPath]);
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
-      onClose();
-    }
-  };
-
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFiles((prev) => [...prev, ...Array.from(e.target.files!)]);
-      e.target.value = '';
-    }
-  };
-
-  const handleDropZone = (e: DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const dropped = Array.from(e.dataTransfer.files);
-    if (dropped.length > 0) {
-      setSelectedFiles((prev) => [...prev, ...dropped]);
-    }
-  };
-
-  const removeFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  return (
-    <Dialog onOpenChange={handleOpenChange} {...{ open }}>
-      <Dialog.Content className={'max-w-md overflow-hidden p-0'}>
-        <div className={'relative border-b border-black/10 bg-linear-to-b from-zinc-600/3 to-transparent px-6 pt-6 pb-5'}>
-          <div className={'flex items-start gap-4'}>
-            <div className={'flex size-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100'}>
-              <Upload className={'size-5 text-zinc-600'} strokeWidth={1.75} />
-            </div>
-            <div className={'min-w-0 flex-1'}>
-              <h2 className={'text-lg font-semibold tracking-tight text-zinc-900'}>{t('files.upload')}</h2>
-              <p className={'mt-0.5 text-sm text-zinc-600'}>{t('files.uploadDescription')}</p>
-            </div>
-          </div>
-        </div>
-        <div className={'space-y-4 px-6 py-5'}>
-          <div>
-            <label className={'mb-1.5 block text-sm font-medium text-zinc-700'}>{t('files.uploadDestination')}</label>
-            <Input type={'text'} value={targetPath} onChange={(e) => setTargetPath(e.target.value)} placeholder={'/'} />
-          </div>
-          <div>
-            <label className={'mb-1.5 block text-sm font-medium text-zinc-700'}>{t('files.files')}</label>
-            <input ref={fileInputRef} type={'file'} multiple onChange={handleFileSelect} className={'hidden'} />
-            <button
-              type={'button'}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragOver(true);
-              }}
-              onDragLeave={(e) => {
-                e.preventDefault();
-                setIsDragOver(false);
-              }}
-              onDrop={handleDropZone}
-              className={cn(
-                'flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-sm transition-colors',
-                isDragOver
-                  ? 'border-zinc-400 bg-zinc-50'
-                  : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50/50'
-              )}
-            >
-              <Upload className={'size-5 text-zinc-400'} strokeWidth={1.75} />
-              <span>{t('files.uploadDropOrBrowse')}</span>
-            </button>
-          </div>
-          {selectedFiles.length > 0 && (
-            <div className={'space-y-1.5'}>
-              {selectedFiles.map((file, index) => (
-                <div
-                  key={`${file.name}-${index}`}
-                  className={'flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2'}
-                >
-                  <div className={'flex min-w-0 items-center gap-2'}>
-                    <File className={'size-4 shrink-0 text-zinc-400'} strokeWidth={1.75} />
-                    <span className={'truncate text-sm text-zinc-700'}>{file.name}</span>
-                    <span className={'shrink-0 text-xs text-zinc-400'}>{formatFileSize(file.size)}</span>
-                  </div>
-                  <button
-                    type={'button'}
-                    onClick={() => removeFile(index)}
-                    className={'ml-2 shrink-0 rounded p-0.5 text-zinc-400 transition-colors hover:text-zinc-600'}
-                  >
-                    <X className={'size-3.5'} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <Dialog.Footer className={'border-t border-black/10 bg-zinc-50/50 px-6 py-4'}>
-          <Button type={'button'} variant={'secondary'} onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            onClick={() => onUpload(selectedFiles, targetPath)}
-            disabled={isPending || selectedFiles.length === 0}
-            loading={isPending}
-          >
-            <Upload className={'size-4'} />
-            {t('files.uploadCount', { count: selectedFiles.length })}
-          </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
-    </Dialog>
   );
 }
 
@@ -507,8 +381,8 @@ function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
       <button
         onClick={() => onNavigate('/')}
         className={cn(
-          'rounded px-1.5 py-0.5 transition-colors hover:bg-zinc-100 hover:text-zinc-900',
-          parts.length === 0 ? 'font-medium text-zinc-700' : 'text-zinc-600'
+          'rounded px-1.5 py-0.5 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
+          parts.length === 0 ? 'font-medium text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
         )}
       >
         root
@@ -517,12 +391,12 @@ function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
         const isLast = index === parts.length - 1;
         return (
           <span key={paths[index]} className={'flex items-center'}>
-            <span className={'text-zinc-300'}>/</span>
+            <span className={'text-zinc-300 dark:text-zinc-600'}>/</span>
             <button
               onClick={() => onNavigate(paths[index])}
               className={cn(
-                'rounded px-1.5 py-0.5 transition-colors hover:bg-zinc-100 hover:text-zinc-900',
-                isLast ? 'font-medium text-zinc-700' : 'text-zinc-600'
+                'rounded px-1.5 py-0.5 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
+                isLast ? 'font-medium text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
               )}
             >
               {part}
@@ -575,22 +449,31 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
   return (
     <div
       className={cn(
-        'group flex min-h-11 items-center justify-between border-b border-black/10 px-4 py-2 transition-colors last:border-b-0 sm:px-6',
-        (isDirectory || isEditable) && action === 'idle' && 'cursor-pointer hover:bg-zinc-50/80'
+        'group flex min-h-11 items-center justify-between border-b border-black/10 px-4 py-2 transition-colors last:border-b-0 sm:px-6 dark:border-white/10',
+        (isDirectory || isEditable) && action === 'idle' && 'cursor-pointer hover:bg-zinc-50/80 dark:hover:bg-zinc-800/80'
       )}
     >
       <div className={'flex min-w-0 flex-1 items-center gap-3'} onClick={action === 'idle' ? handleClick : undefined}>
-        <div className={'flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100'}>
+        <div className={'flex size-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800'}>
           {isDirectory ? <FolderIcon /> : <FileIcon filename={file.name} />}
         </div>
         <div className={'min-w-0 flex-1'}>
-          <span className={cn('truncate text-sm', isDirectory ? 'font-medium text-zinc-800' : 'text-zinc-700')}>{file.name}</span>
+          <span
+            className={cn(
+              'truncate text-sm',
+              isDirectory ? 'font-medium text-zinc-800 dark:text-zinc-200' : 'text-zinc-700 dark:text-zinc-300'
+            )}
+          >
+            {file.name}
+          </span>
         </div>
         <div className={cn('hidden shrink-0 items-center gap-6 sm:flex', action !== 'idle' && 'invisible')}>
-          <span className={'font-jetbrains w-20 text-right text-sm text-zinc-600 tabular-nums'}>
+          <span className={'font-jetbrains w-20 text-right text-sm text-zinc-600 tabular-nums dark:text-zinc-400'}>
             {file.type === 'file' ? formatFileSize(file.size) : ''}
           </span>
-          <span className={'w-36 text-right text-sm text-zinc-600'}>{new Date(file.modified).toLocaleString()}</span>
+          <span className={'w-36 text-right text-sm text-zinc-600 dark:text-zinc-400'}>
+            {new Date(file.modified).toLocaleString()}
+          </span>
         </div>
       </div>
       <div className={'ml-4 flex shrink-0 items-center gap-1'}>
@@ -616,7 +499,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
           </div>
         ) : action === 'delete' ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button variant={'danger'} size={'xs'} onClick={() => onDelete(file)}>
               {t('common.yes')}
             </Button>
@@ -633,7 +516,10 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                   size={'icon-sm'}
                   onClick={() => onEdit(file)}
                   disabled={!isEditable}
-                  className={cn('text-zinc-600 hover:text-zinc-700', !isEditable && 'pointer-events-none invisible')}
+                  className={cn(
+                    'text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
+                    !isEditable && 'pointer-events-none invisible'
+                  )}
                 >
                   <Pencil className={'size-3.5'} />
                 </Button>
@@ -646,7 +532,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                   variant={'ghost'}
                   size={'icon-sm'}
                   onClick={handleStartRename}
-                  className={'text-zinc-600 hover:text-zinc-700'}
+                  className={'text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}
                 >
                   <TextCursorInput className={'size-3.5'} />
                 </Button>
@@ -669,7 +555,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
 }
 
 function FolderIcon() {
-  return <FolderOpen className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+  return <FolderOpen className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
 }
 
 type FileIconProps = {
@@ -680,17 +566,17 @@ function FileIcon({ filename }: FileIconProps) {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
 
   if (['jar', 'zip', 'tar', 'gz'].includes(ext)) {
-    return <FileArchive className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+    return <FileArchive className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
   }
   if (['yml', 'yaml', 'json', 'xml', 'properties'].includes(ext)) {
-    return <FileCode className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+    return <FileCode className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
   }
   if (['sh', 'bat', 'cmd'].includes(ext)) {
-    return <FileTerminal className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+    return <FileTerminal className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
   }
   if (['log', 'txt'].includes(ext)) {
-    return <FileText className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+    return <FileText className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
   }
 
-  return <File className={'size-4 text-zinc-600'} strokeWidth={1.75} />;
+  return <File className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
 }

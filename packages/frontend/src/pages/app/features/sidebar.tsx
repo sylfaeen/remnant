@@ -7,6 +7,7 @@ import { cn } from '@remnant/frontend/lib/cn';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { useLogout } from '@remnant/frontend/hooks/use_auth';
 import { LanguageSelectorCompact } from '@remnant/frontend/features/language_selector';
+import { ThemeToggle } from '@remnant/frontend/features/theme_toggle';
 import {
   useSidebar,
   type SidebarNavItem,
@@ -45,7 +46,7 @@ export function Sidebar() {
             >
               <span className={'text-sm font-bold text-white'}>R</span>
             </div>
-            <span className={'text-base font-semibold tracking-tight text-zinc-900'}>Remnant</span>
+            <span className={'text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100'}>Remnant</span>
           </Link>
         </div>
         {header ? (
@@ -53,7 +54,7 @@ export function Sidebar() {
             <Link
               to={header.backPath}
               className={
-                'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-black'
+                'flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-black dark:text-zinc-400 dark:hover:text-white'
               }
             >
               <ArrowLeft className={'size-3'} strokeWidth={2} />
@@ -72,9 +73,16 @@ export function Sidebar() {
           {bottomItems.map((item) => (
             <SidebarItem key={item.key} {...{ item, location }} />
           ))}
-          <div className={'mt-2 flex items-center justify-between border-t border-zinc-200/60 px-1 pt-3 pb-1'}>
+          <div
+            className={
+              'mt-2 flex items-center justify-between border-t border-zinc-200/60 px-1 pt-3 pb-1 dark:border-zinc-700/60'
+            }
+          >
             <UserDropdown />
-            <LanguageSelectorCompact />
+            <div className={'flex items-center gap-1.5'}>
+              <ThemeToggle />
+              <LanguageSelectorCompact />
+            </div>
           </div>
         </div>
       </aside>
@@ -93,13 +101,15 @@ function UserDropdown() {
       <DropdownMenu.Trigger asChild>
         <button
           type={'button'}
-          className={'flex items-center gap-2 overflow-hidden rounded-md px-1 py-0.5 transition-colors hover:bg-zinc-100'}
+          className={
+            'flex items-center gap-2 overflow-hidden rounded-md px-1 py-0.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          }
         >
           <div className={'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-400/60'}>
             <span className={'text-[10px] font-semibold text-white'}>{user?.username?.charAt(0).toUpperCase() || 'U'}</span>
           </div>
           <span className={'truncate text-sm font-medium'}>{user?.username || 'User'}</span>
-          <ChevronUp className={'size-3 shrink-0 text-zinc-400'} />
+          <ChevronUp className={'size-3 shrink-0 text-zinc-400 dark:text-zinc-500'} />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content side={'top'} align={'start'}>
@@ -108,7 +118,10 @@ function UserDropdown() {
           {t('account.menuSettings')}
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item onSelect={() => logout.mutate()} className={'text-red-600 data-highlighted:bg-red-50'}>
+        <DropdownMenu.Item
+          onSelect={() => logout.mutate()}
+          className={'text-red-600 data-highlighted:bg-red-50 dark:data-highlighted:bg-red-950'}
+        >
           <LogOut className={'size-4'} strokeWidth={1.75} />
           {t('common.logout')}
         </DropdownMenu.Item>
@@ -126,7 +139,11 @@ function SidebarSection({ section, location }: SidebarSectionProps) {
   return (
     <div>
       {section.section && (
-        <div className={'px-2.5 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-zinc-400 uppercase first:pt-0'}>
+        <div
+          className={
+            'px-2.5 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-zinc-400 uppercase first:pt-0 dark:text-zinc-500'
+          }
+        >
           {section.section}
         </div>
       )}
@@ -158,7 +175,7 @@ function SidebarItem({ item, location }: SidebarItemProps) {
         to={item.path}
         className={cn(
           'flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors',
-          isActive ? 'bg-zinc-200' : 'text-zinc-500 hover:text-black'
+          isActive ? 'bg-zinc-200 dark:bg-zinc-700' : 'text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white'
         )}
       >
         <Icon className={'size-4 shrink-0'} strokeWidth={1.75} />
@@ -178,7 +195,7 @@ function SidebarChildren({ items, location }: SidebarChildrenProps) {
   const { t } = useTranslation();
 
   return (
-    <div className={'relative ml-4 border-l border-zinc-200 py-0.5'}>
+    <div className={'relative ml-4 border-l border-zinc-200 py-0.5 dark:border-zinc-700'}>
       {items.map((child) => {
         const isChildActive = child.exact
           ? location.pathname === child.path
@@ -190,10 +207,14 @@ function SidebarChildren({ items, location }: SidebarChildrenProps) {
             to={child.path}
             className={cn(
               'relative block py-1 pr-2.5 pl-4 text-[13px] font-medium transition-colors',
-              isChildActive ? 'text-zinc-900' : 'text-zinc-400 hover:text-zinc-600'
+              isChildActive
+                ? 'text-zinc-900 dark:text-zinc-100'
+                : 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
             )}
           >
-            {isChildActive && <span className={'absolute top-1/2 left-[-0.5px] h-4 w-px -translate-y-1/2 bg-zinc-900'} />}
+            {isChildActive && (
+              <span className={'absolute top-1/2 left-[-0.5px] h-4 w-px -translate-y-1/2 bg-zinc-900 dark:bg-zinc-100'} />
+            )}
             {t(`nav.${child.key}`, child.key)}
           </Link>
         );

@@ -4,12 +4,16 @@ import { cn } from '@remnant/frontend/lib/cn';
 import { Badge } from '@remnant/frontend/features/ui/badge';
 
 export function ServerSection({ children }: { children: ReactNode }) {
-  return <div className={'rounded-xl border border-black/10 bg-white'}>{children}</div>;
+  return <div className={'rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900'}>{children}</div>;
 }
 
 ServerSection.Header = function ServerSectionHeader({ children }: { children: ReactNode }) {
   return (
-    <div className={'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4'}>
+    <div
+      className={
+        'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4 dark:border-white/10'
+      }
+    >
       {children}
     </div>
   );
@@ -24,15 +28,15 @@ ServerSection.HeaderInfo = function ServerSectionHeaderInfo({ children }: { chil
 };
 
 ServerSection.Icon = function ServerSectionIcon({ icon: IconComponent }: { icon: LucideIcon }) {
-  return <IconComponent className={'size-5 text-zinc-700'} strokeWidth={1.75} />;
+  return <IconComponent className={'size-5 text-zinc-700 dark:text-zinc-300'} strokeWidth={1.75} />;
 };
 
 ServerSection.Title = function ServerSectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className={'text-lg font-semibold text-zinc-900'}>{children}</h2>;
+  return <h2 className={'text-lg font-semibold text-zinc-900 dark:text-zinc-100'}>{children}</h2>;
 };
 
 ServerSection.Description = function ServerSectionDescription({ children }: { children: ReactNode }) {
-  return <p className={'text-sm text-zinc-600'}>{children}</p>;
+  return <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{children}</p>;
 };
 
 ServerSection.Count = function ServerSectionCount({ children }: { children: ReactNode }) {
@@ -58,16 +62,16 @@ ServerSection.Empty = function ServerSectionEmpty({ children }: PropsWithChildre
 
 ServerSection.EmptyIcon = function ServerSectionEmptyIcon({ icon: IconComponent }: { icon: LucideIcon }) {
   return (
-    <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
+    <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
       <IconComponent className={'size-6 text-zinc-300'} strokeWidth={1.5} />
     </div>
   );
 };
 
 ServerSection.EmptyTitle = function ServerSectionEmptyTitle({ children }: { children: ReactNode }) {
-  return <p className={'mt-2 font-medium text-zinc-600'}>{children}</p>;
+  return <p className={'mt-2 font-medium text-zinc-600 dark:text-zinc-400'}>{children}</p>;
 };
 
 ServerSection.EmptyDescription = function ServerSectionEmptyDescription({ children }: { children: ReactNode }) {
-  return <p className={'mt-0.5 text-sm text-zinc-500'}>{children}</p>;
+  return <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{children}</p>;
 };

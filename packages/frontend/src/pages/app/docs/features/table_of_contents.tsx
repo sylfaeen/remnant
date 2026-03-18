@@ -18,8 +18,8 @@ export function TableOfContents({ content }: TableOfContentsProps) {
 
   return (
     <nav className={'sticky top-8 w-56 shrink-0'}>
-      <p className={'text-xs font-semibold text-zinc-900'}>On this page</p>
-      <ul className={'mt-3 space-y-1.5 border-l border-zinc-200'}>
+      <p className={'text-xs font-semibold text-zinc-900 dark:text-zinc-100'}>On this page</p>
+      <ul className={'mt-3 space-y-1.5 border-l border-zinc-200 dark:border-zinc-700'}>
         {items.map((item) => (
           <li key={item.id}>
             <a
@@ -31,8 +31,8 @@ export function TableOfContents({ content }: TableOfContentsProps) {
               className={cn(
                 '-ml-px block border-l py-0.5 pl-3 text-[13px] transition-colors',
                 activeId === item.id
-                  ? 'border-zinc-900 font-medium text-zinc-900'
-                  : 'border-transparent text-zinc-400 hover:text-zinc-600'
+                  ? 'border-zinc-900 font-medium text-zinc-900 dark:border-zinc-100 dark:text-zinc-100'
+                  : 'border-transparent text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
               )}
             >
               {item.text}

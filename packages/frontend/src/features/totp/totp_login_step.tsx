@@ -89,7 +89,7 @@ export function TotpLoginStep({ onVerify, onBack, error, loading }: TotpLoginSte
                 setUseRecovery(!useRecovery);
                 setCode('');
               }}
-              className={'text-zinc-500 no-underline hover:text-zinc-700'}
+              className={'text-zinc-500 no-underline hover:text-zinc-700 dark:hover:text-zinc-300'}
             >
               {useRecovery ? t('auth.totp.useAuthenticator') : t('auth.totp.useRecoveryCode')}
             </Button>
@@ -97,7 +97,12 @@ export function TotpLoginStep({ onVerify, onBack, error, loading }: TotpLoginSte
         </div>
       </div>
       <div className={'mt-4 flex justify-center'}>
-        <Button variant={'ghost'} size={'sm'} onClick={onBack} className={'text-zinc-400 hover:text-zinc-600'}>
+        <Button
+          variant={'ghost'}
+          size={'sm'}
+          onClick={onBack}
+          className={'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}
+        >
           <ArrowLeft className={'size-3.5'} />
           {t('auth.totp.back')}
         </Button>

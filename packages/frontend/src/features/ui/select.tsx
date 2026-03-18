@@ -10,7 +10,8 @@ const selectVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-white border border-black/10 focus:border-zinc-900 focus:ring-zinc-900/20 hover:border-black/12',
+        default:
+          'bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 focus:border-zinc-900 dark:focus:border-zinc-100 focus:ring-zinc-900/20 dark:focus:ring-zinc-100/20 hover:border-black/12 dark:hover:border-white/12',
         ghost: 'bg-transparent border border-transparent focus:border-black/10 focus:ring-zinc-900/20 hover:bg-zinc-100',
         filled: 'bg-white border border-black/10 focus:border-zinc-900 focus:ring-zinc-900/20 hover:bg-zinc-100',
       },

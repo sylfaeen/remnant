@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Archive, Download, HardDrive, Loader2, Trash2 } from 'lucide-react';
+import { Archive, Download, HardDrive, Trash2 } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer, useBackupServer } from '@remnant/frontend/hooks/use_servers';
@@ -10,8 +10,7 @@ import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { cn } from '@remnant/frontend/lib/cn';
 import { Button } from '@remnant/frontend/features/ui/button';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { FileTreeSelector } from '@remnant/frontend/features/ui/file_tree_selector';
+import { CreateBackupDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_backup_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { Badge } from '@remnant/frontend/features/ui/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
@@ -110,7 +109,7 @@ export function ServerBackupsPage() {
             onDeleteConfirm={setDeleteConfirm}
             {...{ backups, backupsLoading, deleteConfirm }}
           />
-          <BackupDialog
+          <CreateBackupDialog
             open={dialogOpen}
             isPending={backupServer.isPending}
             onClose={() => setDialogOpen(false)}
@@ -148,24 +147,26 @@ function BackupsSection({
 
   return (
     <FeatureCard>
-      <FeatureCard.Header
-        actions={
-          backups &&
-          backups.length > 0 && (
-            <div className={'flex items-center gap-1.5 text-sm text-zinc-600'}>
+      <FeatureCard.Header>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={backups && backups.length > 0 && backups.length}>{t('backups.title')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('backups.subtitle')}</FeatureCard.Description>
+        </FeatureCard.Content>
+        {backups && backups.length > 0 && (
+          <FeatureCard.Actions>
+            <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
               <HardDrive className={'size-3'} strokeWidth={2} />
               <span>{formatFileSize(totalSize)}</span>
             </div>
-          )
-        }
-      >
-        <FeatureCard.Title count={backups && backups.length > 0 && backups.length}>{t('backups.title')}</FeatureCard.Title>
-        <FeatureCard.Description>{t('backups.subtitle')}</FeatureCard.Description>
+          </FeatureCard.Actions>
+        )}
       </FeatureCard.Header>
       <FeatureCard.Body>
         {backupsLoading ? (
           <div className={'py-8 text-center'}>
-            <div className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+            <div
+              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+            />
           </div>
         ) : !backups || backups.length === 0 ? (
           <Empty />
@@ -191,79 +192,13 @@ function Empty() {
     <FeatureCard.Row className={'relative overflow-hidden'}>
       <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
       <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
-          <Archive className={'size-6 text-zinc-600'} strokeWidth={1.5} />
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+          <Archive className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
         </div>
         <p className={'mt-6 font-medium'}>{t('backups.noBackups')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600'}>{t('backups.createFirst')}</p>
+        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('backups.createFirst')}</p>
       </FeatureCard.Stack>
     </FeatureCard.Row>
-  );
-}
-
-type BackupDialogProps = {
-  open: boolean;
-  serverId: number;
-  isPending: boolean;
-  onClose: () => void;
-  onConfirm: (paths: Array<string>) => void;
-};
-
-function BackupDialog({ open, serverId, isPending, onClose, onConfirm }: BackupDialogProps) {
-  const { t } = useTranslation();
-  const [selectedPaths, setSelectedPaths] = useState<Set<string>>(() => new Set());
-
-  const handleConfirm = () => {
-    onConfirm(Array.from(selectedPaths));
-  };
-
-  return (
-    <Dialog
-      onOpenChange={(isOpen) => {
-        if (!isOpen) onClose();
-      }}
-      {...{ open }}
-    >
-      <Dialog.Content className={'max-w-2xl overflow-hidden p-0'}>
-        <div className={'relative border-b border-black/10 bg-linear-to-b from-zinc-600/3 to-transparent px-6 pt-6 pb-5'}>
-          <div className={'flex items-start gap-4'}>
-            <div className={'flex size-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100'}>
-              <Archive className={'size-5 text-zinc-700'} strokeWidth={1.75} />
-            </div>
-            <div className={'min-w-0 flex-1'}>
-              <h2 className={'text-lg font-semibold tracking-tight text-zinc-900'}>{t('backups.dialogTitle')}</h2>
-              <p className={'mt-0.5 text-sm text-zinc-500'}>{t('backups.dialogDescription')}</p>
-            </div>
-          </div>
-        </div>
-        <div className={'px-6 pt-3 pb-4'}>
-          <FileTreeSelector
-            enabled={open}
-            selectedPaths={selectedPaths}
-            onSelectedPathsChange={setSelectedPaths}
-            {...{ serverId }}
-          />
-        </div>
-        <Dialog.Footer className={'border-t border-black/10 bg-zinc-50/50 px-6 py-4'}>
-          <Button variant={'secondary'} onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={handleConfirm} disabled={selectedPaths.size === 0 || isPending} loading={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className={'size-4 animate-spin'} />
-                {t('backups.backingUp')}
-              </>
-            ) : (
-              <>
-                <Archive className={'size-4'} />
-                {t('backups.startBackup')}
-              </>
-            )}
-          </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
-    </Dialog>
   );
 }
 
@@ -294,14 +229,17 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
         <div
           className={cn(
             'flex size-8 shrink-0 items-center justify-center rounded-lg',
-            isNewest ? 'bg-zinc-200/70' : 'bg-zinc-100'
+            isNewest ? 'bg-zinc-200/70 dark:bg-zinc-700/70' : 'bg-zinc-100 dark:bg-zinc-800'
           )}
         >
-          <Archive className={cn('size-4', isNewest ? 'text-zinc-700' : 'text-zinc-600')} strokeWidth={2} />
+          <Archive
+            className={cn('size-4', isNewest ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400')}
+            strokeWidth={2}
+          />
         </div>
         <div>
           <div className={'flex items-center gap-2'}>
-            <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800'}>{backup.name}</span>
+            <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{backup.name}</span>
             {isNewest && (
               <Badge size={'xs'} className={'font-semibold'}>
                 latest
@@ -313,9 +251,9 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
               </Badge>
             )}
           </div>
-          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600'}>
+          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span className={'font-jetbrains tabular-nums'}>{formatFileSize(backup.size)}</span>
-            <span className={'text-zinc-200'}>·</span>
+            <span className={'text-zinc-200 dark:text-zinc-700'}>·</span>
             <span>{formatRelativeDate(backup.date)}</span>
           </div>
         </div>
@@ -323,7 +261,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
       <div className={'flex shrink-0 items-center gap-1.5'}>
         {deleteConfirm === backup.name ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={'danger'}
               size={'xs'}
@@ -346,7 +284,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
                     variant={'ghost'}
                     size={'icon-sm'}
                     onClick={() => onDownload(backup.name)}
-                    className={'text-zinc-600 hover:text-zinc-600'}
+                    className={'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'}
                   >
                     <Download className={'size-4'} />
                   </Button>

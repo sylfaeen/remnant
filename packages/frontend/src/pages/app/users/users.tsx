@@ -92,18 +92,18 @@ export function UsersPage() {
         <div className={'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'}>
           <div>
             <div className={'flex items-center gap-2'}>
-              <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('users.title')}</h1>
+              <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>{t('users.title')}</h1>
               <DocsLink path={'/guide/users'} />
             </div>
-            <p className={'mt-1 text-zinc-600'}>{t('users.subtitle')}</p>
+            <p className={'mt-1 text-zinc-600 dark:text-zinc-400'}>{t('users.subtitle')}</p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className={'size-4'} />
             {t('users.addUser')}
           </Button>
         </div>
-        <div className={'overflow-hidden rounded-xl border border-black/10 bg-white'}>
-          <div className={'divide-y divide-black/4'}>
+        <div className={'overflow-hidden rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900'}>
+          <div className={'divide-y divide-black/4 dark:divide-white/4'}>
             {users?.map((user) => (
               <UserRow
                 key={user.id}
@@ -168,7 +168,7 @@ function UserRow({
   const specificPermissions = AVAILABLE_PERMISSIONS.filter((p) => p !== '*');
 
   return (
-    <div className={'p-4 transition-colors hover:bg-zinc-100 sm:p-5'}>
+    <div className={'p-4 transition-colors hover:bg-zinc-100 sm:p-5 dark:hover:bg-zinc-800'}>
       <div className={'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'}>
         <div className={'flex items-start gap-3 sm:gap-4'}>
           <div
@@ -185,7 +185,7 @@ function UserRow({
           </div>
           <div>
             <div className={'flex items-center gap-2'}>
-              <span className={'font-semibold text-zinc-900'}>{user.username}</span>
+              <span className={'font-semibold text-zinc-900 dark:text-zinc-100'}>{user.username}</span>
               {isAdmin && (
                 <Badge variant={'warning'} size={'xs'}>
                   {t('users.admin')}
@@ -259,7 +259,7 @@ function PermissionBadge({ permission, granted }: PermissionBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium',
-        granted ? 'bg-emerald-600/10 text-emerald-600' : 'bg-zinc-100 text-zinc-600'
+        granted ? 'bg-emerald-600/10 text-emerald-600' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
       )}
     >
       {granted ? <Check className={'size-3'} strokeWidth={2.5} /> : <X className={'size-3'} strokeWidth={2.5} />}
@@ -280,8 +280,8 @@ function EmptyState({ onCreate }: EmptyStateProps) {
       <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600/10'}>
         <Users className={'size-8 text-emerald-600'} strokeWidth={1.5} />
       </div>
-      <h3 className={'mb-2 font-semibold text-zinc-900'}>{t('users.noUsers')}</h3>
-      <p className={'mb-6 text-zinc-600'}>{t('users.noUsersDescription')}</p>
+      <h3 className={'mb-2 font-semibold text-zinc-900 dark:text-zinc-100'}>{t('users.noUsers')}</h3>
+      <p className={'mb-6 text-zinc-600 dark:text-zinc-400'}>{t('users.noUsersDescription')}</p>
       <Button onClick={onCreate}>
         <Plus className={'size-4'} />
         {t('users.addUser')}

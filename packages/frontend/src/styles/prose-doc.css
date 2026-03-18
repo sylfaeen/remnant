@@ -336,3 +336,118 @@
     color: var(--shiki-light, inherit);
   }
 }
+
+.dark .prose-doc {
+  h2 {
+    border-top-color: #2e2e32;
+  }
+
+  blockquote {
+    border-left-color: #2e2e32;
+    color: #a1a1aa;
+  }
+
+  a {
+    color: #6b9fff;
+  }
+
+  a:hover {
+    color: #8bb4ff;
+  }
+
+  tr {
+    background-color: #1b1b1f;
+    border-top-color: #2e2e32;
+  }
+
+  tr:nth-child(2n) {
+    background-color: #222226;
+  }
+
+  th,
+  td {
+    border-color: #2e2e32;
+  }
+
+  th {
+    color: #a1a1aa;
+    background-color: #222226;
+  }
+
+  hr {
+    border-top-color: #2e2e32;
+  }
+
+  :not(pre, h1, h2, h3, h4, h5, h6) > code {
+    color: #6b9fff;
+  }
+
+  :not(pre) > code {
+    background-color: rgba(101, 117, 133, 0.16);
+  }
+
+  a > code {
+    color: #6b9fff;
+  }
+
+  a:hover > code {
+    color: #8bb4ff;
+  }
+
+  div[class*='language-'] {
+    background-color: #222226;
+  }
+
+  [class*='language-'] > button.copy {
+    border-color: #2e2e32;
+    background-color: #2e2e32;
+  }
+
+  [class*='language-'] > button.copy.copied,
+  [class*='language-'] > button.copy:hover.copied {
+    background-color: #1b1b1f;
+  }
+
+  [class*='language-'] > button.copy.copied:before,
+  [class*='language-'] > button.copy:hover.copied:before {
+    border-color: #2e2e32;
+    color: #a1a1aa;
+    background-color: #1b1b1f;
+  }
+
+  [class*='language-'] > span.lang {
+    color: #a1a1aa;
+  }
+
+  [class*='language-'] code {
+    color: #a1a1aa;
+  }
+
+  .custom-block {
+    color: #a1a1aa;
+
+    &.warning {
+      color: #d4c26a;
+      background-color: rgba(234, 179, 8, 0.12);
+    }
+
+    &.tip {
+      color: #a78bfa;
+      background-color: rgba(100, 108, 255, 0.12);
+    }
+
+    &.danger {
+      color: #f87171;
+      background-color: rgba(244, 63, 94, 0.12);
+    }
+
+    &.info {
+      color: #a1a1aa;
+      background-color: rgba(142, 150, 170, 0.12);
+    }
+  }
+
+  .shiki span {
+    color: var(--shiki-dark, inherit);
+  }
+}

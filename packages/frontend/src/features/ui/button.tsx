@@ -4,21 +4,24 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@remnant/frontend/lib/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-medium tracking-wide transition-all duration-[var(--duration-fast)] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-zinc-50',
+  'inline-flex items-center justify-center gap-2 font-medium tracking-wide transition-all duration-[var(--duration-fast)] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-offset-zinc-900',
   {
     variants: {
       variant: {
         primary:
           'bg-gradient-to-br from-emerald-600 via-emerald-600 to-emerald-800 text-white font-semibold shadow-sm hover:shadow-glow-sm hover:from-emerald-700 hover:via-emerald-600 hover:to-emerald-600 active:scale-[0.98] border border-emerald-600/20',
         secondary:
-          'bg-white/80 backdrop-blur-sm text-zinc-900 border border-black/10 shadow-xs hover:bg-zinc-100 hover:border-black/12 hover:shadow-sm active:bg-zinc-200 active:scale-[0.98]',
-        ghost: 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 active:bg-zinc-200',
-        'ghost-danger': 'text-red-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100',
+          'bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm text-zinc-900 dark:text-zinc-100 border border-black/10 dark:border-white/10 shadow-xs hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:border-black/12 dark:hover:border-white/12 hover:shadow-sm active:bg-zinc-200 dark:active:bg-zinc-600 active:scale-[0.98]',
+        ghost:
+          'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700',
+        'ghost-danger':
+          'text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 active:bg-red-100 dark:active:bg-red-900',
         danger:
           'bg-red-600 text-white font-semibold shadow-sm hover:bg-red-700 hover:shadow-glow-danger active:scale-[0.98] border border-red-600/20',
         success:
           'bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700 hover:shadow-glow-success active:scale-[0.98] border border-emerald-600/20',
-        outline: 'border border-black/10 text-zinc-900 hover:bg-white/85 hover:border-emerald-600/30 active:bg-zinc-200',
+        outline:
+          'border border-black/10 dark:border-white/10 text-zinc-900 dark:text-zinc-100 hover:bg-white/85 dark:hover:bg-zinc-800 hover:border-emerald-600/30 active:bg-zinc-200 dark:active:bg-zinc-700',
         link: 'text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700',
       },
       size: {

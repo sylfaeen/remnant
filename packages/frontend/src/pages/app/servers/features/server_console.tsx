@@ -92,8 +92,10 @@ export function ServerConsole({
       <div className={'flex flex-1 flex-col overflow-hidden rounded-xl border border-black/10 bg-zinc-950'}>
         <div className={'flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-2'}>
           <div className={'flex items-center gap-2'}>
-            <Terminal className={'size-4 text-zinc-600'} />
-            <span className={'text-sm font-medium tracking-wider text-zinc-600 uppercase'}>{t('nav.console')}</span>
+            <Terminal className={'size-4 text-zinc-600 dark:text-zinc-400'} />
+            <span className={'text-sm font-medium tracking-wider text-zinc-600 uppercase dark:text-zinc-400'}>
+              {t('nav.console')}
+            </span>
           </div>
           <div className={'flex items-center gap-2'}>
             <div
@@ -109,7 +111,7 @@ export function ServerConsole({
         </div>
         <div ref={messagesContainerRef} onScroll={handleScroll} className={'custom-scrollbar min-h-0 flex-1 overflow-y-auto p-4'}>
           {messages.length === 0 ? (
-            <div className={'font-jetbrains py-8 text-center text-sm text-zinc-600'}>
+            <div className={'font-jetbrains py-8 text-center text-sm text-zinc-600 dark:text-zinc-400'}>
               {isConnected ? t('console.serverNotRunning') : t('console.startToViewLogs')}
             </div>
           ) : (
@@ -188,7 +190,7 @@ function MessageLine({ message }: MessageLineProps) {
         typeStyles[message.type] || 'text-zinc-200'
       )}
     >
-      <span className={'mr-2 text-zinc-600 select-none'}>[{time}]</span>
+      <span className={'mr-2 text-zinc-600 select-none dark:text-zinc-400'}>[{time}]</span>
       <span className={'break-all whitespace-pre-wrap'}>{message.data}</span>
     </div>
   );

@@ -7,9 +7,9 @@ export function AppNotFoundPage() {
 
   return (
     <main className={'flex flex-1 flex-col items-center justify-center px-4 py-20'}>
-      <h1 className={'text-9xl font-bold text-zinc-200'}>404</h1>
-      <p className={'mt-4 text-2xl font-semibold text-zinc-900'}>{t('notFound.title')}</p>
-      <p className={'mt-2 mb-8 text-zinc-500'}>{t('notFound.message')}</p>
+      <h1 className={'text-9xl font-bold text-zinc-200 dark:text-zinc-700'}>404</h1>
+      <p className={'mt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-100'}>{t('notFound.title')}</p>
+      <p className={'mt-2 mb-8 text-zinc-500 dark:text-zinc-400'}>{t('notFound.message')}</p>
       <Link
         to={'/app'}
         className={

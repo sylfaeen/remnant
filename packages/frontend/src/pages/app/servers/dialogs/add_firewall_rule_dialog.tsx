@@ -66,8 +66,8 @@ export function AddFirewallRuleDialog({ open, onOpenChange, onAdd }: AddFirewall
                     className={cn(
                       'group/preset flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-all',
                       port === String(preset.port) && protocol === preset.protocol
-                        ? 'border-emerald-600/30 bg-emerald-600/5 text-emerald-700'
-                        : 'border-black/10 text-zinc-600 hover:border-black/10 hover:bg-zinc-50'
+                        ? 'border-emerald-600/30 bg-emerald-600/5 text-emerald-700 dark:text-emerald-400'
+                        : 'border-black/10 text-zinc-600 hover:border-black/10 hover:bg-zinc-50 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/10 dark:hover:bg-zinc-800'
                     )}
                   >
                     <Zap className={'size-3 text-zinc-400 transition-colors group-hover/preset:text-emerald-600'} />
@@ -95,7 +95,7 @@ export function AddFirewallRuleDialog({ open, onOpenChange, onAdd }: AddFirewall
               </div>
               <div>
                 <Label>{t('settings.firewall.protocol')}</Label>
-                <div className={'flex gap-1 rounded-lg bg-zinc-100 p-1'}>
+                <div className={'flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800'}>
                   {(['tcp', 'udp', 'both'] as Array<Protocol>).map((p) => {
                     const style = PROTOCOL_STYLES[p];
                     return (
@@ -105,7 +105,9 @@ export function AddFirewallRuleDialog({ open, onOpenChange, onAdd }: AddFirewall
                         onClick={() => setProtocol(p)}
                         className={cn(
                           'flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-all',
-                          protocol === p ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+                          protocol === p
+                            ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100'
+                            : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
                         )}
                       >
                         <span className={cn(protocol === p && style.text)}>{style.label}</span>

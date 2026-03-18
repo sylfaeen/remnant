@@ -12,7 +12,7 @@
     left: 0;
     top: 0;
     z-index: 25;
-    background-color: #f6f6f7;
+    background-color: var(--surface-sidebar);
     opacity: 0;
     width: calc(100vw - 64px);
     max-width: 320px;
@@ -34,7 +34,7 @@
 
     @media (min-width: 960px) {
       width: 272px;
-      background-color: #f6f6f7;
+      background-color: var(--surface-sidebar);
       opacity: 1;
       visibility: visible;
       max-width: 100%;
@@ -132,14 +132,14 @@
             }
 
             .header {
-              background-color: #ffffff;
+              background-color: var(--surface-header);
               border-bottom: 1px solid transparent;
               padding: 16px;
               width: 100%;
               max-width: 100%;
 
               &.scrolled {
-                @apply border-black/6;
+                border-color: var(--border-header);
               }
 
               @media (min-width: 1280px) {
@@ -200,14 +200,14 @@
               position: sticky;
               top: 0;
               z-index: 30;
-              background-color: #ffffff;
+              background-color: var(--surface-header);
               border-bottom: 1px solid transparent;
               padding: 32px 32px 16px;
               width: 100%;
               max-width: 100%;
 
               &.scrolled {
-                @apply border-black/6;
+                border-color: var(--border-header);
               }
             }
           }
@@ -254,7 +254,7 @@
 
             .aside-curtain {
               z-index: 10;
-              background: linear-gradient(transparent, #ffffff 70%);
+              background: linear-gradient(transparent, var(--surface-curtain) 70%);
               pointer-events: none;
               width: 224px;
               height: 32px;

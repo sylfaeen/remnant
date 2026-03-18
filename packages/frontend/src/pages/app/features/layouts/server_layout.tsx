@@ -3,11 +3,15 @@ import { Outlet, useParams } from '@tanstack/react-router';
 import { Activity, Archive, BookOpen, Clock, FolderOpen, Puzzle, Settings, SlidersHorizontal } from 'lucide-react';
 import { useSidebarItems, type SidebarNavSection } from '@remnant/frontend/pages/app/features/sidebar_context';
 import { Sidebar } from '@remnant/frontend/pages/app/features/sidebar';
+import { useServer } from '@remnant/frontend/hooks/use_servers';
 
 export function ServerLayout() {
   const { id } = useParams({ strict: false });
+  const serverId = id ? parseInt(id, 10) : NaN;
 
-  const sections = useMemo(() => getServerNavSections(id || ''), [id]);
+  const { data: server } = useServer(serverId);
+
+  const sections = useMemo(() => getServerNavSections(id || '', server?.name || ''), [id, server?.name]);
   const serverHeader = { backPath: '/app/servers', backLabel: 'servers' };
 
   useSidebarItems(sections, serverHeader);
@@ -26,10 +30,11 @@ export function ServerLayout() {
   );
 }
 
-function getServerNavSections(serverId: string): Array<SidebarNavSection> {
+function getServerNavSections(serverId: string, serverName: string): Array<SidebarNavSection> {
   const basePath = `/app/servers/${serverId}`;
   return [
     {
+      section: serverName,
       items: [
         { key: 'overview', path: basePath, exact: true, icon: Activity },
         { key: 'files', path: `${basePath}/files`, icon: FolderOpen },

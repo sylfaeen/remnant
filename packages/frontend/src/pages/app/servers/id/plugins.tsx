@@ -165,7 +165,9 @@ function UploadSection({
       <FeatureCard.Body
         className={cn(
           'rounded-xl border-2 border-dashed shadow-none transition-all',
-          isDragging ? 'border-zinc-400/40 bg-zinc-100/50' : 'border-black/10 hover:border-black/12'
+          isDragging
+            ? 'border-zinc-400/40 bg-zinc-100/50 dark:bg-zinc-800/50'
+            : 'border-black/10 hover:border-black/12 dark:border-white/10 dark:hover:border-white/12'
         )}
       >
         <div className={'relative overflow-hidden'} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
@@ -176,14 +178,21 @@ function UploadSection({
             )}
           />
           <div className={'relative flex flex-col items-center py-8'}>
-            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors'}>
+            <div
+              className={
+                'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors dark:bg-zinc-800'
+              }
+            >
               <UploadCloud
-                className={cn('size-6 transition-colors', isDragging ? 'text-zinc-600' : 'text-zinc-300')}
+                className={cn(
+                  'size-6 transition-colors',
+                  isDragging ? 'text-zinc-600 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-500'
+                )}
                 strokeWidth={1.5}
               />
             </div>
             <p className={'font-medium'}>{t('plugins.uploadHint')}</p>
-            <p className={'mt-1 text-sm text-zinc-600'}>{t('plugins.jarOnly', '.jar files only')}</p>
+            <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.jarOnly', '.jar files only')}</p>
             <label className={'mt-3 inline-block cursor-pointer'}>
               <Button asChild variant={'secondary'} size={'sm'} disabled={uploadPending} loading={uploadPending}>
                 <span>
@@ -194,8 +203,10 @@ function UploadSection({
               <input type={'file'} accept={'.jar'} multiple onChange={onFileSelect} className={'hidden'} />
             </label>
             {uploadPending && (
-              <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600'}>
-                <div className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+              <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
+                <div
+                  className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+                />
                 {t('files.uploadProgress')}
               </div>
             )}
@@ -237,7 +248,9 @@ function PluginListSection({ pluginsLoading, plugins, enabledCount, togglePlugin
       <FeatureCard.Body>
         {pluginsLoading ? (
           <div className={'py-8 text-center'}>
-            <div className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600'} />
+            <div
+              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+            />
           </div>
         ) : !plugins || plugins.length === 0 ? (
           <Empty />
@@ -291,16 +304,16 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
         </div>
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
-            <span className={'font-jetbrains text-sm font-medium text-zinc-800'}>{plugin.name}</span>
+            <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{plugin.name}</span>
             {!plugin.enabled && (
               <Badge variant={'muted'} size={'xs'} className={'font-semibold'}>
                 {t('plugins.disabled')}
               </Badge>
             )}
           </div>
-          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600'}>
+          <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span className={'font-jetbrains tabular-nums'}>{formatPluginSize(plugin.size)}</span>
-            <span className={'text-zinc-200'}>&middot;</span>
+            <span className={'text-zinc-200 dark:text-zinc-700'}>&middot;</span>
             <span>{new Date(plugin.modified).toLocaleDateString()}</span>
           </div>
         </div>
@@ -308,7 +321,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
       <FeatureCard.RowControl>
         {toggleConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={plugin.enabled ? 'secondary' : 'success'}
               size={'xs'}
@@ -324,7 +337,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
           </div>
         ) : deleteConfirm ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={'danger'}
               size={'xs'}
@@ -347,7 +360,9 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
                     variant={plugin.enabled ? 'ghost' : 'success'}
                     size={plugin.enabled ? 'icon-sm' : 'xs'}
                     onClick={() => setToggleConfirm(true)}
-                    className={cn(plugin.enabled && 'text-zinc-600 hover:text-zinc-600')}
+                    className={cn(
+                      plugin.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
+                    )}
                   >
                     {plugin.enabled ? (
                       <PowerOff className={'size-4'} />
@@ -386,11 +401,11 @@ function Empty() {
     <FeatureCard.Row className={'relative overflow-hidden'}>
       <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
       <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100'}>
-          <Puzzle className={'size-6 text-zinc-600'} strokeWidth={1.5} />
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+          <Puzzle className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
         </div>
         <p className={'mt-6 font-medium'}>{t('plugins.noPlugins')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600'}>{t('plugins.uploadFirst')}</p>
+        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.uploadFirst')}</p>
       </FeatureCard.Stack>
     </FeatureCard.Row>
   );

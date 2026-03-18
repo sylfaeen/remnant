@@ -23,7 +23,7 @@ Tooltip.Content = function TooltipContent({
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         className={cn(
-          'z-50 max-w-80 rounded-xl border border-black/10 bg-white p-4 text-sm text-zinc-600 shadow-lg',
+          'z-50 max-w-80 rounded-xl border border-black/10 bg-white p-4 text-sm text-zinc-600 shadow-lg dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200',
           'animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
           className
         )}

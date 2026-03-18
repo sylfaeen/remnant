@@ -18,7 +18,9 @@ export function DocsLink({ path }: DocsLinkProps) {
           <Link
             to={'/app/docs/$slug'}
             params={{ slug }}
-            className={'inline-flex items-center rounded-md p-1 text-zinc-400 transition-colors hover:text-zinc-600'}
+            className={
+              'inline-flex items-center rounded-md p-1 text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300'
+            }
           >
             <BookOpen className={'size-4'} strokeWidth={1.75} />
           </Link>

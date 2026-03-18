@@ -69,10 +69,10 @@ export function ServersPage() {
         <div className={'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'}>
           <div>
             <div className={'flex items-center gap-2'}>
-              <h1 className={'text-2xl font-bold tracking-tight text-zinc-900'}>{t('servers.title')}</h1>
+              <h1 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>{t('servers.title')}</h1>
               <DocsLink path={'/guide/server-management'} />
             </div>
-            <p className={'mt-1 text-zinc-600'}>{t('servers.subtitle', 'Manage your Minecraft servers')}</p>
+            <p className={'mt-1 text-zinc-600 dark:text-zinc-400'}>{t('servers.subtitle', 'Manage your Minecraft servers')}</p>
           </div>
           <Button onClick={handleCreate}>
             <Plus className={'size-4'} />
@@ -110,13 +110,17 @@ function ServerCard({ server, ipAddress }: ServerCardProps) {
   const address = ipAddress ? `${ipAddress}:${server.java_port}` : `:${server.java_port}`;
 
   return (
-    <div className={'overflow-hidden rounded-xl border border-black/10 bg-white transition-colors hover:bg-black/2'}>
+    <div
+      className={
+        'overflow-hidden rounded-xl border border-black/10 bg-white transition-colors hover:bg-black/2 dark:border-white/10 dark:bg-zinc-900'
+      }
+    >
       <div className={'px-4 py-3'}>
         <Link to={'/app/servers/$id'} params={{ id: String(server.id) }} className={'group flex items-start gap-3 sm:gap-4'}>
           <ServerStatusIcon status={server.status} />
           <div>
             <h3 className={'font-semibold'}>{server.name}</h3>
-            <div className={'flex flex-wrap gap-x-2 text-sm text-zinc-600'}>
+            <div className={'flex flex-wrap gap-x-2 text-sm text-zinc-600 dark:text-zinc-400'}>
               <span>{address}</span>
               {isRunning && (
                 <>
@@ -148,7 +152,10 @@ function ServerCardSkeletons() {
   return (
     <>
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={`skeleton-${i}`} className={'overflow-hidden rounded-xl border border-black/10 bg-white'}>
+        <div
+          key={`skeleton-${i}`}
+          className={'overflow-hidden rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900'}
+        >
           <div className={'px-4 py-3'}>
             <div className={'flex items-start gap-3 sm:gap-4'}>
               <Skeleton variant={'circular'} className={'size-5 shrink-0'} />
@@ -172,12 +179,14 @@ function EmptyState({ onCreate }: EmptyStateProps) {
   const { t } = useTranslation();
 
   return (
-    <div className={'rounded-xl border border-black/10 bg-white p-12 text-center'}>
+    <div className={'rounded-xl border border-black/10 bg-white p-12 text-center dark:border-white/10 dark:bg-zinc-900'}>
       <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600/10'}>
         <Server className={'size-8 text-emerald-600'} strokeWidth={1.5} />
       </div>
-      <h3 className={'mb-2 font-semibold text-zinc-900'}>{t('servers.noServers')}</h3>
-      <p className={'mb-6 text-zinc-600'}>{t('servers.noServersDescription', 'Get started by adding your first server')}</p>
+      <h3 className={'mb-2 font-semibold text-zinc-900 dark:text-zinc-100'}>{t('servers.noServers')}</h3>
+      <p className={'mb-6 text-zinc-600 dark:text-zinc-400'}>
+        {t('servers.noServersDescription', 'Get started by adding your first server')}
+      </p>
       <Button onClick={onCreate}>
         <Plus className={'size-4'} />
         {t('servers.addServer')}

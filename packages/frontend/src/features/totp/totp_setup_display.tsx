@@ -195,7 +195,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
           </div>
           <div className={'flex-1'}>
             <h2 className={'font-semibold text-zinc-900'}>{t('settings.twoFactor.title')}</h2>
-            <p className={'text-sm text-zinc-600'}>
+            <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>
               {enabled ? t('settings.twoFactor.enabled') : t('settings.twoFactor.disabled')}
             </p>
           </div>
@@ -209,7 +209,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
       <div className={'p-5'}>
         {enabled ? (
           <div className={'space-y-4'}>
-            <p className={'text-sm text-zinc-600'}>{t('settings.twoFactor.enabledDescription')}</p>
+            <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.twoFactor.enabledDescription')}</p>
             <Button variant={'outline'} size={'sm'} onClick={onDisable} {...{ loading }}>
               <ShieldOff className={'size-3.5'} />
               {t('settings.twoFactor.disable')}
@@ -217,7 +217,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
           </div>
         ) : (
           <div className={'space-y-4'}>
-            <p className={'text-sm text-zinc-600'}>{t('settings.twoFactor.disabledDescription')}</p>
+            <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.twoFactor.disabledDescription')}</p>
             <Button size={'sm'} onClick={onSetupStart} {...{ loading }}>
               <Shield className={'size-3.5'} />
               {t('settings.twoFactor.enable')}

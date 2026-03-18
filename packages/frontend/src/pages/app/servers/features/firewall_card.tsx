@@ -190,11 +190,11 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
       )}
     >
       <div className={cn('flex items-center gap-2.5', !rule.enabled && 'opacity-50')}>
-        <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums'}>{rule.port}</span>
+        <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums dark:text-zinc-200'}>{rule.port}</span>
         <Badge variant={PROTOCOL_BADGE_VARIANT[rule.protocol]} className={'font-semibold'}>
           {PROTOCOL_LABELS[rule.protocol]}
         </Badge>
-        <span className={'text-sm text-zinc-600'}>{rule.label}</span>
+        <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{rule.label}</span>
         {!rule.enabled && (
           <Badge variant={'muted'} size={'xs'}>
             {t('settings.firewall.disabled')}
@@ -204,7 +204,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
       <div className={'flex shrink-0 items-center gap-1.5'}>
         {toggleConfirm === rule.id ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={rule.enabled ? 'secondary' : 'success'}
               size={'xs'}
@@ -221,7 +221,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
           </div>
         ) : deleteConfirm === rule.id ? (
           <div className={'flex items-center gap-1.5'}>
-            <span className={'text-sm text-zinc-600'}>{t('common.confirm')}?</span>
+            <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button variant={'danger'} size={'xs'} onClick={() => onDelete(rule.id)}>
               {t('common.yes')}
             </Button>
@@ -235,7 +235,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
               variant={rule.enabled ? 'ghost' : 'success'}
               size={rule.enabled ? 'icon-sm' : 'sm'}
               onClick={() => onToggleConfirm(rule.id)}
-              className={cn(rule.enabled && 'text-zinc-600 hover:text-zinc-600')}
+              className={cn(rule.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300')}
             >
               {rule.enabled ? (
                 <PowerOff className={'size-4'} />
@@ -272,11 +272,13 @@ function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuidelinesDial
         </Dialog.Header>
         <div className={'mt-4 divide-y divide-black/4'}>
           <div className={'pb-3'}>
-            <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoPortRangeLabel')}</p>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.firewall.infoPortRangeLabel')}</p>
             <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoPortRangeDesc')}</p>
           </div>
           <div className={'py-3'}>
-            <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoReservedPortsLabel')}</p>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
+              {t('settings.firewall.infoReservedPortsLabel')}
+            </p>
             <div className={'mt-1.5 flex flex-wrap gap-1.5'}>
               {[22, 80, 443, 3000, 3001].map((port) => (
                 <Badge key={port} variant={'muted'} className={'font-jetbrains'}>
@@ -286,7 +288,7 @@ function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuidelinesDial
             </div>
           </div>
           <div className={'py-3'}>
-            <p className={'text-sm font-medium text-zinc-700'}>{t('settings.firewall.infoProtocolLabel')}</p>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.firewall.infoProtocolLabel')}</p>
             <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoProtocolDesc')}</p>
           </div>
         </div>

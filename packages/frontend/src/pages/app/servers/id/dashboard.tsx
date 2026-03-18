@@ -95,7 +95,7 @@ export function ServerDashboardPage() {
               <ServerPageHeader.PageName>{t('nav.dashboard')}</ServerPageHeader.PageName>
               <StatusBadge status={server.status} />
             </ServerPageHeader.Heading>
-            <p className={'font-jetbrains mt-0.5 truncate text-sm text-zinc-600'}>{server.path}</p>
+            <p className={'font-jetbrains mt-0.5 truncate text-sm text-zinc-600 dark:text-zinc-400'}>{server.path}</p>
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
         <ServerPageHeader.Actions>
@@ -244,7 +244,7 @@ function MetricsBar({ isRunning, metrics, playerCount, players, uptime }: Metric
     <div className={'flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6'}>
       <MetricItem
         icon={Cpu}
-        iconColor={'text-zinc-600'}
+        iconColor={'text-zinc-600 dark:text-zinc-400'}
         label={t('dashboard.cpu')}
         value={isRunning && metrics ? `${metrics.cpu.toFixed(1)}%` : '-'}
         tooltip={cpuTooltip}
@@ -252,7 +252,7 @@ function MetricsBar({ isRunning, metrics, playerCount, players, uptime }: Metric
       <div className={'hidden h-4 w-px bg-black/6 sm:block'} />
       <MetricItem
         icon={HardDrive}
-        iconColor={'text-zinc-600'}
+        iconColor={'text-zinc-600 dark:text-zinc-400'}
         label={t('dashboard.memory')}
         value={isRunning && metrics ? formatMemory(metrics.memory) : '-'}
         detail={isRunning && metrics ? `${metrics.memory_percent.toFixed(0)}%` : undefined}
@@ -263,7 +263,7 @@ function MetricsBar({ isRunning, metrics, playerCount, players, uptime }: Metric
           <Tooltip.Trigger>
             <MetricItem
               icon={Users}
-              iconColor={'text-zinc-600'}
+              iconColor={'text-zinc-600 dark:text-zinc-400'}
               label={t('dashboard.players')}
               value={isRunning ? `${playerCount}` : '-'}
             />
@@ -278,7 +278,7 @@ function MetricsBar({ isRunning, metrics, playerCount, players, uptime }: Metric
       <div className={'hidden h-4 w-px bg-black/6 sm:block'} />
       <MetricItem
         icon={Activity}
-        iconColor={'text-zinc-600'}
+        iconColor={'text-zinc-600 dark:text-zinc-400'}
         label={t('dashboard.uptime')}
         value={isRunning && uptime ? formatUptime(uptime) : '-'}
       />
@@ -299,9 +299,9 @@ function MetricItem({ icon: Icon, iconColor, label, value, detail, tooltip }: Me
   const content = (
     <div className={'flex items-center gap-2'}>
       <Icon className={cn('size-3.5', iconColor)} strokeWidth={1.75} />
-      <span className={'text-sm text-zinc-600'}>{label}</span>
-      <span className={'text-sm font-medium text-zinc-900 tabular-nums'}>{value}</span>
-      {detail && <span className={'text-sm text-zinc-600'}>{detail}</span>}
+      <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{label}</span>
+      <span className={'text-sm font-medium text-zinc-900 tabular-nums dark:text-zinc-100'}>{value}</span>
+      {detail && <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{detail}</span>}
     </div>
   );
 

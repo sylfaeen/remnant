@@ -22,8 +22,8 @@ ServerPageHeader.Left = function ServerPageHeaderLeft({ children }: { children: 
 
 ServerPageHeader.Icon = function ServerPageHeaderIcon({ icon: IconComponent }: { icon: LucideIcon }) {
   return (
-    <div className={'mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-gray-100'}>
-      <IconComponent className={'size-5 text-zinc-600'} strokeWidth={2} />
+    <div className={'mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-zinc-800'}>
+      <IconComponent className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
     </div>
   );
 };
@@ -50,7 +50,7 @@ ServerPageHeader.ServerName = function ServerPageHeaderServerName() {
 ServerPageHeader.PageName = function ServerPageHeaderPageName({ children }: { children: ReactNode }) {
   return (
     <>
-      <span className={'text-[8px] text-zinc-400'}>&bull;</span>
+      <span className={'text-[8px] text-zinc-400 dark:text-zinc-500'}>&bull;</span>
       {children}
     </>
   );
@@ -61,7 +61,7 @@ ServerPageHeader.Docs = function ServerPageHeaderDocs({ path }: { path: string }
 };
 
 ServerPageHeader.Description = function ServerPageHeaderDescription({ children }: { children: ReactNode }) {
-  return <p className={'mt-0.5 text-sm text-zinc-600'}>{children}</p>;
+  return <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{children}</p>;
 };
 
 ServerPageHeader.Actions = function ServerPageHeaderActions({ children }: { children: ReactNode }) {

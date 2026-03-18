@@ -49,7 +49,7 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
     >
       <Dialog.Content>
         <Dialog.Header>
-          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600'}>
+          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
             <Pencil className={'size-5'} strokeWidth={1.75} />
           </Dialog.Icon>
           <div>
@@ -75,7 +75,7 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
                 <Label>{t('servers.serverPath')}</Label>
                 <div
                   className={
-                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600'
+                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
                   }
                 >
                   <FolderOpen className={'size-4 shrink-0'} />
@@ -88,13 +88,13 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
                 <Label>{t('servers.jarFile')}</Label>
                 <div
                   className={
-                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600'
+                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
                   }
                 >
                   <Package className={'size-4 shrink-0'} />
                   <span className={'truncate'}>{server.jar_file}</span>
                 </div>
-                <p className={'mt-1 text-sm text-zinc-600'}>
+                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
                   {t('servers.jarHint', 'Change the active JAR file in server settings')}
                 </p>
               </div>
@@ -145,7 +145,7 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
             </div>
             <Label className={'flex cursor-pointer items-center gap-2'}>
               <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
-              <span className={'text-zinc-600'}>{t('servers.autoStartDesc')}</span>
+              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</span>
             </Label>
           </Dialog.Body>
         </form>
