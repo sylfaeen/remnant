@@ -176,6 +176,9 @@ detect_system() {
 # ── Version resolution ────────────────────────────────────────────────────────
 
 resolve_version() {
+    if [[ "$REMNANT_VERSION" == "local" ]]; then
+        return 0
+    fi
     if [[ "$REMNANT_VERSION" == "latest" ]]; then
         REMNANT_VERSION=$(curl -sf --connect-timeout 5 "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" \
             | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/' || echo "")
@@ -422,17 +425,23 @@ download_remnant() {
     # Download & extract
     print_ok "Version: ${REMNANT_VERSION}"
 
-    local url="https://github.com/${GITHUB_REPO}/releases/download/v${REMNANT_VERSION}/remnant-${REMNANT_VERSION}.tar.gz"
     local tarball="/tmp/remnant-${REMNANT_VERSION}.tar.gz"
 
-    curl -sfL "$url" -o "$tarball" 2>/dev/null &
-    spinner $! "Downloading remnant-${REMNANT_VERSION}.tar.gz..."
-    [[ -f "$tarball" ]] || fail "Download failed: ${url}"
-    print_ok "Download complete"
+    # Support local tarball for dev testing
+    if [[ "$REMNANT_VERSION" == "local" ]] && [[ -f "/tmp/remnant-local.tar.gz" ]]; then
+        tarball="/tmp/remnant-local.tar.gz"
+        print_ok "Using local tarball"
+    else
+        local url="https://github.com/${GITHUB_REPO}/releases/download/v${REMNANT_VERSION}/remnant-${REMNANT_VERSION}.tar.gz"
+        curl -sfL "$url" -o "$tarball" 2>/dev/null &
+        spinner $! "Downloading remnant-${REMNANT_VERSION}.tar.gz..."
+        [[ -f "$tarball" ]] || fail "Download failed: ${url}"
+        print_ok "Download complete"
+    fi
 
     tar -xzf "$tarball" -C "$APP_DIR" --strip-components=1 2>/dev/null &
     spinner $! "Extracting..."
-    rm -f "$tarball"
+    rm -f "$tarball" 2>/dev/null || true
     print_ok "Extracted to ${APP_DIR}"
 
     # Dependencies
@@ -524,6 +533,9 @@ EOF
 
     print_ok "Systemd service created"
 
+    # Ensure ReadWritePaths directories exist (systemd NAMESPACE fails on missing paths)
+    mkdir -p /etc/letsencrypt /var/lib/letsencrypt /var/log/letsencrypt
+
     systemctl daemon-reload
     systemctl enable remnant >/dev/null 2>&1
     systemctl start remnant
@@ -576,7 +588,7 @@ NGINX_EOF
 
     if nginx -t 2>/dev/null; then
         systemctl enable nginx >/dev/null 2>&1
-        systemctl reload nginx
+        systemctl start nginx 2>/dev/null || systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null || true
         print_ok "Nginx is running"
     else
         print_warn "Nginx config test failed — check: nginx -t"

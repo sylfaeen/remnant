@@ -65,6 +65,65 @@ gh run watch --repo sylfaeen/remnant-private
 
 > `bump` accepte `patch`, `minor`, `major` ou `auto` (détection automatique via les commits conventionnels).
 
+## Development
+
+### Prerequisites
+
+- Node.js 20+, pnpm 9+
+- Docker runtime ([OrbStack](https://orbstack.dev/) recommended on macOS)
+
+### Native (macOS/Linux)
+
+For frontend and backend development without Nginx/SSL features:
+
+```bash
+pnpm install
+turbo dev
+```
+
+Backend on `http://localhost:3001`, frontend on `http://localhost:3000`.
+
+### Docker (simulated VPS)
+
+Spins up a Debian container with systemd, Nginx, Certbot — identical to production. Runs `install.sh` like on a real server.
+
+**macOS Docker setup:**
+
+```bash
+brew install orbstack
+brew install docker-compose
+mkdir -p ~/.docker/cli-plugins
+ln -sf $(brew --prefix)/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+```
+
+Then launch OrbStack from your Applications.
+
+**First time — build, start and install:**
+
+```bash
+./scripts/dev-server.sh
+```
+
+This builds the project, starts a Debian container with systemd, and runs `install.sh` automatically.
+
+**After code changes — rebuild and redeploy:**
+
+```bash
+./scripts/dev-server.sh deploy
+```
+
+Rebuilds the project, replaces the code in the container, and restarts the service. Database, `.env` and servers are preserved.
+
+| Command | Description |
+|---------|-------------|
+| `./scripts/dev-server.sh` | Build + start + install (first time) |
+| `./scripts/dev-server.sh deploy` | Rebuild and redeploy code (keeps data) |
+| `./scripts/dev-server.sh shell` | Enter the container |
+| `./scripts/dev-server.sh stop` | Stop container |
+| `./scripts/dev-server.sh reset` | Destroy everything and start fresh |
+
+> **Note:** SSL certificate generation requires a real public domain. Everything else (Nginx, domains, firewall, systemd) works locally.
+
 ## Conventional Commits
 
 | Type | SemVer Impact | Tag example (from `1.2.3`) |

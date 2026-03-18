@@ -134,7 +134,7 @@ nginx_test_and_reload() {
   nginx_bin=$(command -v nginx 2>/dev/null || echo "/usr/sbin/nginx")
 
   if "$nginx_bin" -t 2>/dev/null; then
-    /usr/bin/systemctl reload nginx 2>/dev/null
+    "$nginx_bin" -s reload 2>/dev/null || /usr/bin/systemctl reload nginx 2>/dev/null || true
     return 0
   else
     return 1
