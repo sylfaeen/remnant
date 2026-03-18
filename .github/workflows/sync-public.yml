@@ -35,13 +35,13 @@ jobs:
       - name: Remove private files
         run: |
           rm -rf .claude .cursor .tessl .agents .local _bmad _bmad-output .github/skills .mcp.json tessl.json
-          rm -f CLAUDE.md .github/workflows/sync-public.yml .github/workflows/release.yml
+          rm -f CLAUDE.md .env.development .github/workflows/sync-public.yml .github/workflows/release.yml
           mv README.public.md README.md
 
       - name: Verify no private files remain
         run: |
           EXIT=0
-          for item in .claude .cursor .tessl .local _bmad _bmad-output .github/skills .mcp.json tessl.json CLAUDE.md .github/workflows/sync-public.yml .github/workflows/release.yml; do
+          for item in .claude .cursor .tessl .local _bmad _bmad-output .github/skills .mcp.json tessl.json CLAUDE.md .env.development .github/workflows/sync-public.yml .github/workflows/release.yml; do
             if [ -e "$item" ]; then
               echo "::error::Private file still present: $item"
               EXIT=1
