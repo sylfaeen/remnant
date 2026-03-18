@@ -418,8 +418,42 @@ action_update_panel() {
     json_error "Panel vhost not found at ${panel_vhost}"
   fi
 
-  # Update server_name: keep catch-all _ so IP access still works
-  sed -i "s/server_name .*/server_name ${domain} _;/" "$panel_vhost"
+  # Update server_name with the domain only
+  sed -i "s/server_name .*/server_name ${domain};/" "$panel_vhost"
+
+  # Ensure a catch-all vhost exists for IP access
+  local fallback_vhost="${SITES_AVAILABLE}/remnant-fallback"
+  if [ ! -f "$fallback_vhost" ]; then
+    local port
+    port=$(grep -oP 'proxy_pass http://127\.0\.0\.1:\K[0-9]+' "$panel_vhost" | head -1)
+    port="${port:-3001}"
+    cat > "$fallback_vhost" << FALLBACK
+server {
+    listen 80 default_server;
+    server_name _;
+    client_max_body_size 256M;
+
+    location / {
+        proxy_pass http://127.0.0.1:${port};
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /ws/ {
+        proxy_pass http://127.0.0.1:${port};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+FALLBACK
+    ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
+  fi
 
   if ! nginx_test_and_reload; then
     # Rollback to catch-all
@@ -473,6 +507,9 @@ server {
 }
 PANEL_VHOST
   fi
+
+  # Remove fallback vhost (no longer needed when panel uses catch-all)
+  rm -f "${SITES_ENABLED}/remnant-fallback" "${SITES_AVAILABLE}/remnant-fallback"
 
   if ! nginx_test_and_reload; then
     json_error "Nginx configuration test failed after resetting panel domain."

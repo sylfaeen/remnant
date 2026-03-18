@@ -282,6 +282,7 @@ do_uninstall() {
 
     # Nginx (only remnant vhost + managed domain vhosts)
     sudo rm -f /etc/nginx/sites-enabled/remnant /etc/nginx/sites-available/remnant
+    sudo rm -f /etc/nginx/sites-enabled/remnant-fallback /etc/nginx/sites-available/remnant-fallback
     if [[ -n "$managed_domains" ]]; then
         while IFS= read -r domain; do
             [[ -z "$domain" ]] && continue
