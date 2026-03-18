@@ -116,7 +116,7 @@ function ServerCard({ server, ipAddress }: ServerCardProps) {
       }
     >
       <div className={'px-4 py-3'}>
-        <Link to={'/app/servers/$id'} params={{ id: String(server.id) }} className={'group flex items-start gap-3 sm:gap-4'}>
+        <Link to={'/app/servers/$id'} params={{ id: String(server.id) }} className={'group flex items-center gap-3 sm:gap-4'}>
           <ServerStatusIcon status={server.status} />
           <div>
             <h3 className={'font-semibold'}>{server.name}</h3>

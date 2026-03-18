@@ -23,12 +23,14 @@ import { ServerPluginsPage } from '@remnant/frontend/pages/app/servers/id/plugin
 import { ServerTasksPage } from '@remnant/frontend/pages/app/servers/id/tasks';
 import { ServerBackupsPage } from '@remnant/frontend/pages/app/servers/id/backups';
 import { NotFoundPage } from '@remnant/frontend/pages/web/not_found';
-import { SettingsPage } from '@remnant/frontend/pages/app/settings/settings';
+import { SettingsEnvironmentPage } from '@remnant/frontend/pages/app/settings/environment';
 import { AccountPage } from '@remnant/frontend/pages/app/account';
 import { AppNotFoundPage } from '@remnant/frontend/pages/app/not_found';
 import { DocsLayout } from '@remnant/frontend/pages/app/features/layouts/docs_layout';
 import { MarkdownPage } from '@remnant/frontend/pages/app/docs/markdown';
 import { DEFAULT_DOC_SLUG } from '@remnant/frontend/pages/app/docs/features/docs_content';
+import { SettingsGeneralPage } from '@remnant/frontend/pages/app/settings/general';
+import { SettingsPage } from '@remnant/frontend/pages/app/settings/settings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -154,6 +156,18 @@ const appSettingsRoute = createRoute({
   component: SettingsPage,
 });
 
+const appSettingsGeneralRoute = createRoute({
+  getParentRoute: () => mainLayoutRoute,
+  path: 'settings/general',
+  component: SettingsGeneralPage,
+});
+
+const appSettingsEnvironmentRoute = createRoute({
+  getParentRoute: () => mainLayoutRoute,
+  path: 'settings/environment',
+  component: SettingsEnvironmentPage,
+});
+
 const accountRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
   path: 'account',
@@ -170,7 +184,7 @@ const docsIndexRoute = createRoute({
   getParentRoute: () => docsLayoutRoute,
   path: '/',
   beforeLoad: () => {
-    throw redirect({ to: `/app/docs/${DEFAULT_DOC_SLUG}` });
+    throw redirect({ to: '/app/docs/$slug', params: { slug: DEFAULT_DOC_SLUG } });
   },
 });
 
@@ -260,11 +274,16 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   setupRoute,
   appRoute.addChildren([
-    // Main layout: dashboard, servers list, users
-    mainLayoutRoute.addChildren([dashboardRoute, serversRoute, usersRoute, appSettingsRoute, accountRoute]),
-    // Docs layout: documentation pages
+    mainLayoutRoute.addChildren([
+      dashboardRoute,
+      serversRoute,
+      usersRoute,
+      appSettingsRoute,
+      appSettingsGeneralRoute,
+      appSettingsEnvironmentRoute,
+      accountRoute,
+    ]),
     docsLayoutRoute.addChildren([docsIndexRoute, docsSlugRoute]),
-    // Server layout: server-specific pages
     serverLayoutRoute.addChildren([
       serverDashboardRoute,
       serverFilesRoute,

@@ -190,3 +190,8 @@ development_status:
   15-3-routing-markdown-loading: done
   15-4-markdown-page-assembly: done
   15-5-docslink-update-integration: done
+
+  # Epic 16: Gestion de l'Environnement (.env)
+  epic-16: done
+  16-1-env-read-write-api: done
+  16-2-environment-page-frontend: done

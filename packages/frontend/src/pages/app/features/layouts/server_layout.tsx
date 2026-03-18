@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Outlet, useParams } from '@tanstack/react-router';
-import { Activity, Archive, BookOpen, Clock, FolderOpen, Puzzle, Settings, SlidersHorizontal } from 'lucide-react';
+import { Activity, Archive, BookOpen, Clock, FolderOpen, Puzzle, SlidersHorizontal } from 'lucide-react';
 import { useSidebarItems, type SidebarNavSection } from '@remnant/frontend/pages/app/features/sidebar_context';
 import { Sidebar } from '@remnant/frontend/pages/app/features/sidebar';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
@@ -52,7 +52,6 @@ function getServerNavSections(serverId: string, serverName: string): Array<Sideb
           ],
         },
         { key: 'docs', path: '/app/docs', icon: BookOpen, bottom: true },
-        { key: 'globalSettings', path: '/app/settings', icon: Settings, bottom: true },
       ],
     },
   ];

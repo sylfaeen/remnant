@@ -9,8 +9,16 @@ const mainNavItems: Array<SidebarNavSection> = [
       { key: 'dashboard', path: '/app', exact: true, icon: LayoutDashboard },
       { key: 'servers', path: '/app/servers', icon: Server },
       { key: 'users', path: '/app/users', icon: Users },
+      {
+        key: 'settings',
+        path: '/app/settings',
+        icon: Settings,
+        children: [
+          { key: 'settingsGeneral', path: '/app/settings/general' },
+          { key: 'settingsEnvironment', path: '/app/settings/environment' },
+        ],
+      },
       { key: 'docs', path: '/app/docs', icon: BookOpen, bottom: true },
-      { key: 'settings', path: '/app/settings', icon: Settings, bottom: true },
     ],
   },
 ];

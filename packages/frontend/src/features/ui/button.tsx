@@ -4,35 +4,32 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@remnant/frontend/lib/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-medium tracking-wide transition-all duration-[var(--duration-fast)] disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-zinc-50 dark:focus-visible:ring-offset-zinc-900',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 dark:focus-visible:ring-zinc-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        primary:
-          'bg-gradient-to-br from-emerald-600 via-emerald-600 to-emerald-800 text-white font-semibold shadow-sm hover:shadow-glow-sm hover:from-emerald-700 hover:via-emerald-600 hover:to-emerald-600 active:scale-[0.98] border border-emerald-600/20',
+        primary: 'bg-zinc-900 text-zinc-50 shadow-sm hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200',
         secondary:
-          'bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm text-zinc-900 dark:text-zinc-100 border border-black/10 dark:border-white/10 shadow-xs hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:border-black/12 dark:hover:border-white/12 hover:shadow-sm active:bg-zinc-200 dark:active:bg-zinc-600 active:scale-[0.98]',
+          'bg-white text-zinc-900 border border-zinc-200 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 dark:bg-zinc-900 dark:text-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-50',
         ghost:
-          'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700',
+          'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50',
         'ghost-danger':
-          'text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 active:bg-red-100 dark:active:bg-red-900',
-        danger:
-          'bg-red-600 text-white font-semibold shadow-sm hover:bg-red-700 hover:shadow-glow-danger active:scale-[0.98] border border-red-600/20',
-        success:
-          'bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700 hover:shadow-glow-success active:scale-[0.98] border border-emerald-600/20',
+          'text-red-500 hover:bg-red-50 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-950 dark:hover:text-red-400',
+        danger: 'bg-red-500 text-zinc-50 shadow-sm hover:bg-red-600 dark:bg-red-900 dark:text-zinc-50 dark:hover:bg-red-800',
+        success: 'bg-emerald-600 text-zinc-50 shadow-sm hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600',
         outline:
-          'border border-black/10 dark:border-white/10 text-zinc-900 dark:text-zinc-100 hover:bg-white/85 dark:hover:bg-zinc-800 hover:border-emerald-600/30 active:bg-zinc-200 dark:active:bg-zinc-700',
-        link: 'text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700',
+          'border border-zinc-200 bg-white shadow-xs hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 dark:hover:text-zinc-50',
+        link: 'text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-50',
       },
       size: {
-        xs: 'h-7 px-2.5 text-sm rounded-md',
-        sm: 'h-8 px-3 text-sm rounded-md',
-        md: 'h-10 px-4 text-sm rounded-lg',
-        lg: 'h-11 px-5 text-base rounded-lg',
-        xl: 'h-12 px-6 text-base rounded-xl',
-        icon: 'size-10 rounded-lg',
+        xs: 'h-7 px-2.5 text-xs rounded-md',
+        sm: 'h-8 rounded-md px-3 text-sm',
+        md: 'h-9 px-4 py-2',
+        lg: 'h-10 rounded-md px-8',
+        xl: 'h-11 rounded-md px-8',
+        icon: 'size-9',
         'icon-sm': 'size-8 rounded-md',
-        'icon-lg': 'size-12 rounded-xl',
+        'icon-lg': 'size-10',
       },
     },
     defaultVariants: {

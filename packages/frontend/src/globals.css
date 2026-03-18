@@ -11,8 +11,6 @@
   --color-glow-primary: var(--glow-primary);
   --color-glow-primary-strong: var(--glow-primary-strong);
   --color-glow-secondary: var(--glow-secondary);
-  --color-glow-success: var(--glow-success);
-  --color-glow-danger: var(--glow-danger);
 
   --color-status-online: var(--status-online);
   --color-status-offline: var(--status-offline);
@@ -38,9 +36,6 @@
   --font-family-mono: var(--font-jetbrains);
 
   --shadow-glow: var(--shadow-glow);
-  --shadow-glow-sm: var(--shadow-glow-sm);
-  --shadow-glow-success: var(--shadow-glow-success);
-  --shadow-glow-danger: var(--shadow-glow-danger);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-inner: var(--shadow-inner);
@@ -193,4 +188,20 @@ body {
 button,
 a {
   @apply cursor-pointer;
+}
+
+code:not(pre code) {
+  background-color: #f2f4f2;
+  border-color: #022a0214;
+  @apply rounded-md;
+  border-style: solid;
+  border-width: 1px;
+  color: #141e12;
+  padding-inline: calc(var(--spacing) * .5);
+}
+
+.dark code:not(pre code) {
+  background-color: #27272a;
+  border-color: #ffffff14;
+  color: #e4e4e7;
 }

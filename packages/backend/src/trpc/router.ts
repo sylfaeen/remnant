@@ -12,6 +12,7 @@ import { firewallRouter } from '@remnant/backend/trpc/routers/firewall';
 import { onboardingRouter } from '@remnant/backend/trpc/routers/onboarding';
 import { totpRouter } from '@remnant/backend/trpc/routers/totp';
 import { auditRouter } from '@remnant/backend/trpc/routers/audit';
+import { envRouter } from '@remnant/backend/trpc/routers/env';
 
 export const appRouter = router({
   auth: authRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
   onboarding: onboardingRouter,
   totp: totpRouter,
   audit: auditRouter,
+  env: envRouter,
 });
 
 export type AppRouter = typeof appRouter;

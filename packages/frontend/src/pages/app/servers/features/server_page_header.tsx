@@ -65,5 +65,5 @@ ServerPageHeader.Description = function ServerPageHeaderDescription({ children }
 };
 
 ServerPageHeader.Actions = function ServerPageHeaderActions({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return <div className={'flex items-center justify-end gap-2'}>{children}</div>;
 };

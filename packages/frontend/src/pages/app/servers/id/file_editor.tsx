@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import Editor, { loader } from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
-import { FileCode, Save, Check, AlertCircle, ArrowLeft } from 'lucide-react';
-
-loader.config({ monaco });
+import Editor from '@monaco-editor/react';
+import { FileCode, Save, AlertCircle, ArrowLeft } from 'lucide-react';
+import {
+  registerMonacoThemes,
+  MONACO_THEME_LIGHT,
+  MONACO_THEME_DARK,
+  MONACO_CONTAINER_CLASS,
+} from '@remnant/frontend/lib/monaco';
+import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import { useFileContent, useWriteFile, getFileExtension } from '@remnant/frontend/hooks/use_files';
 import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge } from '@remnant/frontend/features/ui/badge';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { ApiError } from '@remnant/frontend/lib/api';
@@ -34,7 +37,7 @@ export function ServerFileEditorPage() {
   const [content, setContent] = useState<string>('');
   const [hasChanges, setHasChanges] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Initialize content when a file loads
   useEffect(() => {
@@ -44,7 +47,6 @@ export function ServerFileEditorPage() {
     }
   }, [fileData?.content]);
 
-  // Handle content changes
   const handleEditorChange = useCallback(
     (value: string | undefined) => {
       if (value !== undefined) {
@@ -66,7 +68,6 @@ export function ServerFileEditorPage() {
       await writeFile.mutateAsync({ path: filePath, content });
       setSaveStatus('saved');
       setHasChanges(false);
-      // Reset status after 2 seconds
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (err) {
       setSaveStatus('error');
@@ -141,29 +142,32 @@ export function ServerFileEditorPage() {
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
         <ServerPageHeader.Actions>
-          <div className={'flex items-center gap-3'}>
-            <SaveStatus status={saveStatus} errorMessage={errorMessage} />
-            <Button size={'sm'} onClick={handleSave} disabled={!hasChanges || saveStatus === 'saving'}>
-              <Save className={'size-4'} />
-              {t('common.save')}
+          <Link to={'/app/servers/$id/files'} params={{ id: String(serverId) }} search={{ path: parentDir }}>
+            <Button variant={'secondary'} size={'sm'}>
+              <ArrowLeft className={'size-4'} />
+              {t('files.backToFiles')}
             </Button>
-            <Link to={'/app/servers/$id/files'} params={{ id: String(serverId) }} search={{ path: parentDir }}>
-              <Button variant={'secondary'} size={'sm'}>
-                <ArrowLeft className={'size-4'} />
-                {t('files.backToFiles')}
-              </Button>
-            </Link>
-          </div>
+          </Link>
+          <Button size={'sm'} onClick={handleSave} disabled={!hasChanges || saveStatus === 'saving'}>
+            <Save className={'size-4'} />
+            {t('common.save')}
+          </Button>
         </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
-        <div className={'min-h-0 flex-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10'}>
+        <div
+          className={cn(
+            'min-h-0 flex-1 overflow-hidden rounded-md border border-black/10 shadow-xs dark:border-white/10',
+            MONACO_CONTAINER_CLASS
+          )}
+        >
           <Editor
             height={'100%'}
             language={language}
             value={content}
             onChange={handleEditorChange}
-            theme={isDark ? 'vs-dark' : 'light'}
+            theme={isDark ? MONACO_THEME_DARK : MONACO_THEME_LIGHT}
+            beforeMount={registerMonacoThemes}
             options={{
               minimap: { enabled: true },
               fontSize: 14,
@@ -177,56 +181,9 @@ export function ServerFileEditorPage() {
             }}
           />
         </div>
-        <div className={'flex shrink-0 items-center justify-between text-sm text-zinc-600 dark:text-zinc-400'}>
-          <div className={'flex items-center gap-3'}>
-            <Badge variant={'muted'} size={'sm'}>
-              {language}
-            </Badge>
-            <span className={'font-jetbrains text-xs'}>{filename}</span>
-          </div>
-          <span className={'text-xs text-zinc-400 dark:text-zinc-500'}>{t('files.ctrlS')}</span>
-        </div>
       </PageContent>
     </>
   );
-}
-
-type SaveStatusProps = {
-  status: 'idle' | 'saving' | 'saved' | 'error';
-  errorMessage: string | null;
-};
-
-function SaveStatus({ status, errorMessage }: SaveStatusProps) {
-  const { t } = useTranslation();
-
-  if (status === 'saving') {
-    return (
-      <span className={'flex items-center gap-1.5 text-sm text-emerald-600'}>
-        <div className={'size-3 animate-spin rounded-full border-t-2 border-b-2 border-emerald-600'} />
-        {t('files.saving')}
-      </span>
-    );
-  }
-
-  if (status === 'saved') {
-    return (
-      <span className={'flex items-center gap-1.5 text-sm text-emerald-600'}>
-        <Check className={'size-4'} />
-        {t('files.saved')}
-      </span>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <span className={'flex items-center gap-1.5 text-sm text-red-600'} title={errorMessage || undefined}>
-        <AlertCircle className={'size-4'} />
-        {t('common.error')}
-      </span>
-    );
-  }
-
-  return null;
 }
 
 // Map file extensions to Monaco language identifiers

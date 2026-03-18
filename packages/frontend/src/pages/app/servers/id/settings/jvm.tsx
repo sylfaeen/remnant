@@ -283,19 +283,17 @@ function JvmConfigSection({
       <FeatureCard.Body className={'space-y-6'}>
         <FeatureCard.Row>
           <FeatureCard.Stack>
-            <div>
-              <h3 className={'mb-3 text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.memorySettings')}</h3>
-              <div className={'grid gap-4 sm:grid-cols-2'}>
-                <div>
-                  <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.minRam')}</Label>
-                  <Input type={'text'} value={minRam} onChange={(e) => onMinRamChange(e.target.value)} placeholder={'2G'} />
-                  <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
-                </div>
-                <div>
-                  <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.maxRam')}</Label>
-                  <Input type={'text'} value={maxRam} onChange={(e) => onMaxRamChange(e.target.value)} placeholder={'4G'} />
-                  <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
-                </div>
+            <FeatureCard.RowLabel>{t('settings.memorySettings')}</FeatureCard.RowLabel>
+            <div className={'grid gap-4 sm:grid-cols-2'}>
+              <div>
+                <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.minRam')}</Label>
+                <Input type={'text'} value={minRam} onChange={(e) => onMinRamChange(e.target.value)} placeholder={'2G'} />
+                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
+              </div>
+              <div>
+                <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.maxRam')}</Label>
+                <Input type={'text'} value={maxRam} onChange={(e) => onMaxRamChange(e.target.value)} placeholder={'4G'} />
+                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.ramHint')}</p>
               </div>
             </div>
             <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-4 dark:border-white/6 dark:bg-zinc-800/50'}>

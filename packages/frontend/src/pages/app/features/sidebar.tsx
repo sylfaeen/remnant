@@ -105,9 +105,6 @@ function UserDropdown() {
             'flex items-center gap-2 overflow-hidden rounded-md px-1 py-0.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800'
           }
         >
-          <div className={'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-400/60'}>
-            <span className={'text-[10px] font-semibold text-white'}>{user?.username?.charAt(0).toUpperCase() || 'U'}</span>
-          </div>
           <span className={'truncate text-sm font-medium'}>{user?.username || 'User'}</span>
           <ChevronUp className={'size-3 shrink-0 text-zinc-400 dark:text-zinc-500'} />
         </button>
@@ -115,7 +112,7 @@ function UserDropdown() {
       <DropdownMenu.Content side={'top'} align={'start'}>
         <DropdownMenu.Item onSelect={() => navigate({ to: '/app/account' }).then()}>
           <Settings className={'size-4'} strokeWidth={1.75} />
-          {t('account.menuSettings')}
+          <span className={'font-medium'}>{t('account.menuSettings')}</span>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item
@@ -123,7 +120,7 @@ function UserDropdown() {
           className={'text-red-600 data-highlighted:bg-red-50 dark:data-highlighted:bg-red-950'}
         >
           <LogOut className={'size-4'} strokeWidth={1.75} />
-          {t('common.logout')}
+          <span className={'font-medium'}>{t('common.logout')}</span>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu>
