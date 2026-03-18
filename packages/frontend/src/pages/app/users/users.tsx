@@ -174,13 +174,13 @@ function UserRow({
           <div
             className={cn(
               'flex size-10 shrink-0 items-center justify-center rounded-full',
-              isAdmin ? 'bg-amber-500/10' : 'bg-emerald-600/10'
+              isAdmin ? 'bg-amber-500/10' : 'bg-green-600/10'
             )}
           >
             {isAdmin ? (
-              <Crown className={'size-5 text-amber-500'} strokeWidth={1.75} />
+              <Crown className={'size-5 text-amber-500'} strokeWidth={2} />
             ) : (
-              <Shield className={'size-5 text-emerald-600'} strokeWidth={1.75} />
+              <Shield className={'size-5 text-green-600'} strokeWidth={2} />
             )}
           </div>
           <div>
@@ -259,7 +259,7 @@ function PermissionBadge({ permission, granted }: PermissionBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium',
-        granted ? 'bg-emerald-600/10 text-emerald-600' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+        granted ? 'bg-green-600/10 text-green-600' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
       )}
     >
       {granted ? <Check className={'size-3'} strokeWidth={2.5} /> : <X className={'size-3'} strokeWidth={2.5} />}
@@ -277,8 +277,8 @@ function EmptyState({ onCreate }: EmptyStateProps) {
 
   return (
     <div className={'p-12 text-center'}>
-      <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600/10'}>
-        <Users className={'size-8 text-emerald-600'} strokeWidth={1.5} />
+      <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-600/10'}>
+        <Users className={'size-8 text-green-600'} strokeWidth={1.5} />
       </div>
       <h3 className={'mb-2 font-semibold text-zinc-900 dark:text-zinc-100'}>{t('users.noUsers')}</h3>
       <p className={'mb-6 text-zinc-600 dark:text-zinc-400'}>{t('users.noUsersDescription')}</p>

@@ -28,7 +28,7 @@ let envRegistered = false;
 export function SettingsEnvironmentPage() {
   return (
     <PageContent>
-      <div className={'space-y-6'}>
+      <div className={'space-y-4'}>
         <RestartBanner />
         <FeatureCard.Stack>
           <EnvironmentSection />
@@ -209,7 +209,7 @@ function RestartBanner() {
 
   return (
     <div className={'flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-50 px-4 py-3 dark:bg-amber-950/30'}>
-      <TriangleAlert className={'size-4 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={1.75} />
+      <TriangleAlert className={'size-4 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
       <p
         className={'text-sm text-amber-800 dark:text-amber-200'}
         dangerouslySetInnerHTML={{ __html: t('environment.restartWarning') }}

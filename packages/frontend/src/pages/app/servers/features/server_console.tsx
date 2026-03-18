@@ -101,7 +101,7 @@ export function ServerConsole({
             <div
               className={cn(
                 'size-2 rounded-full',
-                isConnected ? 'bg-emerald-600' : isConnecting ? 'animate-pulse bg-amber-500' : 'bg-red-600'
+                isConnected ? 'bg-green-600' : isConnecting ? 'animate-pulse bg-amber-500' : 'bg-red-600'
               )}
             />
             <span className={'text-[10px] font-medium text-zinc-500 uppercase'}>
@@ -121,7 +121,7 @@ export function ServerConsole({
         </div>
         <form onSubmit={handleSubmit} className={'flex gap-2 border-t border-zinc-800 bg-zinc-900 p-3'}>
           <div className={'relative flex-1'}>
-            <span className={'font-jetbrains absolute top-1/2 left-3 -translate-y-1/2 font-bold text-emerald-600'}>&gt;</span>
+            <span className={'font-jetbrains absolute top-1/2 left-3 -translate-y-1/2 font-bold text-green-600'}>&gt;</span>
             <input
               ref={inputRef}
               type={'text'}
@@ -153,7 +153,7 @@ export function ServerConsole({
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
           }}
           className={
-            'absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-emerald-600/90 shadow-lg backdrop-blur-sm hover:bg-emerald-600'
+            'absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-green-600/90 shadow-lg backdrop-blur-sm hover:bg-green-600'
           }
         >
           <ArrowDown className={'size-3'} />

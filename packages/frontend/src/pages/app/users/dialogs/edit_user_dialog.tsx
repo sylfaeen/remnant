@@ -61,7 +61,7 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
       <Dialog.Content>
         <Dialog.Header>
           <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
-            <Pencil className={'size-5'} strokeWidth={1.75} />
+            <Pencil className={'size-4'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('users.editUser')}</Dialog.Title>

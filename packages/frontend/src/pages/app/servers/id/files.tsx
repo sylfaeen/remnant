@@ -45,33 +45,75 @@ export function ServerFilesPage() {
 
   const search: { path?: string } = useSearch({ strict: false });
   const [currentPath, setCurrentPath] = useState(search.path || '/');
-  const [newFolderName, setNewFolderName] = useState('');
-  const [showNewFolderInput, setShowNewFolderInput] = useState(false);
-  const navigate = useNavigate();
 
   const { isLoading: serverLoading } = useServer(serverId || 0);
-  const { data: files, isLoading: filesLoading, error } = useFiles(serverId, currentPath);
-  const deleteFileMutation = useDeleteFile(serverId || 0);
-  const createDirMutation = useCreateDirectory(serverId || 0);
-  const renameMutation = useRenameFile(serverId || 0);
-  const uploadMutation = useUploadFile(serverId || 0);
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path);
   };
 
+  if (!serverId || isNaN(serverId)) {
+    return <PageError message={t('files.invalidServerId')} />;
+  }
+
+  if (serverLoading) {
+    return <PageLoader />;
+  }
+
+  return (
+    <>
+      <ServerPageHeader>
+        <ServerPageHeader.Left>
+          <ServerPageHeader.Icon icon={FolderOpen} />
+          <ServerPageHeader.Info>
+            <ServerPageHeader.Heading>
+              <ServerPageHeader.ServerName />
+              <ServerPageHeader.PageName>{t('nav.files')}</ServerPageHeader.PageName>
+              <ServerPageHeader.Docs path={'/guide/files'} />
+            </ServerPageHeader.Heading>
+            <Breadcrumb path={currentPath} onNavigate={handleNavigate} />
+          </ServerPageHeader.Info>
+        </ServerPageHeader.Left>
+      </ServerPageHeader>
+      <PageContent>
+        <FilesSection onNavigate={handleNavigate} {...{ serverId, currentPath }} />
+      </PageContent>
+    </>
+  );
+}
+
+type FilesSectionProps = {
+  serverId: number;
+  currentPath: string;
+  onNavigate: (path: string) => void;
+};
+
+function FilesSection({ serverId, currentPath, onNavigate }: FilesSectionProps) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const [newFolderName, setNewFolderName] = useState('');
+  const [showNewFolderInput, setShowNewFolderInput] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+
+  const { data: files, isLoading: filesLoading, error } = useFiles(serverId, currentPath);
+  const deleteFileMutation = useDeleteFile(serverId);
+  const createDirMutation = useCreateDirectory(serverId);
+  const renameMutation = useRenameFile(serverId);
+  const uploadMutation = useUploadFile(serverId);
+
+  const dirCount = files?.filter((f) => f.type === 'directory').length ?? 0;
+  const fileCount = files?.filter((f) => f.type === 'file').length ?? 0;
+
   const handleGoUp = () => {
     if (currentPath === '/') return;
     const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/')) || '/';
-    setCurrentPath(parentPath);
+    onNavigate(parentPath);
   };
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) return;
-
     try {
       const path = currentPath === '/' ? `/${newFolderName}` : `${currentPath}/${newFolderName}`;
       await createDirMutation.mutateAsync(path);
@@ -88,7 +130,6 @@ export function ServerFilesPage() {
 
   const handleRename = async (oldPath: string, newName: string) => {
     if (!newName.trim()) return;
-
     try {
       const parentPath = oldPath.substring(0, oldPath.lastIndexOf('/'));
       const newPath = parentPath ? `${parentPath}/${newName}` : `/${newName}`;
@@ -117,10 +158,8 @@ export function ServerFilesPage() {
   const handleDrop = async (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-
     const droppedFiles = Array.from(e.dataTransfer.files);
     if (droppedFiles.length === 0) return;
-
     for (const file of droppedFiles) {
       try {
         await uploadMutation.mutateAsync({ file, targetPath: currentPath });
@@ -128,242 +167,160 @@ export function ServerFilesPage() {
     }
   };
 
-  if (!serverId || isNaN(serverId)) {
-    return <PageError message={t('files.invalidServerId')} />;
-  }
-
-  if (serverLoading) {
-    return <PageLoader />;
-  }
+  const handleUpload = (uploadFiles: Array<File>, targetPath: string) => {
+    const uploadAll = async () => {
+      for (const file of uploadFiles) {
+        await uploadMutation.mutateAsync({ file, targetPath });
+      }
+      setShowUploadDialog(false);
+    };
+    uploadAll().catch(() => {});
+  };
 
   return (
     <>
-      <ServerPageHeader>
-        <ServerPageHeader.Left>
-          <ServerPageHeader.Icon icon={FolderOpen} />
-          <ServerPageHeader.Info>
-            <ServerPageHeader.Heading>
-              <ServerPageHeader.ServerName />
-              <ServerPageHeader.PageName>{t('nav.files')}</ServerPageHeader.PageName>
-              <ServerPageHeader.Docs path={'/guide/files'} />
-            </ServerPageHeader.Heading>
-            <Breadcrumb path={currentPath} onNavigate={handleNavigate} />
-          </ServerPageHeader.Info>
-        </ServerPageHeader.Left>
-      </ServerPageHeader>
-      <PageContent>
-        <div className={'space-y-6'}>
-          <FilesSection
-            createDirPending={createDirMutation.isPending}
-            uploadPending={uploadMutation.isPending}
-            onNavigate={handleNavigate}
-            onGoUp={handleGoUp}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onRename={handleRename}
-            onNewFolderNameChange={setNewFolderName}
-            onCreateFolder={handleCreateFolder}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onShowUploadDialog={() => setShowUploadDialog(true)}
-            onShowNewFolderInput={setShowNewFolderInput}
-            {...{ files, error, currentPath, newFolderName, filesLoading, isDragging, showNewFolderInput }}
-          />
-          <UploadFileDialog
-            open={showUploadDialog}
-            isPending={uploadMutation.isPending}
-            onUpload={(files, targetPath) => {
-              const uploadAll = async () => {
-                for (const file of files) {
-                  await uploadMutation.mutateAsync({ file, targetPath });
-                }
-                setShowUploadDialog(false);
-              };
-              uploadAll().catch(() => {});
-            }}
-            onClose={() => setShowUploadDialog(false)}
-            {...{ currentPath }}
-          />
-        </div>
-      </PageContent>
-    </>
-  );
-}
-
-type FilesSectionProps = {
-  filesLoading: boolean;
-  files: Array<FileInfo> | undefined;
-  error: unknown;
-  currentPath: string;
-  isDragging: boolean;
-  showNewFolderInput: boolean;
-  newFolderName: string;
-  createDirPending: boolean;
-  uploadPending: boolean;
-  onNavigate: (path: string) => void;
-  onGoUp: () => void;
-  onEdit: (file: FileInfo) => void;
-  onDelete: (file: FileInfo) => void;
-  onRename: (oldPath: string, newName: string) => void;
-  onNewFolderNameChange: (name: string) => void;
-  onCreateFolder: () => void;
-  onShowNewFolderInput: (show: boolean) => void;
-  onDragOver: (e: DragEvent) => void;
-  onDragLeave: (e: DragEvent) => void;
-  onDrop: (e: DragEvent) => void;
-  onShowUploadDialog: () => void;
-};
-
-function FilesSection({
-  filesLoading,
-  files,
-  error,
-  currentPath,
-  isDragging,
-  showNewFolderInput,
-  newFolderName,
-  createDirPending,
-  onNavigate,
-  onGoUp,
-  onEdit,
-  onDelete,
-  onRename,
-  onNewFolderNameChange,
-  onCreateFolder,
-  onShowNewFolderInput,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onShowUploadDialog,
-}: FilesSectionProps) {
-  const { t } = useTranslation();
-
-  const dirCount = files?.filter((f) => f.type === 'directory').length ?? 0;
-  const fileCount = files?.filter((f) => f.type === 'file').length ?? 0;
-
-  return (
-    <div
-      className={cn(
-        'relative overflow-hidden rounded-xl border bg-white transition-colors dark:bg-zinc-900',
-        isDragging ? 'border-zinc-400/40 ring-2 ring-zinc-400/10' : 'border-black/10 dark:border-white/10'
-      )}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-    >
-      {isDragging && (
-        <div
-          className={'pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/90 dark:bg-zinc-900/90'}
-        >
-          <div className={'flex flex-col items-center'}>
-            <div className={'mb-3 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-              <Upload className={'size-7 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
-            </div>
-            <p className={'font-medium text-zinc-700 dark:text-zinc-300'}>{t('files.dropFilesHere')}</p>
-          </div>
-        </div>
-      )}
       <div
-        className={
-          'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4 dark:border-white/10'
-        }
+        className={cn(
+          'relative overflow-hidden rounded-xl border bg-white transition-colors dark:bg-zinc-900',
+          isDragging ? 'border-zinc-400/40 ring-2 ring-zinc-400/10' : 'border-black/10 dark:border-white/10'
+        )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
-        <div className={'flex items-center gap-2 sm:gap-3'}>
-          <Button variant={'secondary'} size={'sm'} onClick={onGoUp} disabled={currentPath === '/'}>
-            <ArrowUp className={'size-4'} />
-            {t('files.parentFolder')}
-          </Button>
-          {files && files.length > 0 && (
-            <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
-              {dirCount > 0 && (
-                <Badge size={'md'}>
-                  {dirCount} {dirCount === 1 ? t('files.folder', 'folder') : t('files.folders', 'folders')}
-                </Badge>
-              )}
-              {fileCount > 0 && (
-                <Badge variant={'muted'} size={'md'}>
-                  {fileCount} {fileCount === 1 ? t('files.file', 'file') : t('files.files', 'files')}
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-        <div className={'flex items-center gap-2'}>
-          <Button variant={'secondary'} size={'sm'} onClick={onShowUploadDialog}>
-            <Upload className={'size-4'} />
-            {t('files.upload')}
-          </Button>
-          {showNewFolderInput ? (
-            <div className={'flex items-center gap-2'}>
-              <Input
-                type={'text'}
-                value={newFolderName}
-                onChange={(e) => onNewFolderNameChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') onCreateFolder();
-                  if (e.key === 'Escape') {
-                    onShowNewFolderInput(false);
-                    onNewFolderNameChange('');
-                  }
-                }}
-                placeholder={t('files.folderName')}
-                className={'w-48'}
-                autoFocus
-              />
-              <Button size={'sm'} onClick={onCreateFolder} disabled={createDirPending} loading={createDirPending}>
-                {t('common.create')}
-              </Button>
-              <Button
-                variant={'ghost'}
-                size={'sm'}
-                onClick={() => {
-                  onShowNewFolderInput(false);
-                  onNewFolderNameChange('');
-                }}
-              >
-                {t('common.cancel')}
-              </Button>
-            </div>
-          ) : (
-            <Button variant={'secondary'} size={'sm'} onClick={() => onShowNewFolderInput(true)}>
-              <FolderPlus className={'size-4'} />
-              {t('files.newFolder')}
-            </Button>
-          )}
-        </div>
-      </div>
-      <div>
-        {filesLoading ? (
-          <div className={'py-12 text-center'}>
-            <div
-              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
-            />
-          </div>
-        ) : error ? (
-          <div className={'py-12 text-center text-sm text-red-600'}>{t('files.loadError')}</div>
-        ) : files && files.length > 0 ? (
-          <div>
-            {files.map((file) => (
-              <FileRow key={file.path} {...{ file, onNavigate, onEdit, onDelete, onRename }} />
-            ))}
-          </div>
-        ) : (
-          <div className={'relative overflow-hidden py-14'}>
-            <div className={'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent'} />
-            <div className={'relative flex flex-col items-center'}>
-              <div className={'mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-                <FolderOpen className={'size-7 text-zinc-300 dark:text-zinc-500'} strokeWidth={1.5} />
+        {isDragging && (
+          <div
+            className={
+              'pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-white/90 dark:bg-zinc-900/90'
+            }
+          >
+            <div className={'flex flex-col items-center'}>
+              <div className={'mb-3 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+                <Upload className={'size-7 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
               </div>
-              <p className={'font-medium text-zinc-600 dark:text-zinc-400'}>{t('files.emptyFolder')}</p>
-              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
-                {t('files.dropOrCreate', 'Drop files here or create a new folder')}
-              </p>
+              <p className={'font-medium text-zinc-700 dark:text-zinc-300'}>{t('files.dropFilesHere')}</p>
             </div>
           </div>
         )}
+        <div
+          className={
+            'flex flex-wrap items-center justify-between gap-3 border-b border-black/10 px-4 py-3 sm:px-6 sm:py-4 dark:border-white/10'
+          }
+        >
+          <div className={'flex items-center gap-2 sm:gap-3'}>
+            <Button variant={'secondary'} size={'sm'} onClick={handleGoUp} disabled={currentPath === '/'}>
+              <ArrowUp className={'size-4'} />
+              {t('files.parentFolder')}
+            </Button>
+            {files && files.length > 0 && (
+              <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
+                {dirCount > 0 && (
+                  <Badge size={'md'}>
+                    {dirCount} {dirCount === 1 ? t('files.folder', 'folder') : t('files.folders', 'folders')}
+                  </Badge>
+                )}
+                {fileCount > 0 && (
+                  <Badge variant={'muted'} size={'md'}>
+                    {fileCount} {fileCount === 1 ? t('files.file', 'file') : t('files.files', 'files')}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+          <div className={'flex items-center gap-2'}>
+            <Button variant={'secondary'} size={'sm'} onClick={() => setShowUploadDialog(true)}>
+              <Upload className={'size-4'} />
+              {t('files.upload')}
+            </Button>
+            {showNewFolderInput ? (
+              <div className={'flex items-center gap-2'}>
+                <Input
+                  type={'text'}
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreateFolder();
+                    if (e.key === 'Escape') {
+                      setShowNewFolderInput(false);
+                      setNewFolderName('');
+                    }
+                  }}
+                  placeholder={t('files.folderName')}
+                  className={'w-48'}
+                  autoFocus
+                />
+                <Button
+                  size={'sm'}
+                  onClick={handleCreateFolder}
+                  disabled={createDirMutation.isPending}
+                  loading={createDirMutation.isPending}
+                >
+                  {t('common.create')}
+                </Button>
+                <Button
+                  variant={'ghost'}
+                  size={'sm'}
+                  onClick={() => {
+                    setShowNewFolderInput(false);
+                    setNewFolderName('');
+                  }}
+                >
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            ) : (
+              <Button variant={'secondary'} size={'sm'} onClick={() => setShowNewFolderInput(true)}>
+                <FolderPlus className={'size-4'} />
+                {t('files.newFolder')}
+              </Button>
+            )}
+          </div>
+        </div>
+        <div>
+          {filesLoading ? (
+            <div className={'py-12 text-center'}>
+              <div
+                className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
+              />
+            </div>
+          ) : error ? (
+            <div className={'py-12 text-center text-sm text-red-600'}>{t('files.loadError')}</div>
+          ) : files && files.length > 0 ? (
+            <div>
+              {files.map((file) => (
+                <FileRow
+                  key={file.path}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onRename={handleRename}
+                  {...{ file, onNavigate }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className={'relative overflow-hidden py-14'}>
+              <div className={'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent'} />
+              <div className={'relative flex flex-col items-center'}>
+                <div className={'mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+                  <FolderOpen className={'size-7 text-zinc-300 dark:text-zinc-500'} strokeWidth={1.5} />
+                </div>
+                <p className={'font-medium text-zinc-600 dark:text-zinc-400'}>{t('files.emptyFolder')}</p>
+                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
+                  {t('files.dropOrCreate', 'Drop files here or create a new folder')}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <UploadFileDialog
+        open={showUploadDialog}
+        isPending={uploadMutation.isPending}
+        onUpload={handleUpload}
+        onClose={() => setShowUploadDialog(false)}
+        {...{ currentPath }}
+      />
+    </>
   );
 }
 
@@ -521,7 +478,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                     !isEditable && 'pointer-events-none invisible'
                   )}
                 >
-                  <Pencil className={'size-3.5'} />
+                  <Pencil className={'size-4'} />
                 </Button>
               </Tooltip.Trigger>
               <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.edit')}</Tooltip.Content>
@@ -534,7 +491,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                   onClick={handleStartRename}
                   className={'text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'}
                 >
-                  <TextCursorInput className={'size-3.5'} />
+                  <TextCursorInput className={'size-4'} />
                 </Button>
               </Tooltip.Trigger>
               <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.rename')}</Tooltip.Content>
@@ -542,7 +499,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
             <Tooltip>
               <Tooltip.Trigger asChild>
                 <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setAction('delete')}>
-                  <Trash2 className={'size-3.5'} />
+                  <Trash2 className={'size-4'} />
                 </Button>
               </Tooltip.Trigger>
               <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('common.delete')}</Tooltip.Content>
@@ -555,7 +512,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
 }
 
 function FolderIcon() {
-  return <FolderOpen className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+  return <FolderOpen className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
 }
 
 type FileIconProps = {
@@ -566,17 +523,17 @@ function FileIcon({ filename }: FileIconProps) {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
 
   if (['jar', 'zip', 'tar', 'gz'].includes(ext)) {
-    return <FileArchive className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+    return <FileArchive className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
   }
   if (['yml', 'yaml', 'json', 'xml', 'properties'].includes(ext)) {
-    return <FileCode className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+    return <FileCode className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
   }
   if (['sh', 'bat', 'cmd'].includes(ext)) {
-    return <FileTerminal className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+    return <FileTerminal className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
   }
   if (['log', 'txt'].includes(ext)) {
-    return <FileText className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+    return <FileText className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
   }
 
-  return <File className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />;
+  return <File className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />;
 }

@@ -220,7 +220,7 @@
   "backups": {
     "title": "Backups",
     "subtitle": "Manage server backups",
-    "backupNow": "Backup now",
+    "backupNow": "New backup",
     "backingUp": "Backing up...",
     "noBackups": "No backups yet",
     "createFirst": "Create your first backup to protect your server data",
@@ -280,10 +280,10 @@
     "autoStartSettings": "Auto Start",
     "enableAutoStart": "Enable Auto Start",
     "autoStartDescription": "Start server automatically when panel starts",
-    "saveConfig": "Save configuration",
+    "saveConfig": "Save",
     "configSaved": "Configuration saved",
     "saveError": "Error saving configuration",
-    "discardChanges": "Discard changes",
+    "cancel": "Cancel",
     "restartRequired": "JVM configuration and port changes require a server restart to take effect.",
     "papermc": {
       "selectVersion": "Select a version",

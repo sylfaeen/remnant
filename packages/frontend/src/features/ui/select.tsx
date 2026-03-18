@@ -49,7 +49,7 @@ export function Select({ className, variant, selectSize, error, ref, children, .
       </select>
       <ChevronDown
         className={'pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-zinc-400'}
-        strokeWidth={1.75}
+        strokeWidth={2}
       />
     </div>
   );

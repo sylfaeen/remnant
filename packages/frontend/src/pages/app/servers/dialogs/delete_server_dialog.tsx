@@ -24,7 +24,7 @@ export function DeleteServerDialog({ server, isDeleting, onConfirm, onCancel }: 
       <Dialog.Content className={'max-w-md'}>
         <Dialog.Header>
           <Dialog.Icon className={'bg-red-600/10 text-red-600'}>
-            <AlertTriangle className={'size-5'} strokeWidth={1.75} />
+            <AlertTriangle className={'size-4'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('servers.deleteServer')}</Dialog.Title>

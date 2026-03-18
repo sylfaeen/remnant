@@ -47,14 +47,7 @@ export function ServerSettingsFirewallPage() {
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
-
   const { isLoading: serverLoading } = useServer(serverId || 0);
-  const { data: firewallData } = useFirewallRules(serverId);
-  const addFirewallRule = useAddFirewallRule(serverId || 0);
-  const removeFirewallRule = useRemoveFirewallRule(serverId || 0);
-  const toggleFirewallRule = useToggleFirewallRule(serverId || 0);
 
   if (!serverId || isNaN(serverId)) {
     return <PageError message={t('errors.generic')} />;
@@ -63,9 +56,6 @@ export function ServerSettingsFirewallPage() {
   if (serverLoading) {
     return <PageLoader />;
   }
-
-  const rules: Array<FirewallRule> = firewallData?.rules ?? [];
-  const activeCount = rules.filter((r) => r.enabled).length;
 
   return (
     <>
@@ -81,57 +71,77 @@ export function ServerSettingsFirewallPage() {
             <ServerPageHeader.Description>{t('settings.firewall.description')}</ServerPageHeader.Description>
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
-        <ServerPageHeader.Actions>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className={'size-4'} />
-            {t('settings.firewall.addRule')}
-          </Button>
-        </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
-        <div className={'space-y-6'}>
-          <FeatureCard>
-            <FeatureCard.Header>
-              <FeatureCard.Content>
-                <FeatureCard.Title count={rules.length > 0 && `${activeCount}/${rules.length}`}>
-                  {t('settings.firewall.title')}
-                </FeatureCard.Title>
-                <FeatureCard.Description>{t('settings.firewall.description')}</FeatureCard.Description>
-              </FeatureCard.Content>
-              <FeatureCard.Actions>
-                <Button variant={'ghost'} size={'icon-sm'} onClick={() => setGuidelinesOpen(true)}>
-                  <Info className={'size-4'} />
-                </Button>
-              </FeatureCard.Actions>
-            </FeatureCard.Header>
-            <FeatureCard.Body>
-              {rules.length === 0 ? (
-                <FeatureCard.Empty
-                  icon={Clock}
-                  title={t('settings.firewall.noRules')}
-                  description={t('settings.firewall.noRulesHint')}
-                >
-                  <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={() => setDialogOpen(true)}>
-                    <Plus className={'size-3.5'} />
-                    {t('settings.firewall.addRule')}
-                  </Button>
-                </FeatureCard.Empty>
-              ) : (
-                <>
-                  {rules.map((rule) => (
-                    <RuleRow
-                      key={rule.id}
-                      onToggle={(ruleId) => toggleFirewallRule.mutateAsync(ruleId)}
-                      onDelete={(ruleId) => removeFirewallRule.mutateAsync(ruleId)}
-                      {...{ rule }}
-                    />
-                  ))}
-                </>
-              )}
-            </FeatureCard.Body>
-          </FeatureCard>
-        </div>
+        <FeatureCard.Stack>
+          <FirewallListSection {...{ serverId }} />
+        </FeatureCard.Stack>
       </PageContent>
+    </>
+  );
+}
+
+type FirewallListSectionProps = {
+  serverId: number;
+};
+
+function FirewallListSection({ serverId }: FirewallListSectionProps) {
+  const { t } = useTranslation();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+
+  const { data: firewallData } = useFirewallRules(serverId);
+  const addFirewallRule = useAddFirewallRule(serverId);
+  const removeFirewallRule = useRemoveFirewallRule(serverId);
+  const toggleFirewallRule = useToggleFirewallRule(serverId);
+
+  const rules: Array<FirewallRule> = firewallData?.rules ?? [];
+  const activeCount = rules.filter((r) => r.enabled).length;
+
+  return (
+    <>
+      <FeatureCard>
+        <FeatureCard.Header>
+          <FeatureCard.Content>
+            <div className={'flex items-center justify-start gap-2'}>
+              <FeatureCard.Title count={rules.length > 0 && `${activeCount}/${rules.length}`}>
+                {t('settings.firewall.title')}
+              </FeatureCard.Title>
+              <Button variant={'ghost'} size={'icon-xs'} onClick={() => setGuidelinesOpen(true)}>
+                <Info className={'size-3'} />
+              </Button>
+            </div>
+            <FeatureCard.Description>{t('settings.firewall.description')}</FeatureCard.Description>
+          </FeatureCard.Content>
+          <FeatureCard.Actions>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className={'size-4'} />
+              {t('settings.firewall.addRule')}
+            </Button>
+          </FeatureCard.Actions>
+        </FeatureCard.Header>
+        <FeatureCard.Body>
+          {rules.length === 0 ? (
+            <FeatureCard.Empty
+              icon={Clock}
+              title={t('settings.firewall.noRules')}
+              description={t('settings.firewall.noRulesHint')}
+            />
+          ) : (
+            <>
+              {rules.map((rule) => (
+                <RuleRow
+                  key={rule.id}
+                  onToggle={(ruleId) => toggleFirewallRule.mutateAsync(ruleId)}
+                  onDelete={(ruleId) => removeFirewallRule.mutateAsync(ruleId)}
+                  {...{ rule }}
+                />
+              ))}
+            </>
+          )}
+        </FeatureCard.Body>
+      </FeatureCard>
       <AddFirewallRuleDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -242,7 +252,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
               <Tooltip>
                 <Tooltip.Trigger asChild>
                   <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
-                    <Trash2 className={'size-3.5'} />
+                    <Trash2 className={'size-4'} />
                   </Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('rules.tooltipDelete')}</Tooltip.Content>

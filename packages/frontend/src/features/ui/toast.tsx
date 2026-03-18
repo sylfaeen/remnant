@@ -115,7 +115,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   const Icon = icons[toast.type];
 
   const iconColors: Record<ToastType, string> = {
-    success: 'text-emerald-400',
+    success: 'text-green-400',
     error: 'text-red-400',
     warning: 'text-amber-400',
     info: 'text-sky-400',

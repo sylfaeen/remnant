@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Archive, Download, HardDrive, Trash2 } from 'lucide-react';
+import { Archive, Download, HardDrive, Plus, Trash2 } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer, useBackupServer } from '@remnant/frontend/hooks/use_servers';
@@ -23,53 +23,7 @@ export function ServerBackupsPage() {
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
 
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-
   const { isLoading: serverLoading } = useServer(serverId || 0);
-  const { data: backups, isLoading: backupsLoading } = useBackups(serverId);
-  const backupServer = useBackupServer();
-  const deleteBackup = useDeleteBackup(serverId || 0);
-
-  const utils = trpc.useUtils();
-
-  const handleBackupConfirm = async (paths: Array<string>) => {
-    if (!serverId) return;
-    try {
-      await backupServer.mutateAsync(serverId, paths);
-      setDialogOpen(false);
-      utils.servers.listBackups.invalidate({ id: serverId }).then();
-    } catch {}
-  };
-
-  const handleDownload = async (filename: string) => {
-    const token = useAuthStore.getState().accessToken;
-    const url = `/api/servers/backups/${encodeURIComponent(filename)}`;
-
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: 'include',
-    });
-
-    if (!response.ok) return;
-
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-  };
-
-  const handleDelete = async (filename: string) => {
-    try {
-      await deleteBackup.mutateAsync({ filename });
-      setDeleteConfirm(null);
-    } catch {}
-  };
 
   if (!serverId || isNaN(serverId)) {
     return <PageError message={t('errors.generic')} />;
@@ -93,95 +47,121 @@ export function ServerBackupsPage() {
             <ServerPageHeader.Description>{t('backups.subtitle')}</ServerPageHeader.Description>
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
-        <ServerPageHeader.Actions>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Archive className={'size-4'} />
-            {t('backups.backupNow')}
-          </Button>
-        </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
-        <div className={'space-y-6'}>
-          <BackupsSection
-            deletePending={deleteBackup.isPending}
-            onDownload={handleDownload}
-            onDelete={handleDelete}
-            onDeleteConfirm={setDeleteConfirm}
-            {...{ backups, backupsLoading, deleteConfirm }}
-          />
-          <CreateBackupDialog
-            open={dialogOpen}
-            isPending={backupServer.isPending}
-            onClose={() => setDialogOpen(false)}
-            onConfirm={handleBackupConfirm}
-            {...{ serverId }}
-          />
-        </div>
+        <FeatureCard.Stack>
+          <BackupsSection {...{ serverId }} />
+        </FeatureCard.Stack>
       </PageContent>
     </>
   );
 }
 
 type BackupsSectionProps = {
-  backupsLoading: boolean;
-  backups: Array<{ name: string; size: number; date: string }> | undefined;
-  deleteConfirm: string | null;
-  deletePending: boolean;
-  onDownload: (filename: string) => void;
-  onDelete: (filename: string) => void;
-  onDeleteConfirm: (filename: string | null) => void;
+  serverId: number;
 };
 
-function BackupsSection({
-  backupsLoading,
-  backups,
-  deleteConfirm,
-  deletePending,
-  onDownload,
-  onDelete,
-  onDeleteConfirm,
-}: BackupsSectionProps) {
+function BackupsSection({ serverId }: BackupsSectionProps) {
   const { t } = useTranslation();
+
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { data: backups, isLoading: backupsLoading } = useBackups(serverId);
+  const backupServer = useBackupServer();
+  const deleteBackup = useDeleteBackup(serverId);
+  const utils = trpc.useUtils();
 
   const totalSize = backups?.reduce((acc, b) => acc + b.size, 0) ?? 0;
 
+  const handleBackupConfirm = async (paths: Array<string>) => {
+    try {
+      await backupServer.mutateAsync(serverId, paths);
+      setDialogOpen(false);
+      utils.servers.listBackups.invalidate({ id: serverId }).then();
+    } catch {}
+  };
+
+  const handleDownload = async (filename: string) => {
+    const token = useAuthStore.getState().accessToken;
+    const url = `/api/servers/backups/${encodeURIComponent(filename)}`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
+    });
+    if (!response.ok) return;
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  };
+
+  const handleDelete = async (filename: string) => {
+    try {
+      await deleteBackup.mutateAsync({ filename });
+      setDeleteConfirm(null);
+    } catch {}
+  };
+
   return (
-    <FeatureCard>
-      <FeatureCard.Header>
-        <FeatureCard.Content>
-          <FeatureCard.Title count={backups && backups.length > 0 && backups.length}>{t('backups.title')}</FeatureCard.Title>
-          <FeatureCard.Description>{t('backups.subtitle')}</FeatureCard.Description>
-        </FeatureCard.Content>
-        {backups && backups.length > 0 && (
-          <FeatureCard.Actions>
-            <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
-              <HardDrive className={'size-3'} strokeWidth={2} />
-              <span>{formatFileSize(totalSize)}</span>
-            </div>
+    <>
+      <FeatureCard>
+        <FeatureCard.Header>
+          <FeatureCard.Content>
+            <FeatureCard.Title count={backups && backups.length > 0 && backups.length}>{t('backups.title')}</FeatureCard.Title>
+            <FeatureCard.Description>{t('backups.subtitle')}</FeatureCard.Description>
+          </FeatureCard.Content>
+          <FeatureCard.Actions className={'gap-6'}>
+            {backups && backups.length > 0 && (
+              <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
+                <HardDrive className={'size-3'} strokeWidth={2} />
+                <span>{formatFileSize(totalSize)}</span>
+              </div>
+            )}
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className={'size-4'} />
+              {t('backups.backupNow')}
+            </Button>
           </FeatureCard.Actions>
-        )}
-      </FeatureCard.Header>
-      <FeatureCard.Body>
-        {backupsLoading ? (
-          <div className={'py-8 text-center'}>
-            <div
-              className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
-            />
-          </div>
-        ) : !backups || backups.length === 0 ? (
-          <FeatureCard.Empty icon={Archive} title={t('backups.noBackups')} description={t('backups.createFirst')} />
-        ) : (
-          <>
-            {backups.map((backup, index) => (
-              <BackupRow
-                key={backup.name}
-                {...{ backup, index, deleteConfirm, deletePending, onDownload, onDelete, onDeleteConfirm }}
+        </FeatureCard.Header>
+        <FeatureCard.Body>
+          {backupsLoading ? (
+            <div className={'py-8 text-center'}>
+              <div
+                className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
               />
-            ))}
-          </>
-        )}
-      </FeatureCard.Body>
-    </FeatureCard>
+            </div>
+          ) : !backups || backups.length === 0 ? (
+            <FeatureCard.Empty icon={Archive} title={t('backups.noBackups')} description={t('backups.createFirst')} />
+          ) : (
+            <>
+              {backups.map((backup, index) => (
+                <BackupRow
+                  key={backup.name}
+                  deletePending={deleteBackup.isPending}
+                  onDownload={handleDownload}
+                  onDelete={handleDelete}
+                  onDeleteConfirm={setDeleteConfirm}
+                  {...{ backup, index, deleteConfirm }}
+                />
+              ))}
+            </>
+          )}
+        </FeatureCard.Body>
+      </FeatureCard>
+      <CreateBackupDialog
+        open={dialogOpen}
+        isPending={backupServer.isPending}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={handleBackupConfirm}
+        {...{ serverId }}
+      />
+    </>
   );
 }
 
@@ -277,7 +257,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
               <Tooltip>
                 <Tooltip.Trigger asChild>
                   <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(backup.name)}>
-                    <Trash2 className={'size-3.5'} />
+                    <Trash2 className={'size-4'} />
                   </Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('backups.tooltipDelete')}</Tooltip.Content>

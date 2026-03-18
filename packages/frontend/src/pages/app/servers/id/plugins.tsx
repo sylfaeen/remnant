@@ -26,26 +26,67 @@ export function ServerPluginsPage() {
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
 
+  const { isLoading: serverLoading } = useServer(serverId || 0);
+
+  if (!serverId || isNaN(serverId)) {
+    return <PageError message={t('errors.generic')} />;
+  }
+
+  if (serverLoading) {
+    return <PageLoader />;
+  }
+
+  return (
+    <>
+      <ServerPageHeader>
+        <ServerPageHeader.Left>
+          <ServerPageHeader.Icon icon={Puzzle} />
+          <ServerPageHeader.Info>
+            <ServerPageHeader.Heading>
+              <ServerPageHeader.ServerName />
+              <ServerPageHeader.PageName>{t('nav.plugins')}</ServerPageHeader.PageName>
+              <ServerPageHeader.Docs path={'/guide/plugins'} />
+            </ServerPageHeader.Heading>
+            <ServerPageHeader.Description>
+              {t('plugins.subtitle', 'Upload and manage server plugins')}
+            </ServerPageHeader.Description>
+          </ServerPageHeader.Info>
+        </ServerPageHeader.Left>
+      </ServerPageHeader>
+      <PageContent>
+        <FeatureCard.Stack>
+          <UploadSection {...{ serverId }} />
+          <PluginListSection {...{ serverId }} />
+        </FeatureCard.Stack>
+      </PageContent>
+    </>
+  );
+}
+
+type UploadSectionProps = {
+  serverId: number;
+};
+
+function UploadSection({ serverId }: UploadSectionProps) {
+  const { t } = useTranslation();
+
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadPlugin = useUploadPlugin(serverId);
 
-  const { isLoading: serverLoading } = useServer(serverId || 0);
-  const { data: pluginsData, isLoading: pluginsLoading } = usePlugins(serverId);
-  const uploadPlugin = useUploadPlugin(serverId || 0);
-  const deletePlugin = useDeletePlugin(serverId || 0);
-  const togglePlugin = useTogglePlugin(serverId || 0);
+  const uploadPending = uploadPlugin.isPending;
 
-  const handleDragOver = (e: DragEvent) => {
+  const onDragOver = (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e: DragEvent) => {
+  const onDragLeave = (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
   };
 
-  const handleDrop = async (e: DragEvent) => {
+  const onDrop = async (e: DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     setUploadError(null);
@@ -65,7 +106,7 @@ export function ServerPluginsPage() {
     }
   };
 
-  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+  const onFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -87,75 +128,6 @@ export function ServerPluginsPage() {
 
     e.target.value = '';
   };
-
-  if (!serverId || isNaN(serverId)) {
-    return <PageError message={t('errors.generic')} />;
-  }
-
-  if (serverLoading) {
-    return <PageLoader />;
-  }
-
-  const enabledCount = pluginsData?.plugins.filter((p: PluginInfo) => p.enabled).length ?? 0;
-
-  return (
-    <>
-      <ServerPageHeader>
-        <ServerPageHeader.Left>
-          <ServerPageHeader.Icon icon={Puzzle} />
-          <ServerPageHeader.Info>
-            <ServerPageHeader.Heading>
-              <ServerPageHeader.ServerName />
-              <ServerPageHeader.PageName>{t('nav.plugins')}</ServerPageHeader.PageName>
-              <ServerPageHeader.Docs path={'/guide/plugins'} />
-            </ServerPageHeader.Heading>
-            <ServerPageHeader.Description>
-              {t('plugins.subtitle', 'Upload and manage server plugins')}
-            </ServerPageHeader.Description>
-          </ServerPageHeader.Info>
-        </ServerPageHeader.Left>
-      </ServerPageHeader>
-      <PageContent>
-        <FeatureCard.Stack>
-          <UploadSection
-            uploadPending={uploadPlugin.isPending}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onFileSelect={handleFileSelect}
-            {...{ isDragging, uploadError }}
-          />
-          <PluginListSection
-            plugins={pluginsData?.plugins}
-            deletePending={deletePlugin.isPending}
-            {...{ pluginsLoading, enabledCount, togglePlugin, deletePlugin }}
-          />
-        </FeatureCard.Stack>
-      </PageContent>
-    </>
-  );
-}
-
-type UploadSectionProps = {
-  isDragging: boolean;
-  uploadError: string | null;
-  uploadPending: boolean;
-  onDragOver: (e: DragEvent) => void;
-  onDragLeave: (e: DragEvent) => void;
-  onDrop: (e: DragEvent) => void;
-  onFileSelect: (e: ChangeEvent<HTMLInputElement>) => void;
-};
-
-function UploadSection({
-  isDragging,
-  uploadError,
-  uploadPending,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onFileSelect,
-}: UploadSectionProps) {
-  const { t } = useTranslation();
 
   return (
     <FeatureCard>
@@ -227,16 +199,18 @@ function UploadSection({
 }
 
 type PluginListSectionProps = {
-  pluginsLoading: boolean;
-  plugins: Array<PluginInfo> | undefined;
-  enabledCount: number;
-  deletePending: boolean;
-  togglePlugin: { mutateAsync: (filename: string) => Promise<unknown>; isPending: boolean };
-  deletePlugin: { mutateAsync: (filename: string) => Promise<unknown>; isPending: boolean };
+  serverId: number;
 };
 
-function PluginListSection({ pluginsLoading, plugins, enabledCount, togglePlugin, deletePlugin }: PluginListSectionProps) {
+function PluginListSection({ serverId }: PluginListSectionProps) {
   const { t } = useTranslation();
+
+  const { data: pluginsData, isLoading: pluginsLoading } = usePlugins(serverId);
+  const deletePlugin = useDeletePlugin(serverId);
+  const togglePlugin = useTogglePlugin(serverId);
+
+  const plugins = pluginsData?.plugins;
+  const enabledCount = plugins?.filter((p) => p.enabled).length ?? 0;
 
   return (
     <FeatureCard>
@@ -373,7 +347,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
                       <PowerOff className={'size-4'} />
                     ) : (
                       <>
-                        <Power className={'size-3.5'} />
+                        <Power className={'size-4'} />
                         {t('plugins.enable')}
                       </>
                     )}
@@ -386,7 +360,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
               <Tooltip>
                 <Tooltip.Trigger asChild>
                   <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
-                    <Trash2 className={'size-3.5'} />
+                    <Trash2 className={'size-4'} />
                   </Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('plugins.tooltipDelete')}</Tooltip.Content>

@@ -265,7 +265,7 @@ export function getTaskTypes(t: ReturnType<typeof useTranslation>['t']): Array<T
       label: t('tasks.types.backup'),
       description: t('tasks.types.backupDesc'),
       icon: Archive,
-      activeClass: 'border-emerald-600/40 bg-emerald-600/5',
+      activeClass: 'border-green-600/40 bg-green-600/5',
     },
     {
       value: 'command',

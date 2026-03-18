@@ -41,7 +41,7 @@ export function Sidebar() {
           <Link to={'/app'} className={'group flex items-center gap-2.5'}>
             <div
               className={
-                'flex size-7 items-center justify-center rounded-md bg-linear-to-br from-emerald-500 to-amber-500 shadow-sm transition-shadow group-hover:shadow-md'
+                'flex size-7 items-center justify-center rounded-md bg-linear-to-br from-green-500 to-amber-500 shadow-sm transition-shadow group-hover:shadow-md'
               }
             >
               <span className={'text-sm font-bold text-white'}>R</span>
@@ -111,7 +111,7 @@ function UserDropdown() {
       </DropdownMenu.Trigger>
       <DropdownMenu.Content side={'top'} align={'start'}>
         <DropdownMenu.Item onSelect={() => navigate({ to: '/app/account' }).then()}>
-          <Settings className={'size-4'} strokeWidth={1.75} />
+          <Settings className={'size-4'} strokeWidth={2} />
           <span className={'font-medium'}>{t('account.menuSettings')}</span>
         </DropdownMenu.Item>
         <DropdownMenu.Separator />
@@ -119,7 +119,7 @@ function UserDropdown() {
           onSelect={() => logout.mutate()}
           className={'text-red-600 data-highlighted:bg-red-50 dark:data-highlighted:bg-red-950'}
         >
-          <LogOut className={'size-4'} strokeWidth={1.75} />
+          <LogOut className={'size-4'} strokeWidth={2} />
           <span className={'font-medium'}>{t('common.logout')}</span>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
@@ -175,7 +175,7 @@ function SidebarItem({ item, location }: SidebarItemProps) {
           isActive ? 'bg-zinc-200 dark:bg-zinc-700' : 'text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white'
         )}
       >
-        <Icon className={'size-4 shrink-0'} strokeWidth={1.75} />
+        <Icon className={'size-4 shrink-0'} strokeWidth={2} />
         <span>{t(`nav.${item.key}`, item.key)}</span>
       </Link>
       {hasChildren && isActive && <SidebarChildren items={item.children!} {...{ location }} />}

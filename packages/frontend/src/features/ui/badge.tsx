@@ -7,7 +7,7 @@ export const badgeVariants = cva('inline-flex items-center font-medium', {
     variant: {
       default: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300',
       muted: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400',
-      success: 'bg-emerald-600/10 dark:bg-emerald-400/10 text-emerald-700',
+      success: 'bg-green-600/10 dark:bg-green-400/10 text-green-700',
       warning: 'bg-amber-500/10 dark:bg-amber-400/10 text-amber-600',
       info: 'bg-teal-500/10 text-teal-500',
       cyan: 'bg-cyan-50 dark:bg-cyan-950 text-cyan-700',

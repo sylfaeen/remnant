@@ -51,12 +51,12 @@ export function TotpQrDisplay({ qrCodeUri, secret }: TotpQrDisplayProps) {
         <Button variant={'secondary'} size={'sm'} onClick={handleCopy} className={'w-full'}>
           {copied ? (
             <>
-              <Check className={'size-3.5 text-emerald-600'} />
+              <Check className={'size-3.5 text-green-600'} />
               {t('settings.twoFactor.copied')}
             </>
           ) : (
             <>
-              <Copy className={'size-3.5'} />
+              <Copy className={'size-4'} />
               {t('settings.twoFactor.copy')}
             </>
           )}
@@ -148,18 +148,18 @@ export function RecoveryCodesDisplay({ codes, onDone }: RecoveryCodesDisplayProp
         <Button variant={'secondary'} size={'sm'} onClick={handleCopyAll} className={'flex-1'}>
           {copied ? (
             <>
-              <Check className={'size-3.5 text-emerald-600'} />
+              <Check className={'size-3.5 text-green-600'} />
               {t('settings.twoFactor.copied')}
             </>
           ) : (
             <>
-              <Copy className={'size-3.5'} />
+              <Copy className={'size-4'} />
               {t('settings.twoFactor.recoveryCodes.copyAll')}
             </>
           )}
         </Button>
         <Button variant={'secondary'} size={'sm'} onClick={handleDownload} className={'flex-1'}>
-          <Download className={'size-3.5'} />
+          <Download className={'size-4'} />
           {t('settings.twoFactor.recoveryCodes.download')}
         </Button>
       </div>
@@ -185,12 +185,12 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
       <div className={'border-b border-black/10 p-5'}>
         <div className={'flex items-center gap-3'}>
           <div
-            className={cn('flex size-10 items-center justify-center rounded-full', enabled ? 'bg-emerald-600/10' : 'bg-zinc-100')}
+            className={cn('flex size-10 items-center justify-center rounded-full', enabled ? 'bg-green-600/10' : 'bg-zinc-100')}
           >
             {enabled ? (
-              <ShieldCheck className={'size-5 text-emerald-600'} strokeWidth={1.75} />
+              <ShieldCheck className={'size-5 text-green-600'} strokeWidth={2} />
             ) : (
-              <Shield className={'size-5 text-zinc-400'} strokeWidth={1.75} />
+              <Shield className={'size-5 text-zinc-400'} strokeWidth={2} />
             )}
           </div>
           <div className={'flex-1'}>
@@ -211,7 +211,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
           <div className={'space-y-4'}>
             <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.twoFactor.enabledDescription')}</p>
             <Button variant={'outline'} size={'sm'} onClick={onDisable} {...{ loading }}>
-              <ShieldOff className={'size-3.5'} />
+              <ShieldOff className={'size-4'} />
               {t('settings.twoFactor.disable')}
             </Button>
           </div>
@@ -219,7 +219,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
           <div className={'space-y-4'}>
             <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.twoFactor.disabledDescription')}</p>
             <Button size={'sm'} onClick={onSetupStart} {...{ loading }}>
-              <Shield className={'size-3.5'} />
+              <Shield className={'size-4'} />
               {t('settings.twoFactor.enable')}
             </Button>
           </div>

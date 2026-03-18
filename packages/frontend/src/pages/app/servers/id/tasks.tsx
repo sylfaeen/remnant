@@ -28,9 +28,9 @@ import {
   useToggleTask,
   useTaskHistory,
   formatCronExpression,
-  type CreateTaskInput,
   type ScheduledTask,
   type TaskExecution,
+  type CreateTaskInput,
 } from '@remnant/frontend/hooks/use_tasks';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { CreateTaskDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_task_dialog';
@@ -47,45 +47,7 @@ export function ServerTasksPage() {
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<ScheduledTask | null>(null);
-  const [toggleConfirm, setToggleConfirm] = useState<number | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-
   const { isLoading: serverLoading } = useServer(serverId || 0);
-  const { data: tasksData, isLoading: tasksLoading } = useTasks(serverId);
-  const createTask = useCreateTask(serverId || 0);
-  const updateTask = useUpdateTask(serverId || 0);
-  const deleteTask = useDeleteTask(serverId || 0);
-  const toggleTask = useToggleTask(serverId || 0);
-
-  const handleCreateTask = async (input: CreateTaskInput) => {
-    try {
-      await createTask.mutateAsync(input);
-      setShowForm(false);
-    } catch {}
-  };
-
-  const handleUpdateTask = async (input: CreateTaskInput) => {
-    if (!editingTask) return;
-    try {
-      await updateTask.mutateAsync({ taskId: editingTask.id, input });
-      setEditingTask(null);
-    } catch {}
-  };
-
-  const handleDelete = async (taskId: number) => {
-    try {
-      await deleteTask.mutateAsync(taskId);
-      setDeleteConfirm(null);
-    } catch {}
-  };
-
-  const handleToggle = async (taskId: number) => {
-    try {
-      await toggleTask.mutateAsync(taskId);
-    } catch {}
-  };
 
   if (!serverId || isNaN(serverId)) {
     return <PageError message={t('errors.generic')} />;
@@ -109,9 +71,73 @@ export function ServerTasksPage() {
             <ServerPageHeader.Description>{t('tasks.subtitle')}</ServerPageHeader.Description>
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
-        <ServerPageHeader.Actions>
+      </ServerPageHeader>
+      <PageContent>
+        <FeatureCard.Stack>
+          <TasksSection {...{ serverId }} />
+        </FeatureCard.Stack>
+      </PageContent>
+    </>
+  );
+}
+
+type TasksSectionProps = {
+  serverId: number;
+};
+
+function TasksSection({ serverId }: TasksSectionProps) {
+  const { t } = useTranslation();
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<ScheduledTask | null>(null);
+  const [toggleConfirm, setToggleConfirm] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+
+  const { data: tasksData, isLoading: tasksLoading } = useTasks(serverId);
+  const createTask = useCreateTask(serverId);
+  const updateTask = useUpdateTask(serverId);
+  const deleteTask = useDeleteTask(serverId);
+  const toggleTask = useToggleTask(serverId);
+
+  const tasks = tasksData?.tasks;
+  const enabledCount = tasks?.filter((task) => task.enabled).length ?? 0;
+
+  const handleCreateTask = async (input: CreateTaskInput) => {
+    await createTask.mutateAsync(input);
+    setShowForm(false);
+  };
+
+  const handleUpdateTask = async (input: CreateTaskInput) => {
+    if (!editingTask) return;
+    await updateTask.mutateAsync({ taskId: editingTask.id, input });
+    setEditingTask(null);
+  };
+
+  const handleDelete = async (taskId: number) => {
+    try {
+      await deleteTask.mutateAsync(taskId);
+      setDeleteConfirm(null);
+    } catch {}
+  };
+
+  const handleToggle = async (taskId: number) => {
+    try {
+      await toggleTask.mutateAsync(taskId);
+    } catch {}
+  };
+
+  return (
+    <FeatureCard>
+      <FeatureCard.Header>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={tasks && tasks.length > 0 && `${enabledCount}/${tasks.length}`}>
+            {t('tasks.title')}
+          </FeatureCard.Title>
+          <FeatureCard.Description>{t('tasks.subtitle')}</FeatureCard.Description>
+        </FeatureCard.Content>
+        <FeatureCard.Actions>
           <Button onClick={() => setShowForm(true)}>
-            <Plus className={'size-5'} />
+            <Plus className={'size-4'} />
             {t('tasks.addTask')}
           </Button>
           {showForm && (
@@ -131,69 +157,7 @@ export function ServerTasksPage() {
               {...{ serverId }}
             />
           )}
-        </ServerPageHeader.Actions>
-      </ServerPageHeader>
-      <PageContent>
-        <div className={'space-y-6'}>
-          <TasksSection
-            tasks={tasksData?.tasks}
-            deletePending={deleteTask.isPending}
-            togglePending={toggleTask.isPending}
-            onToggle={handleToggle}
-            onEdit={setEditingTask}
-            onDelete={handleDelete}
-            onToggleConfirm={setToggleConfirm}
-            onDeleteConfirm={setDeleteConfirm}
-            {...{ serverId, tasksLoading, toggleConfirm, deleteConfirm }}
-          />
-        </div>
-      </PageContent>
-    </>
-  );
-}
-
-type TasksSectionProps = {
-  serverId: number;
-  tasksLoading: boolean;
-  tasks: Array<ScheduledTask> | undefined;
-  toggleConfirm: number | null;
-  deleteConfirm: number | null;
-  deletePending: boolean;
-  togglePending: boolean;
-  onToggle: (taskId: number) => void;
-  onEdit: (task: ScheduledTask) => void;
-  onDelete: (taskId: number) => void;
-  onToggleConfirm: (taskId: number | null) => void;
-  onDeleteConfirm: (taskId: number | null) => void;
-};
-
-function TasksSection({
-  serverId,
-  tasksLoading,
-  tasks,
-  toggleConfirm,
-  deleteConfirm,
-  deletePending,
-  togglePending,
-  onToggle,
-  onEdit,
-  onDelete,
-  onToggleConfirm,
-  onDeleteConfirm,
-}: TasksSectionProps) {
-  const { t } = useTranslation();
-
-  const enabledCount = tasks?.filter((t) => t.enabled).length ?? 0;
-
-  return (
-    <FeatureCard>
-      <FeatureCard.Header>
-        <FeatureCard.Content>
-          <FeatureCard.Title count={tasks && tasks.length > 0 && `${enabledCount}/${tasks.length}`}>
-            {t('tasks.title')}
-          </FeatureCard.Title>
-          <FeatureCard.Description>{t('tasks.subtitle')}</FeatureCard.Description>
-        </FeatureCard.Content>
+        </FeatureCard.Actions>
       </FeatureCard.Header>
       <FeatureCard.Body>
         {tasksLoading ? (
@@ -209,19 +173,13 @@ function TasksSection({
             {tasks.map((task) => (
               <TaskRow
                 key={task.id}
-                {...{
-                  serverId,
-                  task,
-                  toggleConfirm,
-                  deleteConfirm,
-                  deletePending,
-                  togglePending,
-                  onToggle,
-                  onEdit,
-                  onDelete,
-                  onToggleConfirm,
-                  onDeleteConfirm,
-                }}
+                deletePending={deleteTask.isPending}
+                onToggle={handleToggle}
+                onEdit={setEditingTask}
+                onDelete={handleDelete}
+                onToggleConfirm={setToggleConfirm}
+                onDeleteConfirm={setDeleteConfirm}
+                {...{ serverId, task, toggleConfirm, deleteConfirm }}
               />
             ))}
           </>
@@ -237,7 +195,6 @@ type TaskRowProps = {
   toggleConfirm: number | null;
   deleteConfirm: number | null;
   deletePending: boolean;
-  togglePending: boolean;
   onToggle: (taskId: number) => void;
   onEdit: (task: ScheduledTask) => void;
   onDelete: (taskId: number) => void;
@@ -384,7 +341,7 @@ function TaskRow({
                       onClick={() => onEdit(task)}
                       className={'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'}
                     >
-                      <Pencil className={'size-3.5'} />
+                      <Pencil className={'size-4'} />
                     </Button>
                   </Tooltip.Trigger>
                   <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipEdit')}</Tooltip.Content>
@@ -392,7 +349,7 @@ function TaskRow({
                 <Tooltip>
                   <Tooltip.Trigger asChild>
                     <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(task.id)}>
-                      <Trash2 className={'size-3.5'} />
+                      <Trash2 className={'size-4'} />
                     </Button>
                   </Tooltip.Trigger>
                   <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipDelete')}</Tooltip.Content>

@@ -220,7 +220,7 @@
   "backups": {
     "title": "Sauvegardes",
     "subtitle": "Gérer les sauvegardes du serveur",
-    "backupNow": "Sauvegarder maintenant",
+    "backupNow": "Nouvelle sauvegarde",
     "backingUp": "Sauvegarde en cours...",
     "noBackups": "Aucune sauvegarde",
     "createFirst": "Créez votre première sauvegarde pour protéger les données de votre serveur",
@@ -280,10 +280,10 @@
     "autoStartSettings": "Démarrage automatique",
     "enableAutoStart": "Activer le démarrage automatique",
     "autoStartDescription": "Démarrer le serveur automatiquement au lancement du panneau",
-    "saveConfig": "Sauvegarder la configuration",
+    "saveConfig": "Sauvegarder",
     "configSaved": "Configuration sauvegardée",
     "saveError": "Erreur lors de la sauvegarde",
-    "discardChanges": "Annuler les modifications",
+    "cancel": "Annuler",
     "restartRequired": "Les changements de configuration JVM et de port nécessitent un redémarrage du serveur pour prendre effet.",
     "papermc": {
       "selectVersion": "Sélectionner une version",

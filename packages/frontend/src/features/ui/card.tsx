@@ -10,7 +10,7 @@ const cardVariants = cva(['rounded-xl transition-all duration-[var(--duration-no
       glass: 'bg-white/85 backdrop-blur-xl border border-black/5 shadow-lg',
       interactive:
         'bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 shadow-card hover:border-black/10 hover:shadow-card-hover hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] cursor-pointer',
-      accent: 'bg-white dark:bg-zinc-900 border border-emerald-600/30 shadow-card hover:shadow-glow',
+      accent: 'bg-white dark:bg-zinc-900 border border-green-600/30 shadow-card hover:shadow-glow',
       ghost: 'border border-black/10 dark:border-white/10',
     },
     padding: {
@@ -60,7 +60,7 @@ Card.Stat = function CardStat({ label, value, trend, className }: CardStatProps)
         <span
           className={cn(
             'mt-1 text-sm',
-            trend === 'up' && 'text-emerald-600',
+            trend === 'up' && 'text-green-600',
             trend === 'down' && 'text-red-600',
             trend === 'neutral' && 'text-zinc-600 dark:text-zinc-400'
           )}

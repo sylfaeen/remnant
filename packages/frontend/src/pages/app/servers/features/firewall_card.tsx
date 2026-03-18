@@ -31,9 +31,24 @@ const PROTOCOL_LABELS: Record<Protocol, string> = {
 };
 
 export const PROTOCOL_STYLES: Record<Protocol, { label: string; text: string }> = {
-  tcp: { label: 'TCP', text: 'text-emerald-600' },
+  tcp: { label: 'TCP', text: 'text-green-600' },
   udp: { label: 'UDP', text: 'text-blue-600' },
   both: { label: 'TCP+UDP', text: 'text-violet-600' },
+};
+
+export const PRESET_STYLES: Record<Protocol, { active: string; icon: string }> = {
+  tcp: {
+    active: 'border-emerald-600/30 bg-emerald-600/5 text-emerald-700 dark:text-emerald-400',
+    icon: 'group-hover/preset:text-emerald-600',
+  },
+  udp: {
+    active: 'border-blue-600/30 bg-blue-600/5 text-blue-700 dark:text-blue-400',
+    icon: 'group-hover/preset:text-blue-600',
+  },
+  both: {
+    active: 'border-violet-600/30 bg-violet-600/5 text-violet-700 dark:text-violet-400',
+    icon: 'group-hover/preset:text-violet-600',
+  },
 };
 
 export const FIREWALL_PRESETS: Array<{ label: string; port: number; protocol: Protocol; description: string }> = [
@@ -121,7 +136,7 @@ FirewallCard.EmptyState = function FirewallCardEmptyState({ onAdd }: { onAdd: ()
       <ServerSection.EmptyTitle>{t('settings.firewall.noRules')}</ServerSection.EmptyTitle>
       <ServerSection.EmptyDescription>{t('settings.firewall.noRulesHint')}</ServerSection.EmptyDescription>
       <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={onAdd}>
-        <Plus className={'size-3.5'} />
+        <Plus className={'size-4'} />
         {t('settings.firewall.addRule')}
       </Button>
     </ServerSection.Empty>
@@ -247,7 +262,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
               )}
             </Button>
             <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(rule.id)}>
-              <Trash2 className={'size-3.5'} />
+              <Trash2 className={'size-4'} />
             </Button>
           </>
         )}

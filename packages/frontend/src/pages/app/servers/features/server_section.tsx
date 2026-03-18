@@ -28,7 +28,7 @@ ServerSection.HeaderInfo = function ServerSectionHeaderInfo({ children }: { chil
 };
 
 ServerSection.Icon = function ServerSectionIcon({ icon: IconComponent }: { icon: LucideIcon }) {
-  return <IconComponent className={'size-5 text-zinc-700 dark:text-zinc-300'} strokeWidth={1.75} />;
+  return <IconComponent className={'size-5 text-zinc-700 dark:text-zinc-300'} strokeWidth={2} />;
 };
 
 ServerSection.Title = function ServerSectionTitle({ children }: { children: ReactNode }) {

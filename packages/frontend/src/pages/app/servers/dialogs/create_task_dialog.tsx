@@ -37,7 +37,7 @@ export function CreateTaskDialog({ serverId, onSubmit, onCancel, isLoading }: Cr
       <Dialog.Content className={'max-w-2xl'}>
         <Dialog.Header>
           <Dialog.Icon className={'bg-cyan-600/10 text-cyan-600'}>
-            <CalendarClock className={'size-5'} strokeWidth={1.75} />
+            <CalendarClock className={'size-4'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('tasks.newTask')}</Dialog.Title>
@@ -162,7 +162,7 @@ function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
                       'mb-2 size-4 transition-colors',
                       isActive ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
                     )}
-                    strokeWidth={1.75}
+                    strokeWidth={2}
                   />
                   <div
                     className={cn(

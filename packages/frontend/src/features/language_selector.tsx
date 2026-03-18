@@ -43,7 +43,7 @@ export function LanguageSelector() {
         )}
         aria-label={'Select language'}
       >
-        <Globe className={'size-4'} strokeWidth={1.75} />
+        <Globe className={'size-4'} strokeWidth={2} />
       </button>
       {isOpen && (
         <div
@@ -59,13 +59,13 @@ export function LanguageSelector() {
               className={cn(
                 'flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors duration-(--duration-fast)',
                 lang.code === i18n.language
-                  ? 'bg-emerald-50 text-emerald-600'
+                  ? 'bg-green-50 text-green-600'
                   : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
               )}
             >
               <span className={'text-base'}>{lang.flag}</span>
               <span className={'flex-1 text-left'}>{lang.name}</span>
-              {lang.code === i18n.language && <Check className={'size-3.5 text-emerald-600'} strokeWidth={2} />}
+              {lang.code === i18n.language && <Check className={'size-3.5 text-green-600'} strokeWidth={2} />}
             </button>
           ))}
         </div>

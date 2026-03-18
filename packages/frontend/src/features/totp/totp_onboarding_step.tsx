@@ -55,8 +55,8 @@ export function TotpOnboardingStep({
         <div className={'mx-auto w-full max-w-100'}>
           <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
             <div className={'flex flex-col items-center text-center'}>
-              <div className={'mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-600/10'}>
-                <Shield className={'size-6 text-emerald-600'} strokeWidth={1.75} />
+              <div className={'mb-4 flex size-12 items-center justify-center rounded-full bg-green-600/10'}>
+                <Shield className={'size-6 text-green-600'} strokeWidth={2} />
               </div>
               <h2 className={'text-lg font-semibold text-zinc-900'}>{t('onboarding.security.title')}</h2>
               <p className={'mt-1.5 max-w-xs text-sm text-zinc-500'}>{t('onboarding.security.subtitle')}</p>

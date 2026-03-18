@@ -9,8 +9,6 @@ import { Badge } from '@remnant/frontend/features/ui/badge';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 
 export function SettingsGeneralPage() {
-  const { t } = useTranslation();
-
   return (
     <PageContent>
       <div className={'space-y-6'}>
@@ -53,7 +51,7 @@ function JavaSection() {
             <FeatureCard.Row key={java.name}>
               <FeatureCard.RowLabel description={<span className={'font-jetbrains'}>{java.path}</span>}>
                 <div className={'flex items-center gap-2'}>
-                  <Coffee className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />
+                  <Coffee className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
                   <span>{java.name}</span>
                   {java.isDefault && (
                     <Badge variant={'warning'} size={'xs'}>
@@ -162,7 +160,7 @@ function ServiceFileBlock() {
             className={'absolute top-2 right-2 text-zinc-600 hover:bg-zinc-700 hover:text-white dark:text-zinc-400'}
             onClick={handleCopy}
           >
-            {copied ? <Check className={'size-4 text-emerald-400'} /> : <Copy className={'size-4'} />}
+            {copied ? <Check className={'size-4 text-green-400'} /> : <Copy className={'size-4'} />}
           </Button>
         </div>
       )}

@@ -17,7 +17,7 @@ export function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuideli
       <Dialog.Content>
         <Dialog.Header>
           <Dialog.Icon className={'bg-blue-600/10 text-blue-600'}>
-            <Info className={'size-5'} strokeWidth={1.75} />
+            <Info className={'size-4'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('settings.firewall.infoTitle')}</Dialog.Title>

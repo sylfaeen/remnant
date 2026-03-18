@@ -35,11 +35,11 @@ export function TotpLoginStep({ onVerify, onBack, error, loading }: TotpLoginSte
     <div className={'animate-fade-in'}>
       <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
         <div className={'mb-5 flex flex-col items-center text-center'}>
-          <div className={'mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-600/10'}>
+          <div className={'mb-4 flex size-12 items-center justify-center rounded-full bg-green-600/10'}>
             {useRecovery ? (
-              <KeyRound className={'size-6 text-emerald-600'} strokeWidth={1.75} />
+              <KeyRound className={'size-6 text-green-600'} strokeWidth={2} />
             ) : (
-              <ShieldCheck className={'size-6 text-emerald-600'} strokeWidth={1.75} />
+              <ShieldCheck className={'size-6 text-green-600'} strokeWidth={2} />
             )}
           </div>
           <h2 className={'text-lg font-semibold text-zinc-900'}>{t('auth.totp.title')}</h2>
@@ -103,7 +103,7 @@ export function TotpLoginStep({ onVerify, onBack, error, loading }: TotpLoginSte
           onClick={onBack}
           className={'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'}
         >
-          <ArrowLeft className={'size-3.5'} />
+          <ArrowLeft className={'size-4'} />
           {t('auth.totp.back')}
         </Button>
       </div>

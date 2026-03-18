@@ -30,6 +30,48 @@ export function ServerSettingsJarsPage() {
   const { id } = useParams({ strict: false });
   const serverId = id ? parseInt(id, 10) : null;
 
+  const { isLoading: serverLoading } = useServer(serverId || 0);
+
+  if (!serverId || isNaN(serverId)) {
+    return <PageError message={t('errors.generic')} />;
+  }
+
+  if (serverLoading) {
+    return <PageLoader />;
+  }
+
+  return (
+    <>
+      <ServerPageHeader>
+        <ServerPageHeader.Left>
+          <ServerPageHeader.Icon icon={Package} />
+          <ServerPageHeader.Info>
+            <ServerPageHeader.Heading>
+              <ServerPageHeader.ServerName />
+              <ServerPageHeader.PageName>{t('settings.jarManagement')}</ServerPageHeader.PageName>
+              <ServerPageHeader.Docs path={'/guide/configuration'} />
+            </ServerPageHeader.Heading>
+            <ServerPageHeader.Description>{t('settings.subtitle')}</ServerPageHeader.Description>
+          </ServerPageHeader.Info>
+        </ServerPageHeader.Left>
+      </ServerPageHeader>
+      <PageContent>
+        <FeatureCard.Stack>
+          <AddJarSection {...{ serverId }} />
+          <JarListSection {...{ serverId }} />
+        </FeatureCard.Stack>
+      </PageContent>
+    </>
+  );
+}
+
+type AddJarSectionProps = {
+  serverId: number;
+};
+
+function AddJarSection({ serverId }: AddJarSectionProps) {
+  const { t } = useTranslation();
+
   const [jarSourceTab, setJarSourceTab] = useState<'upload' | 'papermc'>('upload');
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [selectedBuild, setSelectedBuild] = useState<number | null>(null);
@@ -38,21 +80,15 @@ export function ServerSettingsJarsPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const { data: server, isLoading: serverLoading } = useServer(serverId || 0);
   const { data: versions, isLoading: versionsLoading } = usePaperVersions();
   const { data: builds, isLoading: buildsLoading } = usePaperBuilds(selectedVersion);
-  const { data: jarsData, isLoading: jarsLoading } = useServerJars(serverId);
-  const downloadJar = useDownloadJar(serverId || 0);
-  const setActiveJar = useSetActiveJar(serverId || 0);
-  const deleteJar = useDeleteJar(serverId || 0);
-  const uploadJar = useUploadJar(serverId || 0);
+  const downloadJar = useDownloadJar(serverId);
+  const uploadJar = useUploadJar(serverId);
 
   const handleDownload = async () => {
     if (!selectedVersion) return;
-
     setIsDownloading(true);
     setDownloadError(null);
-
     try {
       await downloadJar.mutateAsync({
         version: selectedVersion,
@@ -85,13 +121,11 @@ export function ServerSettingsJarsPage() {
     e.preventDefault();
     setIsDragging(false);
     setUploadError(null);
-
     const files = Array.from(e.dataTransfer.files).filter((f) => f.name.endsWith('.jar'));
     if (files.length === 0) {
       setUploadError(t('settings.jarUpload.invalidFile'));
       return;
     }
-
     for (const file of files) {
       try {
         await uploadJar.mutateAsync({ file });
@@ -104,15 +138,12 @@ export function ServerSettingsJarsPage() {
   const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
     setUploadError(null);
     const jarFiles = Array.from(files).filter((f) => f.name.endsWith('.jar'));
-
     if (jarFiles.length === 0) {
       setUploadError(t('settings.jarUpload.invalidFile'));
       return;
     }
-
     for (const file of jarFiles) {
       try {
         await uploadJar.mutateAsync({ file });
@@ -120,120 +151,8 @@ export function ServerSettingsJarsPage() {
         setUploadError(err instanceof Error ? err.message : t('settings.jarUpload.error'));
       }
     }
-
     e.target.value = '';
   };
-
-  if (!serverId || isNaN(serverId)) {
-    return <PageError message={t('errors.generic')} />;
-  }
-
-  if (serverLoading) {
-    return <PageLoader />;
-  }
-
-  return (
-    <>
-      <ServerPageHeader>
-        <ServerPageHeader.Left>
-          <ServerPageHeader.Icon icon={Package} />
-          <ServerPageHeader.Info>
-            <ServerPageHeader.Heading>
-              <ServerPageHeader.ServerName />
-              <ServerPageHeader.PageName>{t('settings.jarManagement')}</ServerPageHeader.PageName>
-              <ServerPageHeader.Docs path={'/guide/configuration'} />
-            </ServerPageHeader.Heading>
-            <ServerPageHeader.Description>{t('settings.subtitle')}</ServerPageHeader.Description>
-          </ServerPageHeader.Info>
-        </ServerPageHeader.Left>
-      </ServerPageHeader>
-      <PageContent>
-        <FeatureCard.Stack>
-          <AddJarSection
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onFileSelect={handleFileSelect}
-            onDownload={handleDownload}
-            onVersionChange={(v) => {
-              setSelectedVersion(v);
-              setSelectedBuild(null);
-            }}
-            onBuildChange={setSelectedBuild}
-            {...{
-              jarSourceTab,
-              isDragging,
-              uploadError,
-              uploadPending: uploadJar.isPending,
-              versions,
-              versionsLoading,
-              builds,
-              buildsLoading,
-              selectedVersion,
-              selectedBuild,
-              isDownloading,
-              downloadError,
-            }}
-            onTabChange={setJarSourceTab}
-          />
-          <JarListSection
-            jars={jarsData?.jars}
-            activeJarFile={server?.jar_file}
-            setActiveJar={setActiveJar}
-            {...{ jarsLoading, deleteJar }}
-          />
-        </FeatureCard.Stack>
-      </PageContent>
-    </>
-  );
-}
-
-type AddJarSectionProps = {
-  jarSourceTab: 'upload' | 'papermc';
-  isDragging: boolean;
-  uploadError: string | null;
-  uploadPending: boolean;
-  versions: Array<string> | undefined;
-  versionsLoading: boolean;
-  builds: Array<number> | undefined;
-  buildsLoading: boolean;
-  selectedVersion: string | null;
-  selectedBuild: number | null;
-  isDownloading: boolean;
-  downloadError: string | null;
-  onTabChange: (tab: 'upload' | 'papermc') => void;
-  onDragOver: (e: DragEvent) => void;
-  onDragLeave: (e: DragEvent) => void;
-  onDrop: (e: DragEvent) => void;
-  onFileSelect: (e: ChangeEvent<HTMLInputElement>) => void;
-  onDownload: () => void;
-  onVersionChange: (v: string | null) => void;
-  onBuildChange: (b: number | null) => void;
-};
-
-function AddJarSection({
-  jarSourceTab,
-  isDragging,
-  uploadError,
-  uploadPending,
-  versions,
-  versionsLoading,
-  builds,
-  buildsLoading,
-  selectedVersion,
-  selectedBuild,
-  isDownloading,
-  downloadError,
-  onTabChange,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onFileSelect,
-  onDownload,
-  onVersionChange,
-  onBuildChange,
-}: AddJarSectionProps) {
-  const { t } = useTranslation();
 
   return (
     <FeatureCard>
@@ -243,30 +162,14 @@ function AddJarSection({
           <FeatureCard.Description>{t('settings.addJarDescription')}</FeatureCard.Description>
         </FeatureCard.Content>
         <FeatureCard.Actions>
-          <button
-            onClick={() => onTabChange('upload')}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-              jarSourceTab === 'upload'
-                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100'
-                : 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300'
-            )}
-          >
-            <Upload className={'mr-1.5 inline-block size-3.5'} />
+          <Button onClick={() => setJarSourceTab('upload')} variant={jarSourceTab === 'upload' ? 'tab' : 'ghost'}>
+            <Upload className={'size-4'} />
             {t('settings.jarUpload.tab')}
-          </button>
-          <button
-            onClick={() => onTabChange('papermc')}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-              jarSourceTab === 'papermc'
-                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100'
-                : 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300'
-            )}
-          >
-            <Download className={'mr-1.5 inline-block size-3.5'} />
+          </Button>
+          <Button onClick={() => setJarSourceTab('papermc')} variant={jarSourceTab === 'papermc' ? 'tab' : 'ghost'}>
+            <Download className={'size-4'} />
             PaperMC
-          </button>
+          </Button>
         </FeatureCard.Actions>
       </FeatureCard.Header>
       <FeatureCard.Body
@@ -278,7 +181,12 @@ function AddJarSection({
         )}
       >
         {jarSourceTab === 'upload' && (
-          <div className={'relative overflow-hidden'} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+          <div
+            className={'relative overflow-hidden'}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div
               className={cn(
                 'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent transition-opacity',
@@ -300,14 +208,14 @@ function AddJarSection({
                 />
               </div>
               <p className={'font-medium'}>{t('settings.jarUpload.dragDrop')}</p>
-              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.jarUpload.or')}</p>
-              <label className={'mt-3 inline-block cursor-pointer'}>
-                <Button asChild variant={'secondary'} size={'sm'}>
+              <p className={'mt-3 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.jarUpload.or')}</p>
+              <Label className={'mt-3 mb-0! inline-block cursor-pointer'}>
+                <Button variant={'secondary'}>
                   <span>{t('settings.jarUpload.browse')}</span>
                 </Button>
-                <input type={'file'} accept={'.jar'} multiple onChange={onFileSelect} className={'hidden'} />
-              </label>
-              {uploadPending && (
+                <input type={'file'} accept={'.jar'} multiple onChange={handleFileSelect} className={'hidden'} />
+              </Label>
+              {uploadJar.isPending && (
                 <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
                   <div
                     className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
@@ -333,7 +241,10 @@ function AddJarSection({
                 </Label>
                 <Select
                   value={selectedVersion || ''}
-                  onChange={(e) => onVersionChange(e.target.value || null)}
+                  onChange={(e) => {
+                    setSelectedVersion(e.target.value || null);
+                    setSelectedBuild(null);
+                  }}
                   disabled={versionsLoading || isDownloading}
                 >
                   <option value={''}>{t('settings.papermc.selectVersion')}</option>
@@ -348,7 +259,7 @@ function AddJarSection({
                 <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.buildOptional')}</Label>
                 <Select
                   value={selectedBuild || ''}
-                  onChange={(e) => onBuildChange(e.target.value ? parseInt(e.target.value) : null)}
+                  onChange={(e) => setSelectedBuild(e.target.value ? parseInt(e.target.value) : null)}
                   disabled={!selectedVersion || buildsLoading || isDownloading}
                 >
                   <option value={''}>{t('settings.latestBuild')}</option>
@@ -361,7 +272,7 @@ function AddJarSection({
               </div>
               <div className={'flex items-end'}>
                 <Button
-                  onClick={onDownload}
+                  onClick={handleDownload}
                   disabled={!selectedVersion || isDownloading}
                   loading={isDownloading}
                   className={'w-full'}
@@ -394,15 +305,19 @@ type JarInfo = {
 };
 
 type JarListSectionProps = {
-  jarsLoading: boolean;
-  jars: Array<JarInfo> | undefined;
-  activeJarFile: string | undefined;
-  setActiveJar: { mutateAsync: (jar: string) => Promise<unknown>; isPending: boolean };
-  deleteJar: { mutateAsync: (jar: string) => Promise<unknown>; isPending: boolean };
+  serverId: number;
 };
 
-function JarListSection({ jarsLoading, jars, activeJarFile, setActiveJar, deleteJar }: JarListSectionProps) {
+function JarListSection({ serverId }: JarListSectionProps) {
   const { t } = useTranslation();
+
+  const { data: server } = useServer(serverId);
+  const { data: jarsData, isLoading: jarsLoading } = useServerJars(serverId);
+  const setActiveJar = useSetActiveJar(serverId);
+  const deleteJar = useDeleteJar(serverId);
+
+  const jars = jarsData?.jars;
+  const activeJarFile = server?.jar_file;
 
   return (
     <FeatureCard>
@@ -542,11 +457,11 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
         ) : !jar.isActive ? (
           <>
             <Button variant={'secondary'} size={'xs'} onClick={() => setActivateConfirm(true)}>
-              <Check className={'size-3.5'} />
+              <Check className={'size-4'} />
               {t('settings.activate')}
             </Button>
             <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
-              <Trash2 className={'size-3.5'} />
+              <Trash2 className={'size-4'} />
             </Button>
           </>
         ) : null}

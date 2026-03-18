@@ -47,8 +47,8 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
     >
       <Dialog.Content>
         <Dialog.Header>
-          <Dialog.Icon className={'bg-emerald-600/10 text-emerald-600'}>
-            <Plus className={'size-5'} strokeWidth={1.75} />
+          <Dialog.Icon className={'bg-green-600/10 text-green-600'}>
+            <Plus className={'size-4'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('servers.addServer')}</Dialog.Title>

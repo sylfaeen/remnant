@@ -60,7 +60,7 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
       <Dialog.Content className={'max-w-md'}>
         <Dialog.Header>
           <Dialog.Icon className={'bg-zinc-100 dark:bg-zinc-800'}>
-            <Upload className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.75} />
+            <Upload className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('files.upload')}</Dialog.Title>
@@ -96,7 +96,7 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
                   : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50/50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800/50'
               )}
             >
-              <Upload className={'size-5 text-zinc-400 dark:text-zinc-500'} strokeWidth={1.75} />
+              <Upload className={'size-5 text-zinc-400 dark:text-zinc-500'} strokeWidth={2} />
               <span>{t('files.uploadDropOrBrowse')}</span>
             </button>
           </div>
@@ -108,7 +108,7 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
                   className={'flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800'}
                 >
                   <div className={'flex min-w-0 items-center gap-2'}>
-                    <File className={'size-4 shrink-0 text-zinc-400 dark:text-zinc-500'} strokeWidth={1.75} />
+                    <File className={'size-4 shrink-0 text-zinc-400 dark:text-zinc-500'} strokeWidth={2} />
                     <span className={'truncate text-sm text-zinc-700 dark:text-zinc-300'}>{file.name}</span>
                     <span className={'shrink-0 text-xs text-zinc-400 dark:text-zinc-500'}>{formatFileSize(file.size)}</span>
                   </div>
@@ -119,7 +119,7 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
                       'ml-2 shrink-0 rounded p-0.5 text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
                     }
                   >
-                    <X className={'size-3.5'} />
+                    <X className={'size-4'} />
                   </button>
                 </div>
               ))}

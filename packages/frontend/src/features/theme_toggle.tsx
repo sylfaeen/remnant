@@ -25,7 +25,7 @@ export function ThemeToggle() {
               : 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
           )}
         >
-          <Icon className={'size-3.5'} strokeWidth={1.75} />
+          <Icon className={'size-4'} strokeWidth={2} />
         </button>
       ))}
     </div>

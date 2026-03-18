@@ -86,7 +86,7 @@ export function LoginPage() {
               <div className={'mb-8 flex flex-col items-center lg:hidden'}>
                 <div
                   className={
-                    'mb-4 flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500 to-amber-500 shadow-sm'
+                    'mb-4 flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-green-500 to-amber-500 shadow-sm'
                   }
                 >
                   <span className={'text-lg font-bold text-white'}>R</span>

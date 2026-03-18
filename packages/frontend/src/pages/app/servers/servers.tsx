@@ -180,8 +180,8 @@ function EmptyState({ onCreate }: EmptyStateProps) {
 
   return (
     <div className={'rounded-xl border border-black/10 bg-white p-12 text-center dark:border-white/10 dark:bg-zinc-900'}>
-      <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600/10'}>
-        <Server className={'size-8 text-emerald-600'} strokeWidth={1.5} />
+      <div className={'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-green-600/10'}>
+        <Server className={'size-8 text-green-600'} strokeWidth={1.5} />
       </div>
       <h3 className={'mb-2 font-semibold text-zinc-900 dark:text-zinc-100'}>{t('servers.noServers')}</h3>
       <p className={'mb-6 text-zinc-600 dark:text-zinc-400'}>

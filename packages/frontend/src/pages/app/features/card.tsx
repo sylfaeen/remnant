@@ -23,7 +23,7 @@ FeatureCard.Header = function FeatureCardHeader({ className, ...rest }: FeatureC
 type FeatureCardContentProps = ComponentProps<'div'>;
 
 FeatureCard.Content = function FeatureCardContent({ className, ...rest }: FeatureCardContentProps) {
-  return <div className={cn('space-y-1', className)} {...rest} />;
+  return <div className={className} {...rest} />;
 };
 
 type FeatureCardTitleProps = ComponentProps<'h3'> & {
@@ -34,7 +34,7 @@ FeatureCard.Title = function FeatureCardTitle({ count, className, children, ...r
   return (
     <h3 className={cn('text-strong flex items-center gap-2 font-medium', className)} {...rest}>
       {children}
-      {count !== undefined && <Badge size={'md'}>{count}</Badge>}
+      {count ? <Badge size={'md'}>{count}</Badge> : null}
     </h3>
   );
 };
@@ -73,7 +73,7 @@ FeatureCard.Row = function FeatureCardRow({ layout = 'row', interactive = false,
     <div
       className={cn(
         'flex w-full justify-between gap-4 px-5 py-4',
-        layout === 'row' && 'flex-col items-start sm:flex-row sm:items-center sm:gap-8',
+        layout === 'row' && 'flex-row items-center sm:gap-8',
         layout === 'column' && 'flex-col items-start',
         interactive && 'hover:bg-card-hover',
         className
@@ -129,7 +129,7 @@ type FeatureCardEmptyProps = PropsWithChildren<{
 FeatureCard.Empty = function FeatureCardEmpty({ icon: Icon, title, description, children }: FeatureCardEmptyProps) {
   return (
     <FeatureCard.Row className={'relative overflow-hidden'}>
-      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
+      <div className={'absolute inset-0 bg-linear-to-t from-gray-400/10 to-transparent'} />
       <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
         <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
           <Icon className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />

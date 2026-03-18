@@ -40,7 +40,7 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   if (!isInitialized) {
     return (
       <div className={'flex min-h-screen items-center justify-center bg-zinc-50'}>
-        <Loader2 className={'size-6 animate-spin text-emerald-600'} />
+        <Loader2 className={'size-6 animate-spin text-green-600'} />
       </div>
     );
   }

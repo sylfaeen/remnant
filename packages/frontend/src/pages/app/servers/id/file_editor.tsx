@@ -39,7 +39,6 @@ export function ServerFileEditorPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [_errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Initialize content when a file loads
   useEffect(() => {
     if (fileData?.content !== undefined) {
       setContent(fileData.content);

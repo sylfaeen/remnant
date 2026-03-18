@@ -25,11 +25,6 @@ export function ServerDashboardPage() {
   const serverId = id ? parseInt(id, 10) : NaN;
 
   const { data: server, isLoading, error } = useServer(serverId);
-  const startServer = useStartServer();
-  const stopServer = useStopServer();
-  const restartServer = useRestartServer();
-
-  const [isActionPending, setIsActionPending] = useState(false);
 
   const {
     messages,
@@ -42,36 +37,6 @@ export function ServerDashboardPage() {
     players,
   } = useConsoleWebSocket(isNaN(serverId) ? null : serverId);
 
-  const handleStart = async () => {
-    setIsActionPending(true);
-    try {
-      await startServer.mutateAsync(serverId);
-    } catch {
-    } finally {
-      setIsActionPending(false);
-    }
-  };
-
-  const handleStop = async () => {
-    setIsActionPending(true);
-    try {
-      await stopServer.mutateAsync(serverId);
-    } catch {
-    } finally {
-      setIsActionPending(false);
-    }
-  };
-
-  const handleRestart = async () => {
-    setIsActionPending(true);
-    try {
-      await restartServer.mutateAsync(serverId);
-    } catch {
-    } finally {
-      setIsActionPending(false);
-    }
-  };
-
   if (isLoading) {
     return <PageLoader />;
   }
@@ -81,8 +46,6 @@ export function ServerDashboardPage() {
   }
 
   const isRunning = server.status === 'running';
-  const isStopped = server.status === 'stopped';
-  const isTransitioning = server.status === 'starting' || server.status === 'stopping';
 
   return (
     <>
@@ -99,16 +62,7 @@ export function ServerDashboardPage() {
           </ServerPageHeader.Info>
         </ServerPageHeader.Left>
         <ServerPageHeader.Actions>
-          <ServerActions
-            status={server.status}
-            startPending={startServer.isPending}
-            stopPending={stopServer.isPending}
-            restartPending={restartServer.isPending}
-            onStart={handleStart}
-            onStop={handleStop}
-            onRestart={handleRestart}
-            {...{ isStopped, isRunning, isTransitioning, isActionPending }}
-          />
+          <ServerActions status={server.status} {...{ serverId }} />
         </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
@@ -152,33 +106,31 @@ function StatusBadge({ status }: StatusBadgeProps) {
 }
 
 type ServerActionsProps = {
-  isStopped: boolean;
-  isRunning: boolean;
-  isTransitioning: boolean;
+  serverId: number;
   status: ServerStatus;
-  isActionPending: boolean;
-  startPending: boolean;
-  stopPending: boolean;
-  restartPending: boolean;
-  onStart: () => void;
-  onStop: () => void;
-  onRestart: () => void;
 };
 
-function ServerActions({
-  isStopped,
-  isRunning,
-  isTransitioning,
-  status,
-  isActionPending,
-  startPending,
-  stopPending,
-  restartPending,
-  onStart,
-  onStop,
-  onRestart,
-}: ServerActionsProps) {
+function ServerActions({ serverId, status }: ServerActionsProps) {
   const { t } = useTranslation();
+
+  const [isActionPending, setIsActionPending] = useState(false);
+  const startServer = useStartServer();
+  const stopServer = useStopServer();
+  const restartServer = useRestartServer();
+
+  const isStopped = status === 'stopped';
+  const isRunning = status === 'running';
+  const isTransitioning = status === 'starting' || status === 'stopping';
+
+  const handleAction = async (action: typeof startServer) => {
+    setIsActionPending(true);
+    try {
+      await action.mutateAsync(serverId);
+    } catch {
+    } finally {
+      setIsActionPending(false);
+    }
+  };
 
   if (isTransitioning) {
     return (
@@ -191,24 +143,34 @@ function ServerActions({
   return (
     <div className={'flex gap-2'}>
       {isStopped && (
-        <Button variant={'success'} onClick={onStart} disabled={isActionPending} loading={startPending}>
-          {startPending ? <Loader2 className={'size-4 animate-spin'} /> : <Play className={'size-4'} />}
+        <Button
+          variant={'success'}
+          onClick={() => handleAction(startServer)}
+          disabled={isActionPending}
+          loading={startServer.isPending}
+        >
+          {startServer.isPending ? <Loader2 className={'size-4 animate-spin'} /> : <Play className={'size-4'} />}
           {t('servers.actions.start')}
         </Button>
       )}
       {isRunning && (
         <>
-          <Button variant={'danger'} onClick={onStop} disabled={isActionPending} loading={stopPending}>
-            {stopPending ? <Loader2 className={'size-4 animate-spin'} /> : <Square className={'size-4'} />}
+          <Button
+            variant={'danger'}
+            onClick={() => handleAction(stopServer)}
+            disabled={isActionPending}
+            loading={stopServer.isPending}
+          >
+            {stopServer.isPending ? <Loader2 className={'size-4 animate-spin'} /> : <Square className={'size-4'} />}
             {t('servers.actions.stop')}
           </Button>
           <Button
             className={'bg-amber-500 text-white hover:bg-amber-600'}
-            onClick={onRestart}
+            onClick={() => handleAction(restartServer)}
             disabled={isActionPending}
-            loading={restartPending}
+            loading={restartServer.isPending}
           >
-            {restartPending ? <Loader2 className={'size-4 animate-spin'} /> : <RotateCcw className={'size-4'} />}
+            {restartServer.isPending ? <Loader2 className={'size-4 animate-spin'} /> : <RotateCcw className={'size-4'} />}
             {t('servers.actions.restart')}
           </Button>
         </>
@@ -298,7 +260,7 @@ type MetricItemProps = {
 function MetricItem({ icon: Icon, iconColor, label, value, detail, tooltip }: MetricItemProps) {
   const content = (
     <div className={'flex items-center gap-2'}>
-      <Icon className={cn('size-3.5', iconColor)} strokeWidth={1.75} />
+      <Icon className={cn('size-3.5', iconColor)} strokeWidth={2} />
       <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{label}</span>
       <span className={'text-sm font-medium text-zinc-900 tabular-nums dark:text-zinc-100'}>{value}</span>
       {detail && <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{detail}</span>}

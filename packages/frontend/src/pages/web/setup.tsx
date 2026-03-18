@@ -202,7 +202,7 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
         <div className={'mb-8 flex flex-col items-center lg:hidden'}>
           <div
             className={
-              'mb-4 flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500 to-amber-500 shadow-sm'
+              'mb-4 flex size-10 items-center justify-center rounded-lg bg-linear-to-br from-green-500 to-amber-500 shadow-sm'
             }
           >
             <span className={'text-lg font-bold text-white'}>R</span>
@@ -268,7 +268,7 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                         'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
                         strength === 'weak' && 'bg-red-500',
                         strength === 'medium' && 'bg-amber-500',
-                        strength === 'strong' && 'bg-emerald-500'
+                        strength === 'strong' && 'bg-green-500'
                       )}
                     />
                     <div
@@ -277,14 +277,14 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                         strength === 'medium'
                           ? 'bg-amber-500'
                           : strength === 'strong'
-                            ? 'bg-emerald-500'
+                            ? 'bg-green-500'
                             : 'bg-zinc-200 dark:bg-zinc-700'
                       )}
                     />
                     <div
                       className={cn(
                         'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'strong' ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
+                        strength === 'strong' ? 'bg-green-500' : 'bg-zinc-200 dark:bg-zinc-700'
                       )}
                     />
                   </div>
@@ -293,7 +293,7 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
                       'text-xs font-medium',
                       strength === 'weak' && 'text-red-500',
                       strength === 'medium' && 'text-amber-600',
-                      strength === 'strong' && 'text-emerald-600'
+                      strength === 'strong' && 'text-green-600'
                     )}
                   >
                     {strength === 'weak' && t('onboarding.account.strengthWeak')}
@@ -396,7 +396,7 @@ function CompleteStep({ username }: CompleteStepProps) {
       <div className={'animate-fade-in'}>
         <div className={'shadow-card rounded-xl border border-black/10 bg-white p-8 dark:border-white/10 dark:bg-zinc-800'}>
           <div className={'flex flex-col items-center text-center'}>
-            <div className={'mb-5 flex size-10 items-center justify-center rounded-full bg-emerald-600'}>
+            <div className={'mb-5 flex size-10 items-center justify-center rounded-full bg-green-600'}>
               <Check className={'size-5 text-white'} strokeWidth={2.5} />
             </div>
             <h2 className={'text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100'}>

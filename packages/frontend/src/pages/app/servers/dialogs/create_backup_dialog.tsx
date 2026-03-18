@@ -31,7 +31,7 @@ export function CreateBackupDialog({ open, serverId, isPending, onClose, onConfi
       <Dialog.Content className={'max-w-2xl'}>
         <Dialog.Header>
           <Dialog.Icon className={'bg-zinc-100 dark:bg-zinc-800'}>
-            <Archive className={'size-5 text-zinc-700 dark:text-zinc-300'} strokeWidth={1.75} />
+            <Archive className={'size-5 text-zinc-700 dark:text-zinc-300'} strokeWidth={2} />
           </Dialog.Icon>
           <div>
             <Dialog.Title>{t('backups.dialogTitle')}</Dialog.Title>
@@ -47,7 +47,7 @@ export function CreateBackupDialog({ open, serverId, isPending, onClose, onConfi
           />
         </Dialog.Body>
         <Dialog.Footer>
-          <Button variant={'secondary'} onClick={onClose}>
+          <Button variant={'secondary'} onClick={onClose} disabled={isPending} loading={isPending}>
             {t('common.cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={selectedPaths.size === 0 || isPending} loading={isPending}>

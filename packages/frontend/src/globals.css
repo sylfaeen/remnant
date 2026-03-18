@@ -197,7 +197,7 @@ code:not(pre code) {
   border-style: solid;
   border-width: 1px;
   color: #141e12;
-  padding-inline: calc(var(--spacing) * .5);
+  padding-inline: calc(var(--spacing) * 0.5);
 }
 
 .dark code:not(pre code) {

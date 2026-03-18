@@ -264,7 +264,7 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
               'size-4 shrink-0 transition-colors',
               isSelected ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-400 dark:text-zinc-500'
             )}
-            strokeWidth={1.75}
+            strokeWidth={2}
           />
         ) : (
           <File
@@ -272,7 +272,7 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
               'size-4 shrink-0 transition-colors',
               isSelected ? 'text-zinc-500 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-600'
             )}
-            strokeWidth={1.75}
+            strokeWidth={2}
           />
         )}
         <span
