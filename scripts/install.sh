@@ -356,13 +356,18 @@ install_dependencies() {
         install_temurin
     fi
 
-    # Nginx
+    # Nginx + stream module
     if command_exists nginx; then
         print_ok "Nginx v$(nginx -v 2>&1 | cut -d'/' -f2)"
     else
         $PKG_INSTALL nginx >/dev/null 2>&1 &
         spinner $! "Installing Nginx..."
         print_ok "Nginx installed"
+    fi
+    if ! nginx -V 2>&1 | grep -q "with-stream"; then
+        $PKG_INSTALL libnginx-mod-stream >/dev/null 2>&1 &
+        spinner $! "Installing Nginx stream module..."
+        print_ok "Nginx stream module installed"
     fi
 
     # Certbot

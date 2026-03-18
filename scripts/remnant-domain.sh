@@ -130,8 +130,11 @@ verify_dns() {
 
 # === Nginx operations ===
 nginx_test_and_reload() {
-  if nginx -t 2>/dev/null; then
-    systemctl reload nginx 2>/dev/null
+  local nginx_bin
+  nginx_bin=$(command -v nginx 2>/dev/null || echo "/usr/sbin/nginx")
+
+  if "$nginx_bin" -t 2>/dev/null; then
+    /usr/bin/systemctl reload nginx 2>/dev/null
     return 0
   else
     return 1
@@ -175,11 +178,15 @@ check_stream_module() {
 }
 
 ensure_stream_dirs() {
+  # Only set up stream dirs if the module is available
+  if ! nginx -V 2>&1 | grep -q "with-stream"; then
+    return 1
+  fi
+
   mkdir -p "$STREAMS_AVAILABLE" "$STREAMS_ENABLED"
 
   # Ensure nginx.conf includes streams
   if ! grep -q "streams-enabled" /etc/nginx/nginx.conf 2>/dev/null; then
-    # Add stream block before the last closing brace or at the end
     if grep -q "^stream {" /etc/nginx/nginx.conf 2>/dev/null; then
       return 0
     fi
