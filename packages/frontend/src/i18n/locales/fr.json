@@ -426,7 +426,9 @@
       "step2Desc": "Une fois l'enregistrement DNS configuré, saisissez le domaine et cliquez sur Configurer. Cela mettra à jour la configuration Nginx.",
       "step2Label": "Votre domaine",
       "step3Title": "Activez le SSL",
-      "step3Desc": "Après la configuration, cliquez sur « Activer SSL » pour générer un certificat Let's Encrypt gratuit. Le panel redémarrera et sera accessible via https://votredomaine.com."
+      "step3Desc": "Après la configuration, cliquez sur « Activer SSL » pour générer un certificat Let's Encrypt gratuit. Le panel redémarrera et sera accessible via https://votredomaine.com.",
+      "sslSuccess": "Certificat SSL activé ! Votre panel est maintenant accessible en HTTPS.",
+      "goToPanel": "Ouvrir https://{{domain}}"
     },
     "java": {
       "title": "Environnements Java",

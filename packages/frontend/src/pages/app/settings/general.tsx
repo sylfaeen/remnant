@@ -50,6 +50,7 @@ function PanelDomainSection() {
   const [domainInput, setDomainInput] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sslJustEnabled, setSslJustEnabled] = useState(false);
 
   const { data: panelData } = usePanelDomain();
   const setPanelDomain = useSetPanelDomain();
@@ -152,7 +153,16 @@ function PanelDomainSection() {
                 ) : (
                   <>
                     {!panelDomain.ssl_enabled && (
-                      <Button variant={'success'} size={'xs'} onClick={() => enableSsl.mutateAsync(panelDomain.id)}>
+                      <Button
+                        variant={'success'}
+                        size={'xs'}
+                        disabled={enableSsl.isPending}
+                        loading={enableSsl.isPending}
+                        onClick={async () => {
+                          await enableSsl.mutateAsync(panelDomain.id);
+                          setSslJustEnabled(true);
+                        }}
+                      >
                         <Lock className={'size-3.5'} />
                         {t('settings.domains.enableSsl')}
                       </Button>
@@ -187,6 +197,25 @@ function PanelDomainSection() {
                 <AlertTriangle className={'size-3.5 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
                 <p className={'text-sm text-amber-800 dark:text-amber-200'}>{t('appSettings.panelDomain.restartWarning')}</p>
               </div>
+              {sslJustEnabled && panelDomain.ssl_enabled && (
+                <div className={'mt-3 rounded-lg border border-green-500/20 bg-green-50/50 p-3 dark:bg-green-950/20'}>
+                  <div className={'flex items-center gap-2'}>
+                    <CheckCircle2 className={'size-4 shrink-0 text-green-600'} strokeWidth={2} />
+                    <p className={'text-sm font-medium text-green-800 dark:text-green-200'}>
+                      {t('appSettings.panelDomain.sslSuccess')}
+                    </p>
+                  </div>
+                  <a
+                    href={`https://${panelDomain.domain}`}
+                    className={
+                      'mt-2 inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700'
+                    }
+                  >
+                    <Globe className={'size-3.5'} />
+                    {t('appSettings.panelDomain.goToPanel', { domain: panelDomain.domain })}
+                  </a>
+                </div>
+              )}
             </div>
           </>
         ) : (

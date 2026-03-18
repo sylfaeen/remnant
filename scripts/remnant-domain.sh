@@ -293,16 +293,17 @@ action_enable_ssl() {
   fi
 
   # Run certbot
-  if certbot --nginx -d "$domain" --non-interactive --agree-tos --register-unsafely-without-email --redirect 2>/dev/null; then
-    # Extract expiry date
-    local expiry=""
-    if command -v openssl &>/dev/null && [ -f "/etc/letsencrypt/live/${domain}/cert.pem" ]; then
-      expiry=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/${domain}/cert.pem" 2>/dev/null | cut -d= -f2)
-    fi
-    echo "{\"success\":true,\"action\":\"enable-ssl\",\"domain\":\"${domain}\",\"ssl_expires_at\":\"${expiry}\"}"
-  else
-    json_error "Certbot failed for ${domain}. Check DNS configuration and rate limits."
+  local certbot_output
+  certbot_output=$(certbot --nginx -d "$domain" --non-interactive --agree-tos --register-unsafely-without-email --redirect 2>&1) || {
+    json_error "Certbot failed for ${domain}: ${certbot_output}"
+  }
+
+  # Extract expiry date
+  local expiry=""
+  if command -v openssl &>/dev/null && [ -f "/etc/letsencrypt/live/${domain}/cert.pem" ]; then
+    expiry=$(openssl x509 -enddate -noout -in "/etc/letsencrypt/live/${domain}/cert.pem" 2>/dev/null | cut -d= -f2)
   fi
+  echo "{\"success\":true,\"action\":\"enable-ssl\",\"domain\":\"${domain}\",\"ssl_expires_at\":\"${expiry}\"}"
 }
 
 action_list() {
@@ -417,8 +418,8 @@ action_update_panel() {
     json_error "Panel vhost not found at ${panel_vhost}"
   fi
 
-  # Update server_name in the panel vhost
-  sed -i "s/server_name .*/server_name ${domain};/" "$panel_vhost"
+  # Update server_name: keep catch-all _ so IP access still works
+  sed -i "s/server_name .*/server_name ${domain} _;/" "$panel_vhost"
 
   if ! nginx_test_and_reload; then
     # Rollback to catch-all

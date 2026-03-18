@@ -426,7 +426,9 @@
       "step2Desc": "Once the DNS record is configured, enter the domain and click Configure. This will update the Nginx configuration.",
       "step2Label": "Your domain",
       "step3Title": "Activate SSL",
-      "step3Desc": "After configuration, click \"Enable SSL\" to generate a free Let's Encrypt certificate. Your panel will restart and become available at https://yourdomain.com."
+      "step3Desc": "After configuration, click \"Enable SSL\" to generate a free Let's Encrypt certificate. Your panel will restart and become available at https://yourdomain.com.",
+      "sslSuccess": "SSL certificate activated! Your panel is now available via HTTPS.",
+      "goToPanel": "Open https://{{domain}}"
     },
     "java": {
       "title": "Java Runtimes",
