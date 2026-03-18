@@ -240,6 +240,7 @@ function AddJarSection({
       <FeatureCard.Header>
         <FeatureCard.Content>
           <FeatureCard.Title>{t('settings.addJar')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('settings.addJarDescription')}</FeatureCard.Description>
         </FeatureCard.Content>
         <FeatureCard.Actions>
           <button
@@ -408,6 +409,7 @@ function JarListSection({ jarsLoading, jars, activeJarFile, setActiveJar, delete
       <FeatureCard.Header>
         <FeatureCard.Content>
           <FeatureCard.Title count={jars && jars.length > 0 && jars.length}>{t('settings.availableJars')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('settings.availableJarsDescription')}</FeatureCard.Description>
         </FeatureCard.Content>
         {activeJarFile && (
           <FeatureCard.Actions>

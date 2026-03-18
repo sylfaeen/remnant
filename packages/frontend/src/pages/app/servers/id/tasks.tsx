@@ -34,6 +34,7 @@ import {
 } from '@remnant/frontend/hooks/use_tasks';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { CreateTaskDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_task_dialog';
+import { EditTaskDialog } from '@remnant/frontend/pages/app/servers/dialogs/edit_task_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
@@ -122,7 +123,7 @@ export function ServerTasksPage() {
             />
           )}
           {editingTask && (
-            <CreateTaskDialog
+            <EditTaskDialog
               task={editingTask}
               onSubmit={handleUpdateTask}
               onCancel={() => setEditingTask(null)}
@@ -187,10 +188,12 @@ function TasksSection({
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title count={tasks && tasks.length > 0 && `${enabledCount}/${tasks.length}`}>
-          {t('tasks.title')}
-        </FeatureCard.Title>
-        <FeatureCard.Description>{t('tasks.subtitle')}</FeatureCard.Description>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={tasks && tasks.length > 0 && `${enabledCount}/${tasks.length}`}>
+            {t('tasks.title')}
+          </FeatureCard.Title>
+          <FeatureCard.Description>{t('tasks.subtitle')}</FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>
         {tasksLoading ? (
@@ -200,7 +203,7 @@ function TasksSection({
             />
           </div>
         ) : !tasks || tasks.length === 0 ? (
-          <Empty />
+          <FeatureCard.Empty icon={Clock} title={t('tasks.noTasks')} description={t('tasks.createFirst')} />
         ) : (
           <>
             {tasks.map((task) => (
@@ -453,23 +456,6 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
         </div>
       )}
     </div>
-  );
-}
-
-function Empty() {
-  const { t } = useTranslation();
-
-  return (
-    <FeatureCard.Row className={'relative overflow-hidden'}>
-      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
-      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-          <Clock className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
-        </div>
-        <p className={'mt-6 font-medium'}>{t('tasks.noTasks')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('tasks.createFirst')}</p>
-      </FeatureCard.Stack>
-    </FeatureCard.Row>
   );
 }
 

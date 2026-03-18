@@ -1,4 +1,5 @@
 import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import { Badge } from '@remnant/frontend/features/ui/badge';
 
@@ -117,4 +118,26 @@ type FeatureCardStackProps = PropsWithChildren<ComponentProps<'div'>>;
 
 FeatureCard.Stack = function FeatureCardStack({ className, ...rest }: FeatureCardStackProps) {
   return <div className={cn('flex w-full flex-col gap-y-4', className)} {...rest} />;
+};
+
+type FeatureCardEmptyProps = PropsWithChildren<{
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}>;
+
+FeatureCard.Empty = function FeatureCardEmpty({ icon: Icon, title, description, children }: FeatureCardEmptyProps) {
+  return (
+    <FeatureCard.Row className={'relative overflow-hidden'}>
+      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
+      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
+        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
+          <Icon className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
+        </div>
+        <p className={'mt-6 font-medium'}>{title}</p>
+        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{description}</p>
+        {children}
+      </FeatureCard.Stack>
+    </FeatureCard.Row>
+  );
 };

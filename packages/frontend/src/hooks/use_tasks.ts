@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Archive, RotateCcw, Terminal } from 'lucide-react';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 
@@ -19,11 +20,13 @@ export interface TaskConfig {
   warn_seconds?: number;
 }
 
+export type TaskType = 'restart' | 'backup' | 'command';
+
 export interface ScheduledTask {
   id: number;
   server_id: number;
   name: string;
-  type: 'restart' | 'backup' | 'command';
+  type: TaskType;
   cron_expression: string;
   enabled: boolean;
   config: TaskConfig | null;
@@ -48,7 +51,7 @@ export function useTaskHistory(serverId: number, taskId: number | null, enabled:
 
 export interface CreateTaskInput {
   name: string;
-  type: 'restart' | 'backup' | 'command';
+  type: TaskType;
   cron_expression: string;
   enabled?: boolean;
   config?: TaskConfig;
@@ -239,3 +242,37 @@ export const CRON_PRESETS = [
   { label: 'Weekly (Sunday midnight)', value: '0 0 0 * * 0' },
   { label: 'Custom', value: '' },
 ] as const;
+
+export type TaskTypeOption = {
+  value: TaskType;
+  label: string;
+  description: string;
+  icon: typeof RotateCcw;
+  activeClass: string;
+};
+
+export function getTaskTypes(t: ReturnType<typeof useTranslation>['t']): Array<TaskTypeOption> {
+  return [
+    {
+      value: 'restart',
+      label: t('tasks.types.restart'),
+      description: t('tasks.types.restartDesc'),
+      icon: RotateCcw,
+      activeClass: 'border-amber-500/40 bg-amber-500/5',
+    },
+    {
+      value: 'backup',
+      label: t('tasks.types.backup'),
+      description: t('tasks.types.backupDesc'),
+      icon: Archive,
+      activeClass: 'border-emerald-600/40 bg-emerald-600/5',
+    },
+    {
+      value: 'command',
+      label: t('tasks.types.command'),
+      description: t('tasks.types.commandDesc'),
+      icon: Terminal,
+      activeClass: 'border-purple-500/40 bg-purple-500/5',
+    },
+  ];
+}

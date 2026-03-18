@@ -275,7 +275,10 @@ function JvmConfigSection({
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title>{t('settings.jvmConfig')}</FeatureCard.Title>
+        <FeatureCard.Content>
+          <FeatureCard.Title>{t('settings.jvmConfig')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('settings.jvmConfigDescription')}</FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body className={'space-y-6'}>
         <FeatureCard.Row>

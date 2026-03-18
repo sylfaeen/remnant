@@ -38,10 +38,12 @@ function JavaSection() {
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title count={javaVersions && javaVersions.length > 0 && javaVersions.length}>
-          {t('appSettings.java.title')}
-        </FeatureCard.Title>
-        <FeatureCard.Description>{t('appSettings.java.description')}</FeatureCard.Description>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={javaVersions && javaVersions.length > 0 && javaVersions.length}>
+            {t('appSettings.java.title')}
+          </FeatureCard.Title>
+          <FeatureCard.Description>{t('appSettings.java.description')}</FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>
         {isLoading ? (
@@ -93,8 +95,10 @@ function SystemdSection() {
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title>{t('appSettings.systemd.title')}</FeatureCard.Title>
-        <FeatureCard.Description>{t('appSettings.systemd.description')}</FeatureCard.Description>
+        <FeatureCard.Content>
+          <FeatureCard.Title>{t('appSettings.systemd.title')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('appSettings.systemd.description')}</FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>
         <FeatureCard.Row layout={'column'}>

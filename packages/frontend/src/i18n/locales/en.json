@@ -253,6 +253,7 @@
     "restartRequired": "Server restart required for changes to take effect",
     "deleteConfirm": "Are you sure you want to delete this plugin?",
     "addPlugin": "Add plugin",
+    "addPluginDescription": "Upload or drag and drop a plugin JAR file",
     "tooltipDisable": "Disable",
     "tooltipEnable": "Enable",
     "tooltipDelete": "Delete"
@@ -367,6 +368,7 @@
     "selectJar": "Select JAR",
     "downloadPaperMC": "Download PaperMC",
     "addJar": "Add JAR",
+    "addJarDescription": "Import a JAR file or download one from PaperMC",
     "jarUpload": {
       "tab": "Import",
       "dragDrop": "Drag and drop your JAR file here",
@@ -380,6 +382,7 @@
     "buildOptional": "Build (optional)",
     "latestBuild": "Latest build",
     "availableJars": "Available JAR files",
+    "availableJarsDescription": "Manage and activate server JAR files",
     "noJarsFound": "No JAR files found in server folder",
     "active": "Active",
     "activate": "Activate",
@@ -389,6 +392,7 @@
     "downloadError": "Error downloading",
     "memorySettings": "Memory Settings",
     "jvmConfig": "JVM Configuration",
+    "jvmConfigDescription": "Memory allocation and JVM flags",
     "jvmSettings": "JVM Settings",
     "minRam": "Minimum RAM (-Xms)",
     "maxRam": "Maximum RAM (-Xmx)",

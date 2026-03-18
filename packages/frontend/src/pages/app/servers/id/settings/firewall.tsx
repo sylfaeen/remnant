@@ -106,7 +106,16 @@ export function ServerSettingsFirewallPage() {
             </FeatureCard.Header>
             <FeatureCard.Body>
               {rules.length === 0 ? (
-                <Empty {...{ setDialogOpen }} />
+                <FeatureCard.Empty
+                  icon={Clock}
+                  title={t('settings.firewall.noRules')}
+                  description={t('settings.firewall.noRulesHint')}
+                >
+                  <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={() => setDialogOpen(true)}>
+                    <Plus className={'size-3.5'} />
+                    {t('settings.firewall.addRule')}
+                  </Button>
+                </FeatureCard.Empty>
               ) : (
                 <>
                   {rules.map((rule) => (
@@ -242,31 +251,6 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
           </>
         )}
       </FeatureCard.RowControl>
-    </FeatureCard.Row>
-  );
-}
-
-type EmptyProps = {
-  setDialogOpen: (open: boolean) => void;
-};
-
-function Empty({ setDialogOpen }: EmptyProps) {
-  const { t } = useTranslation();
-
-  return (
-    <FeatureCard.Row className={'relative overflow-hidden'}>
-      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
-      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-          <Clock className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
-        </div>
-        <p className={'mt-6 font-medium'}>{t('settings.firewall.noRules')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.firewall.noRulesHint')}</p>
-        <Button variant={'secondary'} size={'sm'} className={'mt-4'} onClick={() => setDialogOpen(true)}>
-          <Plus className={'size-3.5'} />
-          {t('settings.firewall.addRule')}
-        </Button>
-      </FeatureCard.Stack>
     </FeatureCard.Row>
   );
 }

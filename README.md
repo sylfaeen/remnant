@@ -47,12 +47,23 @@ git branch -M main
 git push -u origin main
 ```
 
-### 6. Test
+### 6. Sync & Release
+
+Synchroniser le code vers le repo public (sans release) :
 
 ```bash
 gh workflow run sync-public.yml --repo sylfaeen/remnant-private
 gh run watch --repo sylfaeen/remnant-private
 ```
+
+Publier une nouvelle release (bump version, build, tag, release GitHub, puis sync public) :
+
+```bash
+gh workflow run release.yml --repo sylfaeen/remnant-private -f bump=patch
+gh run watch --repo sylfaeen/remnant-private
+```
+
+> `bump` accepte `patch`, `minor`, `major` ou `auto` (détection automatique via les commits conventionnels).
 
 ## Conventional Commits
 

@@ -169,7 +169,7 @@ function BackupsSection({
             />
           </div>
         ) : !backups || backups.length === 0 ? (
-          <Empty />
+          <FeatureCard.Empty icon={Archive} title={t('backups.noBackups')} description={t('backups.createFirst')} />
         ) : (
           <>
             {backups.map((backup, index) => (
@@ -182,23 +182,6 @@ function BackupsSection({
         )}
       </FeatureCard.Body>
     </FeatureCard>
-  );
-}
-
-function Empty() {
-  const { t } = useTranslation();
-
-  return (
-    <FeatureCard.Row className={'relative overflow-hidden'}>
-      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
-      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-          <Archive className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
-        </div>
-        <p className={'mt-6 font-medium'}>{t('backups.noBackups')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('backups.createFirst')}</p>
-      </FeatureCard.Stack>
-    </FeatureCard.Row>
   );
 }
 

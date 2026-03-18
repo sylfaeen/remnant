@@ -238,6 +238,7 @@
     "restartRequired": "Redémarrage du serveur requis pour appliquer les changements",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce plugin ?",
     "addPlugin": "Ajouter un plugin",
+    "addPluginDescription": "Importez ou glissez-déposez un fichier JAR de plugin",
     "tooltipDisable": "Désactiver",
     "tooltipEnable": "Activer",
     "tooltipDelete": "Supprimer"
@@ -352,6 +353,7 @@
     "selectJar": "Sélectionner le JAR",
     "downloadPaperMC": "Télécharger PaperMC",
     "addJar": "Ajouter un JAR",
+    "addJarDescription": "Importez un fichier JAR ou téléchargez-en un depuis PaperMC",
     "jarUpload": {
       "tab": "Importer",
       "dragDrop": "Glissez-déposez votre fichier JAR ici",
@@ -365,6 +367,7 @@
     "buildOptional": "Build (optionnel)",
     "latestBuild": "Dernière build",
     "availableJars": "Fichiers JAR disponibles",
+    "availableJarsDescription": "Gérez et activez les fichiers JAR du serveur",
     "noJarsFound": "Aucun fichier JAR trouvé dans le dossier du serveur",
     "active": "Actif",
     "activate": "Activer",
@@ -374,6 +377,7 @@
     "downloadError": "Erreur lors du téléchargement",
     "memorySettings": "Paramètres mémoire",
     "jvmConfig": "Configuration JVM",
+    "jvmConfigDescription": "Allocation mémoire et flags JVM",
     "jvmSettings": "Paramètres JVM",
     "minRam": "RAM minimum (-Xms)",
     "maxRam": "RAM maximum (-Xmx)",

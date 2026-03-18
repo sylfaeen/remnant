@@ -160,7 +160,10 @@ function UploadSection({
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title>{t('plugins.addPlugin', 'Add plugin')}</FeatureCard.Title>
+        <FeatureCard.Content>
+          <FeatureCard.Title>{t('plugins.addPlugin', 'Add plugin')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('plugins.addPluginDescription')}</FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body
         className={cn(
@@ -238,12 +241,14 @@ function PluginListSection({ pluginsLoading, plugins, enabledCount, togglePlugin
   return (
     <FeatureCard>
       <FeatureCard.Header>
-        <FeatureCard.Title count={plugins && plugins.length > 0 && `${enabledCount}/${plugins.length}`}>
-          {t('plugins.installed')}
-        </FeatureCard.Title>
-        <FeatureCard.Description>
-          {t('plugins.uploadFirst', 'Upload your first plugin to extend your server')}
-        </FeatureCard.Description>
+        <FeatureCard.Content>
+          <FeatureCard.Title count={plugins && plugins.length > 0 && `${enabledCount}/${plugins.length}`}>
+            {t('plugins.installed')}
+          </FeatureCard.Title>
+          <FeatureCard.Description>
+            {t('plugins.uploadFirst', 'Upload your first plugin to extend your server')}
+          </FeatureCard.Description>
+        </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>
         {pluginsLoading ? (
@@ -253,7 +258,7 @@ function PluginListSection({ pluginsLoading, plugins, enabledCount, togglePlugin
             />
           </div>
         ) : !plugins || plugins.length === 0 ? (
-          <Empty />
+          <FeatureCard.Empty icon={Puzzle} title={t('plugins.noPlugins')} description={t('plugins.uploadFirst')} />
         ) : (
           <>
             {plugins.map((plugin) => (
@@ -390,23 +395,6 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
           </>
         )}
       </FeatureCard.RowControl>
-    </FeatureCard.Row>
-  );
-}
-
-function Empty() {
-  const { t } = useTranslation();
-
-  return (
-    <FeatureCard.Row className={'relative overflow-hidden'}>
-      <div className={'absolute inset-0 bg-linear-to-b from-gray-400/10 to-transparent'} />
-      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
-        <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-          <Puzzle className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
-        </div>
-        <p className={'mt-6 font-medium'}>{t('plugins.noPlugins')}</p>
-        <p className={'mt-0.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.uploadFirst')}</p>
-      </FeatureCard.Stack>
     </FeatureCard.Row>
   );
 }

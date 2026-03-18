@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarClock } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import { Input } from '@remnant/frontend/features/ui/input';
 import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
@@ -13,18 +13,20 @@ import {
   CRON_PRESETS,
   getTaskTypes,
   type CreateTaskInput,
+  type ScheduledTask,
   type TaskConfig,
   type TaskType,
 } from '@remnant/frontend/hooks/use_tasks';
 
-type CreateTaskDialogProps = {
+type EditTaskDialogProps = {
   serverId: number;
+  task: ScheduledTask;
   onSubmit: (input: CreateTaskInput) => Promise<void>;
   onCancel: () => void;
   isLoading: boolean;
 };
 
-export function CreateTaskDialog({ serverId, onSubmit, onCancel, isLoading }: CreateTaskDialogProps) {
+export function EditTaskDialog({ serverId, task, onSubmit, onCancel, isLoading }: EditTaskDialogProps) {
   const { t } = useTranslation();
 
   return (
@@ -37,22 +39,22 @@ export function CreateTaskDialog({ serverId, onSubmit, onCancel, isLoading }: Cr
       <Dialog.Content className={'max-w-2xl'}>
         <Dialog.Header>
           <Dialog.Icon className={'bg-cyan-600/10 text-cyan-600'}>
-            <CalendarClock className={'size-5'} strokeWidth={1.75} />
+            <Pencil className={'size-5'} strokeWidth={1.75} />
           </Dialog.Icon>
           <div>
-            <Dialog.Title>{t('tasks.newTask')}</Dialog.Title>
+            <Dialog.Title>{t('tasks.editTask')}</Dialog.Title>
             <Dialog.Description>{t('tasks.subtitle')}</Dialog.Description>
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <CreateTaskForm {...{ serverId, onSubmit, isLoading }} />
+          <EditTaskForm {...{ serverId, task, onSubmit, isLoading }} />
         </Dialog.Body>
         <Dialog.Footer>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
             {t('common.cancel')}
           </Button>
-          <Button type={'submit'} form={'create-task-form'} disabled={isLoading} loading={isLoading}>
-            {isLoading ? t('tasks.creating') : t('tasks.createTask')}
+          <Button type={'submit'} form={'edit-task-form'} disabled={isLoading} loading={isLoading}>
+            {isLoading ? t('tasks.saving') : t('tasks.saveTask')}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>
@@ -60,37 +62,27 @@ export function CreateTaskDialog({ serverId, onSubmit, onCancel, isLoading }: Cr
   );
 }
 
-type CreateTaskFormProps = {
+type EditTaskFormProps = {
   serverId: number;
+  task: ScheduledTask;
   onSubmit: (input: CreateTaskInput) => Promise<void>;
   isLoading: boolean;
 };
 
-function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
+function EditTaskForm({ serverId, task, onSubmit }: EditTaskFormProps) {
   const { t } = useTranslation();
 
-  const defaultNames: Record<TaskType, string> = {
-    restart: t('tasks.defaultName.restart'),
-    backup: t('tasks.defaultName.backup'),
-    command: t('tasks.defaultName.command'),
-  };
+  const initialCronPreset = CRON_PRESETS.some((p) => p.value === task.cron_expression) ? task.cron_expression : '';
 
-  const [taskName, setTaskName] = useState(defaultNames.restart);
-  const [taskType, setTaskType] = useState<TaskType>('restart');
-  const [cronPreset, setCronPreset] = useState('0 0 4 * * *');
-  const [customCron, setCustomCron] = useState('');
-  const [command, setCommand] = useState('');
-  const [backupPaths, setBackupPaths] = useState<Set<string>>(() => new Set());
-  const [warnPlayers, setWarnPlayers] = useState(true);
-  const [warnMessage, setWarnMessage] = useState('The server will restart in 30 seconds...');
-  const [warnSeconds, setWarnSeconds] = useState(30);
-
-  const handleTypeChange = (type: TaskType) => {
-    setTaskType(type);
-    if (!taskName || Object.values(defaultNames).includes(taskName)) {
-      setTaskName(defaultNames[type]);
-    }
-  };
+  const [taskName, setTaskName] = useState(task.name);
+  const [taskType, setTaskType] = useState<TaskType>(task.type as TaskType);
+  const [cronPreset, setCronPreset] = useState(initialCronPreset);
+  const [customCron, setCustomCron] = useState(initialCronPreset === '' ? task.cron_expression : '');
+  const [command, setCommand] = useState(task.config?.command ?? '');
+  const [backupPaths, setBackupPaths] = useState<Set<string>>(() => new Set(task.config?.backup_paths ?? []));
+  const [warnPlayers, setWarnPlayers] = useState(task.config?.warn_players ?? true);
+  const [warnMessage, setWarnMessage] = useState(task.config?.warn_message ?? 'The server will restart in 30 seconds...');
+  const [warnSeconds, setWarnSeconds] = useState(task.config?.warn_seconds ?? 30);
 
   const taskTypes = getTaskTypes(t);
 
@@ -120,13 +112,13 @@ function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
       name: taskName,
       type: taskType,
       cron_expression: cronExpression,
-      enabled: true,
+      enabled: task.enabled,
       config,
     }).then();
   };
 
   return (
-    <form id={'create-task-form'} onSubmit={handleSubmit}>
+    <form id={'edit-task-form'} onSubmit={handleSubmit}>
       <div className={'space-y-5'}>
         <div>
           <Label htmlFor={'task-name'}>{t('tasks.taskName')}</Label>
@@ -149,7 +141,7 @@ function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
                 <button
                   key={type.value}
                   type={'button'}
-                  onClick={() => handleTypeChange(type.value)}
+                  onClick={() => setTaskType(type.value)}
                   className={cn(
                     'rounded-lg border p-3 text-left transition-all',
                     isActive
