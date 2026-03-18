@@ -166,4 +166,28 @@ export const domainsRouter = router({
   ensureTimer: adminOnly.query(async () => {
     return domainService.ensureCertbotTimer();
   }),
+
+  ipAccess: adminOnly.query(async () => {
+    const enabled = await domainService.getIpAccessStatus();
+    return { enabled };
+  }),
+
+  setIpAccess: adminLimited.input(z.object({ enabled: z.boolean() })).mutation(async ({ input, ctx }) => {
+    try {
+      const result = await domainService.setIpAccess(input.enabled);
+
+      await auditService.log({
+        userId: ctx.user.sub,
+        username: ctx.user.username,
+        action: input.enabled ? 'enable-ip-access' : 'disable-ip-access',
+        resourceType: 'domain',
+        ip: ctx.req.ip,
+      });
+
+      return result;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update IP access';
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message });
+    }
+  }),
 });

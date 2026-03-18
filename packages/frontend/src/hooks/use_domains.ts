@@ -156,3 +156,28 @@ export function useEnablePanelSsl() {
     mutateAsync: (id: number) => mutation.mutateAsync({ id }),
   };
 }
+
+export function useIpAccess() {
+  return trpc.domains.ipAccess.useQuery();
+}
+
+export function useSetIpAccess() {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const utils = trpc.useUtils();
+
+  const mutation = trpc.domains.setIpAccess.useMutation({
+    onSuccess: (_, input) => {
+      utils.domains.ipAccess.invalidate().then();
+      addToast({
+        type: 'success',
+        title: input.enabled ? t('toast.ipAccessEnabled') : t('toast.ipAccessDisabled'),
+      });
+    },
+    onError: (error) => {
+      addToast({ type: 'error', title: t('toast.ipAccessError'), description: error.message });
+    },
+  });
+
+  return mutation;
+}

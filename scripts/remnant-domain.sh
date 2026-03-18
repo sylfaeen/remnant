@@ -22,8 +22,8 @@ json_error()   { echo "{\"success\":false,\"error\":\"$1\"}" >&2; exit 1; }
 # === Input validation ===
 validate_action() {
   local action="$1"
-  if ! [[ "$action" =~ ^(add|remove|enable-ssl|dns-check|list|renew|check-expiry|ensure-timer|update-panel|reset-panel)$ ]]; then
-    json_error "Invalid action: must be add, remove, enable-ssl, dns-check, list, renew, check-expiry, ensure-timer, update-panel, or reset-panel"
+  if ! [[ "$action" =~ ^(add|remove|enable-ssl|dns-check|list|renew|check-expiry|ensure-timer|update-panel|reset-panel|enable-fallback|disable-fallback|fallback-status)$ ]]; then
+    json_error "Invalid action"
   fi
 }
 
@@ -518,6 +518,71 @@ PANEL_VHOST
   echo "{\"success\":true,\"action\":\"reset-panel\"}"
 }
 
+action_enable_fallback() {
+  local panel_vhost="${SITES_AVAILABLE}/remnant"
+  if [ ! -f "$panel_vhost" ]; then
+    json_error "Panel vhost not found"
+  fi
+
+  local fallback_vhost="${SITES_AVAILABLE}/remnant-fallback"
+  if [ -f "$fallback_vhost" ]; then
+    echo "{\"success\":true,\"ip_access\":true,\"note\":\"Already enabled\"}"
+    exit 0
+  fi
+
+  local port
+  port=$(grep -oP 'proxy_pass http://127\.0\.0\.1:\K[0-9]+' "$panel_vhost" | head -1)
+  port="${port:-3001}"
+
+  cat > "$fallback_vhost" << FALLBACK
+server {
+    listen 80 default_server;
+    server_name _;
+    client_max_body_size 256M;
+
+    location / {
+        proxy_pass http://127.0.0.1:${port};
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location /ws/ {
+        proxy_pass http://127.0.0.1:${port};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+FALLBACK
+  ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
+
+  if ! nginx_test_and_reload; then
+    rm -f "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
+    json_error "Nginx test failed after enabling IP access"
+  fi
+
+  echo "{\"success\":true,\"ip_access\":true}"
+}
+
+action_disable_fallback() {
+  rm -f "${SITES_ENABLED}/remnant-fallback" "${SITES_AVAILABLE}/remnant-fallback"
+  nginx_test_and_reload || true
+  echo "{\"success\":true,\"ip_access\":false}"
+}
+
+action_fallback_status() {
+  if [ -f "${SITES_AVAILABLE}/remnant-fallback" ]; then
+    echo "{\"ip_access\":true}"
+  else
+    echo "{\"ip_access\":false}"
+  fi
+}
+
 # === Main ===
 ACTION="${1:-}"
 [ -n "$ACTION" ] || json_error "Usage: $0 <add|remove|enable-ssl|dns-check|list|renew|update-panel|reset-panel> [args...]"
@@ -568,5 +633,14 @@ case "$ACTION" in
     ;;
   reset-panel)
     action_reset_panel
+    ;;
+  enable-fallback)
+    action_enable_fallback
+    ;;
+  disable-fallback)
+    action_disable_fallback
+    ;;
+  fallback-status)
+    action_fallback_status
     ;;
 esac

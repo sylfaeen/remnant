@@ -22,6 +22,8 @@ import {
   useSetPanelDomain,
   useRemovePanelDomain,
   useEnablePanelSsl,
+  useIpAccess,
+  useSetIpAccess,
   useServerIp,
 } from '@remnant/frontend/hooks/use_domains';
 import { Button } from '@remnant/frontend/features/ui/button';
@@ -53,9 +55,11 @@ function PanelDomainSection() {
   const [sslJustEnabled, setSslJustEnabled] = useState(false);
 
   const { data: panelData } = usePanelDomain();
+  const { data: ipAccessData } = useIpAccess();
   const setPanelDomain = useSetPanelDomain();
   const removePanelDomain = useRemovePanelDomain();
   const enableSsl = useEnablePanelSsl();
+  const setIpAccess = useSetIpAccess();
   const serverIp = useServerIp();
 
   const panelDomain = panelData?.domain ?? null;
@@ -174,7 +178,7 @@ function PanelDomainSection() {
                 )}
               </FeatureCard.RowControl>
             </FeatureCard.Row>
-            <div className={'border-t border-black/6 px-5 pt-3 pb-4 dark:border-white/6'}>
+            <div className={'border-t border-black/6 px-5 py-4 dark:border-white/6'}>
               <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
                 <div className={'flex items-center justify-between'}>
                   <div className={'font-jetbrains text-sm'}>
@@ -197,6 +201,31 @@ function PanelDomainSection() {
                 <AlertTriangle className={'size-3.5 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
                 <p className={'text-sm text-amber-800 dark:text-amber-200'}>{t('appSettings.panelDomain.restartWarning')}</p>
               </div>
+              {panelDomain.ssl_enabled && (
+                <div
+                  className={
+                    'mt-3 flex items-center justify-between rounded-lg border border-black/6 bg-zinc-50/50 px-3 py-2.5 dark:border-white/6 dark:bg-zinc-800/50'
+                  }
+                >
+                  <div>
+                    <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
+                      {t('appSettings.panelDomain.ipAccess')}
+                    </p>
+                    <p className={'text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.panelDomain.ipAccessDesc')}</p>
+                  </div>
+                  <Button
+                    variant={ipAccessData?.enabled ? 'secondary' : 'success'}
+                    size={'xs'}
+                    disabled={setIpAccess.isPending}
+                    loading={setIpAccess.isPending}
+                    onClick={() => setIpAccess.mutateAsync({ enabled: !ipAccessData?.enabled })}
+                  >
+                    {ipAccessData?.enabled
+                      ? t('appSettings.panelDomain.disableIpAccess')
+                      : t('appSettings.panelDomain.enableIpAccess')}
+                  </Button>
+                </div>
+              )}
               {sslJustEnabled && panelDomain.ssl_enabled && (
                 <div className={'mt-3 rounded-lg border border-green-500/20 bg-green-50/50 p-3 dark:bg-green-950/20'}>
                   <div className={'flex items-center gap-2'}>

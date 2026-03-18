@@ -299,7 +299,7 @@ function DnsHelper({ domain, type, serverIp }: DnsHelperProps) {
   };
 
   return (
-    <div className={'border-t border-black/6 px-5 pt-3 pb-4 dark:border-white/6'}>
+    <div className={'border-t border-black/6 px-5 py-4 dark:border-white/6'}>
       <div className={'text-sm font-medium text-zinc-600 dark:text-zinc-400'}>{t('settings.domains.dnsRecords')}</div>
       <div className={'mt-2 space-y-2'}>
         <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
