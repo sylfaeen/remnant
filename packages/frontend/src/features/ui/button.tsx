@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@remnant/frontend/lib/cn';
+import { Loader2, LucideIcon } from 'lucide-react';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors focus-visible:outline-none relative focus-visible:ring-transparent disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
@@ -44,11 +45,31 @@ const buttonVariants = cva(
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
+  icon?: LucideIcon;
 }
 
-export function Button({ className, variant, size, asChild = false, loading = false, disabled, ...props }: ButtonProps) {
+export function Button({
+  className,
+  variant,
+  size,
+  icon: IconComponent,
+  asChild = false,
+  loading = false,
+  disabled,
+  children,
+  ...rest
+}: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
   const isDisabled = disabled || loading;
 
-  return <Comp className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...props} />;
+  return (
+    <Comp className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...rest}>
+      {loading ? (
+        <Loader2 className={'size-4 animate-spin'} />
+      ) : IconComponent ? (
+        <IconComponent className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
+      ) : null}
+      {children}
+    </Comp>
+  );
 }

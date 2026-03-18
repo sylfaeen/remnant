@@ -49,6 +49,7 @@ function getServerNavSections(serverId: string, serverName: string): Array<Sideb
             { key: 'settingsJars', path: `${basePath}/settings/jars` },
             { key: 'settingsJvm', path: `${basePath}/settings/jvm` },
             { key: 'settingsFirewall', path: `${basePath}/settings/firewall` },
+            { key: 'settingsDomains', path: `${basePath}/settings/domains` },
           ],
         },
         { key: 'docs', path: '/app/docs', icon: BookOpen, bottom: true },

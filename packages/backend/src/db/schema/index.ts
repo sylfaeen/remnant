@@ -7,3 +7,4 @@ export * from './firewall_rules';
 export * from './user_totp';
 export * from './recovery_codes';
 export * from './audit_logs';
+export * from './custom_domains';

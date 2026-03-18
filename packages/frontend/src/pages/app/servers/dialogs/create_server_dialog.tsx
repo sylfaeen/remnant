@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { Dialog } from '@remnant/frontend/features/ui/dialog';
@@ -33,11 +33,6 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
   const [javaPort, setJavaPort] = useState(25565);
   const [autoStart, setAutoStart] = useState(true);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit({ name, min_ram: minRam, max_ram: maxRam, jvm_flags: jvmFlags, java_port: javaPort, auto_start: autoStart });
-  };
-
   return (
     <Dialog
       open={true}
@@ -57,73 +52,26 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
             </Dialog.Description>
           </div>
         </Dialog.Header>
-        <form id={'create-server'} onSubmit={handleSubmit}>
-          <Dialog.Body>
-            {error && <Dialog.Error>{error}</Dialog.Error>}
-            <div>
-              <Label htmlFor={'name'}>{t('servers.serverName')} *</Label>
-              <Input
-                type={'text'}
-                id={'name'}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('servers.serverNamePlaceholder')}
-                required
-              />
-              <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
-                {t('servers.nameHint', 'The server directory and files will be created automatically')}
-              </p>
-            </div>
-            <div className={'grid grid-cols-2 gap-4'}>
-              <div>
-                <Label htmlFor={'minRam'}>{t('servers.minRam')}</Label>
-                <Input
-                  type={'text'}
-                  id={'minRam'}
-                  value={minRam}
-                  onChange={(e) => setMinRam(e.target.value)}
-                  placeholder={'2G'}
-                />
-              </div>
-              <div>
-                <Label htmlFor={'maxRam'}>{t('servers.maxRam')}</Label>
-                <Input
-                  type={'text'}
-                  id={'maxRam'}
-                  value={maxRam}
-                  onChange={(e) => setMaxRam(e.target.value)}
-                  placeholder={'4G'}
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor={'javaPort'}>{t('servers.port')}</Label>
-              <Input
-                type={'number'}
-                id={'javaPort'}
-                value={javaPort}
-                onChange={(e) => setJavaPort(parseInt(e.target.value, 10))}
-                min={1024}
-                max={65535}
-                className={'w-32'}
-              />
-            </div>
-            <div>
-              <Label htmlFor={'jvmFlags'}>{t('servers.jvmFlagsAdditional')}</Label>
-              <Input
-                type={'text'}
-                id={'jvmFlags'}
-                value={jvmFlags}
-                onChange={(e) => setJvmFlags(e.target.value)}
-                placeholder={'-XX:+UseG1GC'}
-              />
-            </div>
-            <Label className={'flex cursor-pointer items-center gap-2'}>
-              <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
-              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</span>
-            </Label>
-          </Dialog.Body>
-        </form>
+        <Dialog.Body>
+          <CreateServerForm
+            {...{
+              name,
+              setName,
+              minRam,
+              setMinRam,
+              maxRam,
+              setMaxRam,
+              jvmFlags,
+              setJvmFlags,
+              javaPort,
+              setJavaPort,
+              autoStart,
+              setAutoStart,
+              error,
+              onSubmit,
+            }}
+          />
+        </Dialog.Body>
         <Dialog.Footer>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
             {t('common.cancel')}
@@ -134,5 +82,100 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
         </Dialog.Footer>
       </Dialog.Content>
     </Dialog>
+  );
+}
+
+type CreateServerFormProps = Pick<CreateServerDialogProps, 'onSubmit' | 'error'> & {
+  name: string;
+  setName: (name: string) => void;
+  minRam: string;
+  setMinRam: (minRam: string) => void;
+  maxRam: string;
+  setMaxRam: (maxRam: string) => void;
+  jvmFlags: string;
+  setJvmFlags: (jvmFlags: string) => void;
+  javaPort: number;
+  setJavaPort: (javaPort: number) => void;
+  autoStart: boolean;
+  setAutoStart: (autoStart: boolean) => void;
+};
+
+function CreateServerForm({
+  name,
+  setName,
+  minRam,
+  setMinRam,
+  maxRam,
+  setMaxRam,
+  jvmFlags,
+  setJvmFlags,
+  javaPort,
+  setJavaPort,
+  autoStart,
+  setAutoStart,
+  error,
+  onSubmit,
+}: CreateServerFormProps) {
+  const { t } = useTranslation();
+
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSubmit({ name, min_ram: minRam, max_ram: maxRam, jvm_flags: jvmFlags, java_port: javaPort, auto_start: autoStart });
+  };
+
+  return (
+    <form id={'create-server'} className={'space-y-6'} onSubmit={handleSubmit}>
+      {error && <Dialog.Error>{error}</Dialog.Error>}
+      <div>
+        <Label htmlFor={'name'}>{t('servers.serverName')} *</Label>
+        <Input
+          type={'text'}
+          id={'name'}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t('servers.serverNamePlaceholder')}
+          required
+        />
+        <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
+          {t('servers.nameHint', 'The server directory and files will be created automatically')}
+        </p>
+      </div>
+      <div className={'grid grid-cols-2 gap-4'}>
+        <div>
+          <Label htmlFor={'minRam'}>{t('servers.minRam')}</Label>
+          <Input type={'text'} id={'minRam'} value={minRam} onChange={(e) => setMinRam(e.target.value)} placeholder={'2G'} />
+        </div>
+        <div>
+          <Label htmlFor={'maxRam'}>{t('servers.maxRam')}</Label>
+          <Input type={'text'} id={'maxRam'} value={maxRam} onChange={(e) => setMaxRam(e.target.value)} placeholder={'4G'} />
+        </div>
+      </div>
+      <div>
+        <Label htmlFor={'javaPort'}>{t('servers.port')}</Label>
+        <Input
+          type={'number'}
+          id={'javaPort'}
+          value={javaPort}
+          onChange={(e) => setJavaPort(parseInt(e.target.value, 10))}
+          min={1024}
+          max={65535}
+          className={'w-32'}
+        />
+      </div>
+      <div>
+        <Label htmlFor={'jvmFlags'}>{t('servers.jvmFlagsAdditional')}</Label>
+        <Input
+          type={'text'}
+          id={'jvmFlags'}
+          value={jvmFlags}
+          onChange={(e) => setJvmFlags(e.target.value)}
+          placeholder={'-XX:+UseG1GC'}
+        />
+      </div>
+      <Label className={'flex cursor-pointer items-center gap-2'}>
+        <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
+        <span className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</span>
+      </Label>
+    </form>
   );
 }

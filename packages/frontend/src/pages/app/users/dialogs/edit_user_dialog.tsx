@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pencil } from 'lucide-react';
 import { AVAILABLE_PERMISSIONS, type UserResponse } from '@remnant/shared';
@@ -42,7 +42,7 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data: EditUserFormData = { username, permissions };
     if (password) {

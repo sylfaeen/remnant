@@ -225,25 +225,6 @@ download_and_replace() {
         print_ok "CLI updated"
     fi
 
-    # Firewall script
-    if [[ -f "$APP_DIR/scripts/remnant-firewall.sh" ]]; then
-        chmod +x "$APP_DIR/scripts/remnant-firewall.sh"
-        print_ok "Firewall script updated"
-
-        local sudoers_file="/etc/sudoers.d/remnant-firewall"
-        local sudoers_line="${SERVICE_USER} ALL=(ALL) NOPASSWD: ${APP_DIR}/scripts/remnant-firewall.sh"
-        if [[ ! -f "$sudoers_file" ]] || ! grep -qF "$sudoers_line" "$sudoers_file"; then
-            echo "$sudoers_line" > "$sudoers_file"
-            chmod 0440 "$sudoers_file"
-            if visudo -c -f "$sudoers_file" >/dev/null 2>&1; then
-                print_ok "Sudoers configured for firewall script"
-            else
-                rm -f "$sudoers_file"
-                print_warn "Sudoers validation failed — firewall management disabled"
-            fi
-        fi
-    fi
-
     # Permissions
     chown -R "$SERVICE_USER:$SERVICE_USER" "$REMNANT_HOME"
     chmod 600 "$APP_DIR/.env"

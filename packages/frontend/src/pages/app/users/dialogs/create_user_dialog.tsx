@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserPlus } from 'lucide-react';
 import { AVAILABLE_PERMISSIONS } from '@remnant/shared';
@@ -41,7 +41,7 @@ export function CreateUserDialog({ onSubmit, onCancel, isLoading, error }: Creat
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit({ username, password, permissions }).then();
   };

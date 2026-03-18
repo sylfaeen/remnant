@@ -126,149 +126,137 @@ function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
   };
 
   return (
-    <form id={'create-task-form'} onSubmit={handleSubmit}>
-      <div className={'space-y-5'}>
-        <div>
-          <Label htmlFor={'task-name'}>{t('tasks.taskName')}</Label>
-          <Input
-            name={'task-name'}
-            type={'text'}
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-            required
-            placeholder={t('tasks.taskNamePlaceholder')}
-          />
-        </div>
-        <div>
-          <label className={'mb-2 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>{t('tasks.taskType')}</label>
-          <div className={'grid grid-cols-3 gap-2'}>
-            {taskTypes.map((type) => {
-              const Icon = type.icon;
-              const isActive = taskType === type.value;
-              return (
-                <button
-                  key={type.value}
-                  type={'button'}
-                  onClick={() => handleTypeChange(type.value)}
+    <form id={'create-task-form'} className={'space-y-6'} onSubmit={handleSubmit}>
+      <div>
+        <Label htmlFor={'task-name'}>{t('tasks.taskName')}</Label>
+        <Input
+          name={'task-name'}
+          type={'text'}
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+          required
+          placeholder={t('tasks.taskNamePlaceholder')}
+        />
+      </div>
+      <div>
+        <Label>{t('tasks.taskType')}</Label>
+        <div className={'grid grid-cols-3 gap-2'}>
+          {taskTypes.map((type) => {
+            const Icon = type.icon;
+            const isActive = taskType === type.value;
+            return (
+              <button
+                key={type.value}
+                type={'button'}
+                onClick={() => handleTypeChange(type.value)}
+                className={cn(
+                  'rounded-lg border p-3 text-left transition-all',
+                  isActive
+                    ? type.activeClass
+                    : 'border-black/6 bg-zinc-50/50 text-zinc-600 hover:border-black/12 hover:bg-zinc-50 dark:border-white/6 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:border-white/12 dark:hover:bg-zinc-800'
+                )}
+              >
+                <Icon
                   className={cn(
-                    'rounded-lg border p-3 text-left transition-all',
-                    isActive
-                      ? type.activeClass
-                      : 'border-black/6 bg-zinc-50/50 text-zinc-600 hover:border-black/12 hover:bg-zinc-50 dark:border-white/6 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:border-white/12 dark:hover:bg-zinc-800'
+                    'mb-2 size-4 transition-colors',
+                    isActive ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
+                  )}
+                  strokeWidth={2}
+                />
+                <div
+                  className={cn(
+                    'text-sm font-medium',
+                    isActive ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      'mb-2 size-4 transition-colors',
-                      isActive ? 'text-zinc-700 dark:text-zinc-300' : 'text-zinc-600 dark:text-zinc-400'
-                    )}
-                    strokeWidth={2}
-                  />
-                  <div
-                    className={cn(
-                      'text-sm font-medium',
-                      isActive ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-600 dark:text-zinc-400'
-                    )}
-                  >
-                    {type.label}
-                  </div>
-                  <div className={'mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400'}>{type.description}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        <div>
-          <Label htmlFor={'cron-preset'}>{t('tasks.schedule')}</Label>
-          <Select name={'cron-preset'} value={cronPreset} onChange={(e) => setCronPreset(e.target.value)}>
-            {CRON_PRESETS.map((preset) => (
-              <option key={preset.value} value={preset.value}>
-                {preset.label}
-              </option>
-            ))}
-          </Select>
-        </div>
-        {cronPreset === '' && (
-          <div>
-            <Label htmlFor={'custom-cron'}>{t('tasks.customCron')}</Label>
-            <Input
-              name={'custom-cron'}
-              type={'text'}
-              value={customCron}
-              onChange={(e) => setCustomCron(e.target.value)}
-              placeholder={'* * * * *'}
-              className={'font-jetbrains'}
-            />
-            <p className={'mt-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('tasks.cronFormat')}</p>
-          </div>
-        )}
-        {taskType === 'command' && (
-          <div>
-            <Label htmlFor={'command'}>{t('tasks.commandToExecute')}</Label>
-            <Input
-              name={'command'}
-              type={'text'}
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              required
-              placeholder={t('tasks.commandPlaceholder')}
-              className={'font-jetbrains'}
-            />
-          </div>
-        )}
-        {taskType === 'backup' && (
-          <div>
-            <Label htmlFor={'backup-paths'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
-              {t('backups.dialogDescription')}
-            </Label>
-            <FileTreeSelector
-              enabled={true}
-              selectedPaths={backupPaths}
-              onSelectedPathsChange={setBackupPaths}
-              {...{ serverId }}
-            />
-          </div>
-        )}
-        {taskType === 'restart' && (
-          <div className={'space-y-3'}>
-            <Label htmlFor={'warn-players'} className={'flex cursor-pointer items-center gap-2'}>
-              <Checkbox
-                name={'warn-players'}
-                checked={warnPlayers}
-                onCheckedChange={(checked) => setWarnPlayers(checked === true)}
-              />
-              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('tasks.warnPlayers')}</span>
-            </Label>
-            {warnPlayers && (
-              <>
-                <div>
-                  <Label htmlFor={'warn-message'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
-                    {t('tasks.warnMessage')}
-                  </Label>
-                  <Input
-                    name={'warn-message'}
-                    type={'text'}
-                    value={warnMessage}
-                    onChange={(e) => setWarnMessage(e.target.value)}
-                  />
+                  {type.label}
                 </div>
-                <div>
-                  <Label htmlFor={'warn-delay'}>{t('tasks.warnDelay')}</Label>
-                  <Input
-                    name={'warn-delay'}
-                    type={'number'}
-                    value={warnSeconds}
-                    onChange={(e) => setWarnSeconds(parseInt(e.target.value) || 30)}
-                    min={5}
-                    max={300}
-                    className={'w-24'}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        )}
+                <div className={'mt-0.5 text-[11px] text-zinc-600 dark:text-zinc-400'}>{type.description}</div>
+              </button>
+            );
+          })}
+        </div>
       </div>
+      <div>
+        <Label htmlFor={'cron-preset'}>{t('tasks.schedule')}</Label>
+        <Select name={'cron-preset'} value={cronPreset} onChange={(e) => setCronPreset(e.target.value)}>
+          {CRON_PRESETS.map((preset) => (
+            <option key={preset.value} value={preset.value}>
+              {preset.label}
+            </option>
+          ))}
+        </Select>
+      </div>
+      {cronPreset === '' && (
+        <div>
+          <Label htmlFor={'custom-cron'}>{t('tasks.customCron')}</Label>
+          <Input
+            name={'custom-cron'}
+            type={'text'}
+            value={customCron}
+            onChange={(e) => setCustomCron(e.target.value)}
+            placeholder={'* * * * *'}
+            className={'font-jetbrains'}
+          />
+          <p className={'mt-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>{t('tasks.cronFormat')}</p>
+        </div>
+      )}
+      {taskType === 'command' && (
+        <div>
+          <Label htmlFor={'command'}>{t('tasks.commandToExecute')}</Label>
+          <Input
+            name={'command'}
+            type={'text'}
+            value={command}
+            onChange={(e) => setCommand(e.target.value)}
+            required
+            placeholder={t('tasks.commandPlaceholder')}
+            className={'font-jetbrains'}
+          />
+        </div>
+      )}
+      {taskType === 'backup' && (
+        <div>
+          <Label htmlFor={'backup-paths'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
+            {t('backups.dialogDescription')}
+          </Label>
+          <FileTreeSelector enabled={true} selectedPaths={backupPaths} onSelectedPathsChange={setBackupPaths} {...{ serverId }} />
+        </div>
+      )}
+      {taskType === 'restart' && (
+        <div className={'space-y-3'}>
+          <Label htmlFor={'warn-players'} className={'flex cursor-pointer items-center gap-2'}>
+            <Checkbox
+              name={'warn-players'}
+              checked={warnPlayers}
+              onCheckedChange={(checked) => setWarnPlayers(checked === true)}
+            />
+            <span className={'text-zinc-600 dark:text-zinc-400'}>{t('tasks.warnPlayers')}</span>
+          </Label>
+          {warnPlayers && (
+            <>
+              <div>
+                <Label htmlFor={'warn-message'} className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
+                  {t('tasks.warnMessage')}
+                </Label>
+                <Input name={'warn-message'} type={'text'} value={warnMessage} onChange={(e) => setWarnMessage(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor={'warn-delay'}>{t('tasks.warnDelay')}</Label>
+                <Input
+                  name={'warn-delay'}
+                  type={'number'}
+                  value={warnSeconds}
+                  onChange={(e) => setWarnSeconds(parseInt(e.target.value) || 30)}
+                  min={5}
+                  max={300}
+                  className={'w-24'}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </form>
   );
 }

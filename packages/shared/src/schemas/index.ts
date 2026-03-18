@@ -4,3 +4,4 @@ export * from './server';
 export * from './firewall';
 export * from './onboarding';
 export * from './totp';
+export * from './domain';

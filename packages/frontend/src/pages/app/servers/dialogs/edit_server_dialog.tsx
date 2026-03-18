@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderOpen, Package, Pencil } from 'lucide-react';
 import { Dialog } from '@remnant/frontend/features/ui/dialog';
@@ -35,7 +35,7 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
   const [javaPort, setJavaPort] = useState(server.java_port);
   const [autoStart, setAutoStart] = useState(server.auto_start);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     onSubmit({ name, min_ram: minRam, max_ram: maxRam, jvm_flags: jvmFlags, java_port: javaPort, auto_start: autoStart });
   };

@@ -103,6 +103,19 @@ export async function initializeDatabase(): Promise<void> {
   `);
 
   sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS custom_domains (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      server_id INTEGER REFERENCES servers(id) ON DELETE CASCADE,
+      domain TEXT NOT NULL UNIQUE,
+      port INTEGER NOT NULL,
+      type TEXT NOT NULL DEFAULT 'http',
+      ssl_enabled INTEGER NOT NULL DEFAULT 0,
+      ssl_expires_at TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  sqlite.exec(`
     CREATE TABLE IF NOT EXISTS audit_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
@@ -127,6 +140,8 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_task_executions_task_id ON task_executions(task_id);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
+    CREATE INDEX IF NOT EXISTS idx_custom_domains_server_id ON custom_domains(server_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_domains_domain ON custom_domains(domain);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id);
   `);
 

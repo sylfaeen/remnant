@@ -28,6 +28,7 @@
     "settingsJars": "Gestion du JAR",
     "settingsJvm": "Java & JVM",
     "settingsFirewall": "Règles Firewall",
+    "settingsDomains": "Domaines",
     "users": "Utilisateurs",
     "docs": "Documentation",
     "docsIntroduction": "Introduction",
@@ -312,6 +313,30 @@
       "infoProtocolLabel": "Protocole",
       "infoProtocolDesc": "Chaque règle nécessite un protocole : TCP, UDP ou Les deux (TCP+UDP)."
     },
+    "domains": {
+      "title": "Domaines",
+      "description": "Configurez des domaines avec SSL pour les services de votre serveur",
+      "addDomain": "Nouveau domaine",
+      "addDomainDescription": "Ajoutez un domaine personnalisé qui pointe vers un service de ce serveur.",
+      "noDomains": "Aucun domaine personnalisé",
+      "noDomainsHint": "Ajoutez un domaine comme map.example.com pour accéder à BlueMap, Dynmap ou d'autres services",
+      "domainName": "Domaine",
+      "port": "Port cible",
+      "type": "Type",
+      "invalidDomain": "Format de domaine invalide (ex : play.example.com)",
+      "invalidPort": "Le port doit être entre 1024 et 65535",
+      "enableSsl": "Activer SSL",
+      "enableSslTooltip": "Générer un certificat SSL Let's Encrypt pour ce domaine",
+      "noSsl": "Pas de SSL",
+      "sslExpiringSoon": "SSL bientôt expiré",
+      "expiresAt": "Expire le {{date}}",
+      "removeDomain": "Supprimer le domaine",
+      "showDnsRecords": "Afficher les enregistrements DNS",
+      "dnsRecords": "Enregistrements DNS à configurer",
+      "dnsHint": "Ajoutez cet enregistrement A dans les paramètres DNS de votre registrar. La propagation peut prendre quelques minutes.",
+      "srvHint": "Enregistrement SRV optionnel — permet aux joueurs de se connecter sans préciser le port",
+      "renewSsl": "Renouveler SSL"
+    },
     "twoFactor": {
       "title": "Authentification à deux facteurs",
       "enabled": "Le 2FA est activé sur votre compte",
@@ -388,6 +413,13 @@
       "description": "Configuré automatiquement par le script d'installation",
       "commands": "Commandes de gestion",
       "viewServiceFile": "Voir le fichier service"
+    },
+    "panelDomain": {
+      "title": "Domaine du panel",
+      "description": "Accédez à votre panel via un domaine personnalisé en HTTPS",
+      "setDomain": "Configurer un domaine personnalisé",
+      "configure": "Configurer",
+      "restartWarning": "L'activation SSL ou le changement de domaine redémarrera le service. L'URL d'accès va changer."
     },
     "java": {
       "title": "Environnements Java",
@@ -487,7 +519,20 @@
     "firewallRuleRemoveError": "Échec de la suppression de la règle firewall",
     "firewallRuleToggleError": "Échec de la mise à jour de la règle firewall",
     "envUpdated": "Variable mise à jour",
-    "envUpdateError": "Échec de la mise à jour de la variable"
+    "envUpdateError": "Échec de la mise à jour de la variable",
+    "domainAdded": "Domaine ajouté",
+    "domainRemoved": "Domaine supprimé",
+    "domainAddError": "Échec de l'ajout du domaine",
+    "domainRemoveError": "Échec de la suppression du domaine",
+    "sslEnabled": "Certificat SSL activé",
+    "sslEnableError": "Échec de l'activation SSL",
+    "dnsCheckError": "Échec de la vérification DNS",
+    "panelDomainSet": "Domaine du panel configuré",
+    "panelDomainSetError": "Échec de la configuration du domaine panel",
+    "panelDomainRemoved": "Domaine du panel supprimé",
+    "panelDomainRemoveError": "Échec de la suppression du domaine panel",
+    "sslRenewed": "Certificats SSL renouvelés",
+    "sslRenewError": "Échec du renouvellement des certificats SSL"
   },
   "onboarding": {
     "welcome": {

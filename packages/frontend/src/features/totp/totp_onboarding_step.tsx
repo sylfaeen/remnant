@@ -53,13 +53,13 @@ export function TotpOnboardingStep({
     <div className={'animate-fade-in w-full'}>
       {subStep === 'prompt' && (
         <div className={'mx-auto w-full max-w-100'}>
-          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
+          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
             <div className={'flex flex-col items-center text-center'}>
               <div className={'mb-4 flex size-12 items-center justify-center rounded-full bg-green-600/10'}>
                 <Shield className={'size-6 text-green-600'} strokeWidth={2} />
               </div>
-              <h2 className={'text-lg font-semibold text-zinc-900'}>{t('onboarding.security.title')}</h2>
-              <p className={'mt-1.5 max-w-xs text-sm text-zinc-500'}>{t('onboarding.security.subtitle')}</p>
+              <h2 className={'text-lg font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.security.title')}</h2>
+              <p className={'mt-1.5 max-w-xs text-sm text-zinc-500 dark:text-zinc-400'}>{t('onboarding.security.subtitle')}</p>
             </div>
             <div className={'mt-6 space-y-2.5'}>
               <Button size={'md'} onClick={handleSetupStart} loading={setupLoading} className={'w-full'}>
@@ -80,13 +80,15 @@ export function TotpOnboardingStep({
       )}
       {subStep === 'setup' && (
         <div className={'mx-auto w-full max-w-180'}>
-          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
-            <h2 className={'mb-1 text-sm font-semibold text-zinc-900'}>{t('onboarding.security.setupTitle')}</h2>
-            <p className={'mb-5 text-xs text-zinc-500'}>{t('onboarding.security.setupDescription')}</p>
+          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
+            <h2 className={'mb-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>
+              {t('onboarding.security.setupTitle')}
+            </h2>
+            <p className={'mb-5 text-xs text-zinc-500 dark:text-zinc-400'}>{t('onboarding.security.setupDescription')}</p>
             {qrCodeUri && secret ? (
               <div className={'space-y-5'}>
                 <TotpQrDisplay {...{ qrCodeUri, secret }} />
-                <div className={'border-t border-black/10 pt-5'}>
+                <div className={'border-t border-black/10 pt-5 dark:border-white/10'}>
                   <TotpCodeInput
                     onChange={setCode}
                     onSubmit={handleVerify}
@@ -106,9 +108,11 @@ export function TotpOnboardingStep({
       )}
       {subStep === 'recovery' && recoveryCodes && (
         <div className={'mx-auto w-full max-w-180'}>
-          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6'}>
-            <h2 className={'mb-1 text-sm font-semibold text-zinc-900'}>{t('settings.twoFactor.recoveryCodes.title')}</h2>
-            <p className={'mb-5 text-xs text-zinc-500'}>{t('settings.twoFactor.recoveryCodes.subtitle')}</p>
+          <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
+            <h2 className={'mb-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>
+              {t('settings.twoFactor.recoveryCodes.title')}
+            </h2>
+            <p className={'mb-5 text-xs text-zinc-500 dark:text-zinc-400'}>{t('settings.twoFactor.recoveryCodes.subtitle')}</p>
             <RecoveryCodesDisplay codes={recoveryCodes} onDone={onComplete} />
           </div>
         </div>

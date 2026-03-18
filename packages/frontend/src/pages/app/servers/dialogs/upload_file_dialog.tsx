@@ -6,6 +6,7 @@ import { Dialog } from '@remnant/frontend/features/ui/dialog';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { Input } from '@remnant/frontend/features/ui/input';
 import { formatFileSize } from '@remnant/frontend/hooks/use_files';
+import { Label } from '@remnant/frontend/features/ui/label';
 
 type UploadFileDialogProps = {
   open: boolean;
@@ -69,13 +70,17 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
         </Dialog.Header>
         <Dialog.Body>
           <div>
-            <label className={'mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
-              {t('files.uploadDestination')}
-            </label>
-            <Input type={'text'} value={targetPath} onChange={(e) => setTargetPath(e.target.value)} placeholder={'/'} />
+            <Label htmlFor={'target-path'}>{t('files.uploadDestination')}</Label>
+            <Input
+              name={'target-path'}
+              type={'text'}
+              value={targetPath}
+              onChange={(e) => setTargetPath(e.target.value)}
+              placeholder={'/'}
+            />
           </div>
           <div>
-            <label className={'mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('files.files')}</label>
+            <Label>{t('files.files')}</Label>
             <input ref={fileInputRef} type={'file'} multiple onChange={handleFileSelect} className={'hidden'} />
             <button
               type={'button'}

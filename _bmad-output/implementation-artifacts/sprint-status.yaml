@@ -195,3 +195,24 @@ development_status:
   epic-16: done
   16-1-env-read-write-api: done
   16-2-environment-page-frontend: done
+
+  # Epic 17: Domaines Personnalisés par Serveur
+  epic-17: done
+  17-1-script-shell-domaines-securise: done
+  17-2-backend-table-service-domaines: done
+  17-3-backend-router-trpc-domaines: done
+  17-4-frontend-page-domaines-serveur: done
+  17-5-installation-sudoers-domaines: done
+
+  # Epic 18: Proxy TCP pour Serveurs Minecraft
+  epic-18: done
+  18-1-support-nginx-stream-proxy-tcp: done
+
+  # Epic 19: Domaine Personnalisé pour le Panel Remnant
+  epic-19: done
+  19-1-backend-service-domaine-panel: done
+  19-2-frontend-settings-domaine-panel: done
+
+  # Epic 20: Renouvellement Automatique SSL
+  epic-20: done
+  20-1-renouvellement-monitoring-ssl: done

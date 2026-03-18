@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Archive, Loader2 } from 'lucide-react';
+import { Archive } from 'lucide-react';
 import { Dialog } from '@remnant/frontend/features/ui/dialog';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { FileTreeSelector } from '@remnant/frontend/features/ui/file_tree_selector';
@@ -51,17 +51,7 @@ export function CreateBackupDialog({ open, serverId, isPending, onClose, onConfi
             {t('common.cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={selectedPaths.size === 0 || isPending} loading={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className={'size-4 animate-spin'} />
-                {t('backups.backingUp')}
-              </>
-            ) : (
-              <>
-                <Archive className={'size-4'} />
-                {t('backups.startBackup')}
-              </>
-            )}
+            {isPending ? t('backups.backingUp') : t('backups.startBackup')}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

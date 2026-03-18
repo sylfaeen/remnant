@@ -204,7 +204,7 @@ pnpm install
   - Ne jamais utiliser de template literals: `` className={`base ${condition}`} ``
 
 **React Types:**
-- Ne jamais utiliser `React.X` (ex: `React.FormEvent`) - cause une erreur UMD global
+- Ne jamais utiliser `React.X` (ex: `React.SubmitEvent`) - cause une erreur UMD global
 - Toujours importer les types directement depuis 'react'
 - `FormEvent` est deprecie - utiliser `SubmitEvent<HTMLFormElement>` pour les formulaires
 - Autres evenements: `DragEvent`, `ChangeEvent`, `KeyboardEvent`, `MouseEvent`, etc.

@@ -19,6 +19,7 @@ import { ServerSettingsPage } from '@remnant/frontend/pages/app/servers/id/setti
 import { ServerSettingsJarsPage } from '@remnant/frontend/pages/app/servers/id/settings/jars';
 import { ServerSettingsJvmPage } from '@remnant/frontend/pages/app/servers/id/settings/jvm';
 import { ServerSettingsFirewallPage } from '@remnant/frontend/pages/app/servers/id/settings/firewall';
+import { ServerSettingsDomainsPage } from '@remnant/frontend/pages/app/servers/id/settings/domains';
 import { ServerPluginsPage } from '@remnant/frontend/pages/app/servers/id/plugins';
 import { ServerTasksPage } from '@remnant/frontend/pages/app/servers/id/tasks';
 import { ServerBackupsPage } from '@remnant/frontend/pages/app/servers/id/backups';
@@ -252,6 +253,12 @@ const serverSettingsFirewallRoute = createRoute({
   component: ServerSettingsFirewallPage,
 });
 
+const serverSettingsDomainsRoute = createRoute({
+  getParentRoute: () => serverLayoutRoute,
+  path: 'settings/domains',
+  component: ServerSettingsDomainsPage,
+});
+
 const serverPluginsRoute = createRoute({
   getParentRoute: () => serverLayoutRoute,
   path: 'plugins',
@@ -292,6 +299,7 @@ const routeTree = rootRoute.addChildren([
       serverSettingsJarsRoute,
       serverSettingsJvmRoute,
       serverSettingsFirewallRoute,
+      serverSettingsDomainsRoute,
       serverPluginsRoute,
       serverBackupsRoute,
       serverTasksRoute,

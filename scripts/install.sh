@@ -443,9 +443,17 @@ download_remnant() {
 
     # Firewall script
     chmod +x "$APP_DIR/scripts/remnant-firewall.sh"
-    echo "${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-firewall.sh" > /etc/sudoers.d/remnant
+
+    # Domain script
+    chmod +x "$APP_DIR/scripts/remnant-domain.sh"
+
+    # Sudoers for both scripts
+    cat > /etc/sudoers.d/remnant << SUDOERS_EOF
+${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-firewall.sh
+${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-domain.sh
+SUDOERS_EOF
     chmod 440 /etc/sudoers.d/remnant
-    print_ok "Firewall sudoers configured"
+    print_ok "Sudoers configured (firewall + domains)"
 
     # Permissions
     chown -R "$SERVICE_USER:$SERVICE_USER" "$REMNANT_HOME"

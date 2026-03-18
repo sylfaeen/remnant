@@ -3404,3 +3404,379 @@ Les fonctionnalités suivantes ont été ajoutées après la complétion du MVP 
 - Contrainte UNIQUE en base de données sur `servers.java_port`
 - Régénération automatique de `server.properties` lors du changement de port
 - Gestion d'erreur `PORT_ALREADY_IN_USE` dans le router tRPC (code CONFLICT)
+
+---
+
+## Epic 17: Domaines Personnalisés par Serveur
+
+L'administrateur peut ajouter des domaines personnalisés à ses serveurs Minecraft, voir les DNS records à configurer, et accéder à ses services (BlueMap, Dynmap, etc.) via des domaines HTTPS sécurisés.
+
+**FRs couverts :** FR1, FR2, FR3, FR8, FR10
+**NFRs couverts :** NFR1, NFR2, NFR3, NFR4, NFR5, NFR6, NFR7
+
+### Story 17.1: Script Shell Domaines Sécurisé
+
+As a administrateur système,
+I want un script shell sécurisé qui gère les vhosts Nginx et les certificats SSL,
+So that les opérations système privilégiées sont isolées et validées.
+
+**Acceptance Criteria:**
+
+##### AC1: Validation d'entrée
+**Given** un appel au script avec un nom de domaine
+**When** le domaine contient des caractères invalides (`;`, `|`, `&`, espaces, `..`)
+**Then** le script retourne une erreur JSON et ne modifie rien
+
+##### AC2: Action add
+**Given** un domaine valide et un port cible
+**When** j'exécute `remnant-domain.sh add <domain> <port> <type>`
+**Then** un fichier vhost est créé dans `/etc/nginx/sites-available/`
+**And** un symlink est créé dans `/etc/nginx/sites-enabled/`
+**And** `nginx -t` est exécuté avant le reload
+**And** si `nginx -t` échoue, le vhost est supprimé et une erreur JSON est retournée
+
+##### AC3: Action remove
+**Given** un domaine existant
+**When** j'exécute `remnant-domain.sh remove <domain>`
+**Then** le vhost et le symlink sont supprimés
+**And** nginx est rechargé
+
+##### AC4: Action enable-ssl
+**Given** un domaine avec un vhost actif
+**When** j'exécute `remnant-domain.sh enable-ssl <domain>`
+**Then** le script vérifie que le DNS pointe vers l'IP du serveur via `dig`
+**And** si le DNS ne pointe pas, une erreur JSON est retournée
+**And** si le DNS est correct, `certbot --nginx -d <domain>` est exécuté
+**And** le résultat (succès/échec) est retourné en JSON
+
+##### AC5: Action list
+**Given** des vhosts existants
+**When** j'exécute `remnant-domain.sh list`
+**Then** la liste des domaines avec leur statut SSL est retournée en JSON
+
+##### AC6: Action renew
+**Given** des certificats existants
+**When** j'exécute `remnant-domain.sh renew`
+**Then** `certbot renew` est exécuté et le résultat retourné en JSON
+
+##### AC7: Protection path traversal
+**Given** un domaine contenant `../` ou des chemins absolus
+**When** le script construit le chemin du fichier vhost
+**Then** `basename` est utilisé et le chemin résultant est vérifié dans `/etc/nginx/sites-available/`
+
+##### AC8: Types de proxy
+**Given** un type `http`
+**When** le vhost est généré
+**Then** il contient un bloc `location / { proxy_pass http://127.0.0.1:<port>; }` avec les headers appropriés
+
+---
+
+### Story 17.2: Backend — Table et Service Domaines
+
+As a administrateur,
+I want que les domaines personnalisés soient persistés en base de données,
+So that je puisse les gérer depuis le panel.
+
+**Acceptance Criteria:**
+
+##### AC1: Schema DB
+**Given** la base de données SQLite
+**When** la migration s'exécute
+**Then** une table `custom_domains` est créée avec : `id`, `server_id` (nullable FK), `domain`, `port`, `type` (http/tcp/panel), `ssl_enabled`, `ssl_expires_at`, `created_at`
+**And** une contrainte UNIQUE est posée sur `domain`
+
+##### AC2: Service domaines
+**Given** le service `domain_service.ts`
+**When** j'appelle `addDomain({ serverId, domain, port, type })`
+**Then** le domaine est validé via regex Zod
+**And** le domaine est vérifié unique en DB
+**And** le script `remnant-domain.sh add` est exécuté via `execFile` avec sudo
+**And** le domaine est inséré en DB
+**And** un audit log est créé
+
+##### AC3: Suppression
+**Given** un domaine existant en DB
+**When** j'appelle `removeDomain(id)`
+**Then** le script `remnant-domain.sh remove` est exécuté
+**And** le domaine est supprimé de la DB
+
+##### AC4: Activation SSL
+**Given** un domaine existant sans SSL
+**When** j'appelle `enableSsl(id)`
+**Then** le script `remnant-domain.sh enable-ssl` est exécuté
+**And** en cas de succès, `ssl_enabled` passe à `true` et `ssl_expires_at` est peuplé
+
+##### AC5: Validation Zod
+**Given** un domaine invalide (ex: `foo`, `a b.com`, `evil;rm`)
+**When** la validation Zod s'exécute
+**Then** une erreur est retournée avant tout appel au script
+
+---
+
+### Story 17.3: Backend — Router tRPC Domaines
+
+As a administrateur,
+I want des endpoints tRPC pour gérer les domaines,
+So that le frontend puisse interagir avec le service domaines.
+
+**Acceptance Criteria:**
+
+##### AC1: Endpoint list
+**Given** un serveur avec des domaines
+**When** j'appelle `domains.list({ serverId })`
+**Then** la liste des domaines du serveur est retournée avec statut SSL
+
+##### AC2: Endpoint add
+**Given** un domaine valide
+**When** j'appelle `domains.add({ serverId, domain, port, type })`
+**Then** le domaine est ajouté via le service
+**And** la permission `servers:manage` est requise
+
+##### AC3: Endpoint remove
+**Given** un domaine existant
+**When** j'appelle `domains.remove({ id })`
+**Then** le domaine est supprimé via le service
+
+##### AC4: Endpoint enableSsl
+**Given** un domaine sans SSL
+**When** j'appelle `domains.enableSsl({ id })`
+**Then** le SSL est activé via le service
+
+##### AC5: Endpoint dnsCheck
+**Given** un domaine
+**When** j'appelle `domains.dnsCheck({ domain })`
+**Then** le backend résout le DNS et retourne si l'IP correspond au serveur
+
+---
+
+### Story 17.4: Frontend — Page Domaines par Serveur
+
+As a administrateur,
+I want une page dans les settings serveur pour gérer les domaines,
+So that je puisse ajouter, supprimer et activer SSL sur mes domaines.
+
+**Acceptance Criteria:**
+
+##### AC1: Route et navigation
+**Given** la navigation serveur
+**When** je clique sur "Domaines" dans le menu settings
+**Then** la page `/app/servers/:id/settings/domains` s'affiche
+
+##### AC2: Liste des domaines
+**Given** des domaines existants
+**When** la page se charge
+**Then** chaque domaine affiche : nom, port, type (badge HTTP/TCP), statut SSL (badge), date d'expiration SSL
+
+##### AC3: Ajout de domaine
+**Given** le formulaire d'ajout
+**When** je saisis un domaine, un port, un type, et je valide
+**Then** le domaine est ajouté
+**And** les DNS records à configurer sont affichés (A record → IP du serveur)
+
+##### AC4: Suppression avec confirmation
+**Given** un domaine existant
+**When** je clique sur supprimer
+**Then** une confirmation est demandée avant la suppression
+
+##### AC5: Activation SSL
+**Given** un domaine sans SSL
+**When** je clique sur "Activer SSL"
+**Then** une vérification DNS est faite d'abord
+**And** si le DNS est OK, certbot est lancé
+**And** le statut SSL est mis à jour en temps réel
+
+##### AC6: DNS records helper
+**Given** un domaine ajouté
+**When** le DNS ne pointe pas encore vers le serveur
+**Then** un message clair indique l'A record à configurer (`domain → IP du serveur`)
+
+##### AC7: i18n
+- [ ] Tous les textes utilisent `t()`
+- [ ] Clés ajoutées à `en.json` et `fr.json`
+
+---
+
+### Story 17.5: Installation et Sudoers Domaines
+
+As a administrateur système,
+I want que le script domaines soit installé et configuré automatiquement,
+So that le backend puisse l'exécuter sans intervention manuelle.
+
+**Acceptance Criteria:**
+
+##### AC1: install.sh
+**Given** l'installation de Remnant
+**When** `install.sh` s'exécute
+**Then** `remnant-domain.sh` est copié dans `$APP_DIR/scripts/`
+**And** les permissions sont `755`, owner `root`
+**And** une entrée sudoers est ajoutée : `remnant ALL=(root) NOPASSWD: $APP_DIR/scripts/remnant-domain.sh`
+
+##### AC2: update.sh
+**Given** une mise à jour de Remnant
+**When** `update.sh` s'exécute
+**Then** le script `remnant-domain.sh` est mis à jour
+**And** les permissions sudoers sont vérifiées
+
+---
+
+## Epic 18: Proxy TCP pour Serveurs Minecraft
+
+L'administrateur peut associer un domaine qui redirige le trafic TCP directement vers le port du serveur Minecraft, permettant aux joueurs de se connecter via un nom de domaine.
+
+**FRs couverts :** FR9
+**NFRs couverts :** NFR4, NFR5
+
+### Story 18.1: Support Nginx Stream pour Proxy TCP
+
+As a administrateur,
+I want configurer un domaine TCP qui proxy le trafic vers le port Minecraft,
+So that les joueurs puissent se connecter avec `play.mydomain.com`.
+
+**Acceptance Criteria:**
+
+##### AC1: Module stream Nginx
+**Given** l'installation Nginx
+**When** le script `remnant-domain.sh` reçoit un type `tcp`
+**Then** il vérifie que le module `ngx_stream_module` est chargé
+**And** si non chargé, retourne une erreur avec les instructions d'installation
+
+##### AC2: Config stream
+**Given** un domaine de type `tcp` avec un port cible
+**When** le script génère la config
+**Then** un fichier stream est créé dans `/etc/nginx/streams-available/` (ou block stream dans nginx.conf)
+**And** il contient `server { listen <port_externe>; proxy_pass 127.0.0.1:<port_minecraft>; }`
+
+##### AC3: Frontend — Type TCP
+**Given** le formulaire d'ajout de domaine (Story 17.4)
+**When** je sélectionne le type "Game (TCP)"
+**Then** le port par défaut est prérempli avec le port Java du serveur
+**And** les DNS records affichés indiquent un SRV record en plus du A record
+
+##### AC4: nginx -t + rollback
+**Given** une config stream générée
+**When** `nginx -t` échoue
+**Then** la config est supprimée et une erreur est retournée
+
+---
+
+## Epic 19: Domaine Personnalisé pour le Panel Remnant
+
+L'administrateur peut configurer un domaine custom pour accéder au panel Remnant en HTTPS sécurisé, remplaçant l'accès par IP.
+
+**FRs couverts :** FR5, FR6, FR7
+**NFRs couverts :** NFR1, NFR2, NFR5
+
+### Story 19.1: Backend — Service Domaine Panel
+
+As a administrateur,
+I want configurer un domaine pour le panel Remnant,
+So that j'accède à mon panel via `panel.mydomain.com` en HTTPS.
+
+**Acceptance Criteria:**
+
+##### AC1: Endpoint setPanelDomain
+**Given** un domaine valide
+**When** j'appelle `domains.setPanelDomain({ domain })`
+**Then** le vhost Nginx `remnant` est mis à jour avec le `server_name`
+**And** le domaine est stocké en DB avec `server_id = NULL` et `type = 'panel'`
+
+##### AC2: Activation SSL panel
+**Given** un domaine panel configuré
+**When** j'appelle `domains.enableSsl({ id })`
+**Then** certbot est lancé sur le domaine
+**And** en cas de succès, `.env` est mis à jour : `CORS_ORIGIN=https://<domain>`, `SECURE_COOKIES=true`
+**And** le service Remnant est redémarré automatiquement
+
+##### AC3: Suppression domaine panel
+**Given** un domaine panel existant
+**When** j'appelle `domains.removePanelDomain()`
+**Then** le vhost Nginx revient au `server_name _` par défaut
+**And** `.env` est restauré avec l'IP du serveur et `SECURE_COOKIES=false`
+**And** le service est redémarré
+
+##### AC4: Un seul domaine panel
+**Given** un domaine panel déjà configuré
+**When** j'essaie d'en ajouter un autre
+**Then** l'ancien est remplacé (pas d'accumulation)
+
+---
+
+### Story 19.2: Frontend — Settings Domaine Panel
+
+As a administrateur,
+I want une section dans les settings globaux pour gérer le domaine du panel,
+So that je puisse configurer et surveiller le domaine panel depuis l'interface.
+
+**Acceptance Criteria:**
+
+##### AC1: Section dans settings globaux
+**Given** la page `/app/settings`
+**When** je la visite
+**Then** une section "Domaine du panel" est visible
+
+##### AC2: Formulaire domaine panel
+**Given** aucun domaine panel configuré
+**When** je saisis un domaine et valide
+**Then** le domaine est configuré
+**And** les DNS records à ajouter sont affichés
+
+##### AC3: Statut SSL
+**Given** un domaine panel configuré
+**When** la section se charge
+**Then** le statut SSL est affiché (activé/désactivé, date d'expiration)
+**And** un bouton "Activer SSL" est disponible si pas encore activé
+
+##### AC4: Suppression
+**Given** un domaine panel configuré
+**When** je clique sur supprimer avec confirmation
+**Then** le domaine est supprimé et le panel revient en mode IP
+
+##### AC5: Avertissement restart
+**Given** l'activation SSL ou le changement de domaine
+**When** l'opération réussit
+**Then** un message informe que le service va redémarrer
+**And** l'URL du panel va changer
+
+##### AC6: i18n
+- [ ] Tous les textes utilisent `t()`
+- [ ] Clés ajoutées à `en.json` et `fr.json`
+
+---
+
+## Epic 20: Renouvellement Automatique SSL
+
+Les certificats SSL se renouvellent automatiquement sans intervention, avec monitoring de l'état des certificats.
+
+**FRs couverts :** FR4
+**NFRs couverts :** NFR6, NFR7
+
+### Story 20.1: Renouvellement et Monitoring SSL
+
+As a administrateur,
+I want que mes certificats SSL se renouvellent automatiquement,
+So that mes domaines restent sécurisés sans intervention manuelle.
+
+**Acceptance Criteria:**
+
+##### AC1: Timer certbot
+**Given** l'installation de Remnant
+**When** un certificat SSL est généré
+**Then** le timer systemd `certbot.timer` est vérifié actif
+**And** s'il n'est pas actif, il est activé automatiquement
+
+##### AC2: Expiration dans le frontend
+**Given** des domaines avec SSL
+**When** la page domaines se charge
+**Then** la date d'expiration est affichée pour chaque domaine
+**And** un badge d'avertissement apparaît si l'expiration est dans moins de 14 jours
+
+##### AC3: Action renew manuelle
+**Given** des certificats existants
+**When** je clique sur "Renouveler" dans l'interface
+**Then** `certbot renew` est exécuté via le script
+**And** les dates d'expiration sont mises à jour en DB
+
+##### AC4: Mise à jour des dates en DB
+**Given** un renouvellement certbot réussi (auto ou manuel)
+**When** le certificat est renouvelé
+**Then** le champ `ssl_expires_at` est mis à jour en DB

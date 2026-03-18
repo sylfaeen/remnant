@@ -28,6 +28,7 @@
     "settingsJars": "JAR Management",
     "settingsJvm": "Java & JVM",
     "settingsFirewall": "Firewall Rules",
+    "settingsDomains": "Domains",
     "users": "Users",
     "docs": "Documentation",
     "docsIntroduction": "Introduction",
@@ -312,6 +313,30 @@
       "infoProtocolLabel": "Protocol",
       "infoProtocolDesc": "Each rule requires a protocol: TCP, UDP, or Both (TCP+UDP)."
     },
+    "domains": {
+      "title": "Domains",
+      "description": "Configure custom domains with SSL for your server services",
+      "addDomain": "New domain",
+      "addDomainDescription": "Add a custom domain that points to a service on this server.",
+      "noDomains": "No custom domains",
+      "noDomainsHint": "Add a domain like map.example.com to access BlueMap, Dynmap, or other services",
+      "domainName": "Domain",
+      "port": "Target Port",
+      "type": "Type",
+      "invalidDomain": "Invalid domain format (e.g. play.example.com)",
+      "invalidPort": "Port must be between 1024 and 65535",
+      "enableSsl": "Enable SSL",
+      "enableSslTooltip": "Generate a Let's Encrypt SSL certificate for this domain",
+      "noSsl": "No SSL",
+      "sslExpiringSoon": "SSL Expiring",
+      "expiresAt": "Expires {{date}}",
+      "removeDomain": "Remove domain",
+      "showDnsRecords": "Show DNS records",
+      "dnsRecords": "DNS Records to configure",
+      "dnsHint": "Add this A record in your domain registrar's DNS settings. It may take a few minutes to propagate.",
+      "srvHint": "Optional SRV record — allows players to connect without specifying the port",
+      "renewSsl": "Renew SSL"
+    },
     "twoFactor": {
       "title": "Two-factor authentication",
       "enabled": "2FA is enabled on your account",
@@ -388,6 +413,13 @@
       "description": "Automatically configured by the installation script",
       "commands": "Management commands",
       "viewServiceFile": "View service file"
+    },
+    "panelDomain": {
+      "title": "Panel Domain",
+      "description": "Access your panel via a custom domain with HTTPS",
+      "setDomain": "Configure a custom domain",
+      "configure": "Configure",
+      "restartWarning": "Enabling SSL or changing the domain will restart the panel service. The access URL will change."
     },
     "java": {
       "title": "Java Runtimes",
@@ -487,7 +519,20 @@
     "firewallRuleRemoveError": "Failed to remove firewall rule",
     "firewallRuleToggleError": "Failed to toggle firewall rule",
     "envUpdated": "Variable updated",
-    "envUpdateError": "Failed to update variable"
+    "envUpdateError": "Failed to update variable",
+    "domainAdded": "Domain added",
+    "domainRemoved": "Domain removed",
+    "domainAddError": "Failed to add domain",
+    "domainRemoveError": "Failed to remove domain",
+    "sslEnabled": "SSL certificate activated",
+    "sslEnableError": "Failed to enable SSL",
+    "dnsCheckError": "DNS check failed",
+    "panelDomainSet": "Panel domain configured",
+    "panelDomainSetError": "Failed to configure panel domain",
+    "panelDomainRemoved": "Panel domain removed",
+    "panelDomainRemoveError": "Failed to remove panel domain",
+    "sslRenewed": "SSL certificates renewed",
+    "sslRenewError": "Failed to renew SSL certificates"
   },
   "onboarding": {
     "welcome": {

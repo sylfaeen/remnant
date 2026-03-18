@@ -49,7 +49,6 @@ export function AddFirewallRuleDialog({ open, onOpenChange, ...rest }: AddFirewa
             {t('common.cancel')}
           </Button>
           <Button type={'submit'} form={'add-firewall-rule'} disabled={!canSubmit}>
-            <Shield className={'size-4'} />
             {t('settings.firewall.addRule')}
           </Button>
         </Dialog.Footer>
