@@ -1,9 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(__dirname, '../../../..');
+const PROJECT_ROOT = resolve(process.cwd(), '../..');
 export const ENV_PATH = resolve(PROJECT_ROOT, '.env');
 
 export function readEnvContent(): string {

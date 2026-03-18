@@ -50,7 +50,7 @@ function EnvironmentSection() {
 
   const [content, setContent] = useState<string>('');
   const [hasChanges, setHasChanges] = useState<boolean>(false);
-  const [revealed, setRevealed] = useState<boolean>(true);
+  const [revealed, setRevealed] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   useEffect(() => {
