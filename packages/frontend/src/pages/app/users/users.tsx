@@ -103,7 +103,7 @@ export function UsersPage() {
           </Button>
         </div>
         <div className={'overflow-hidden rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900'}>
-          <div className={'divide-y divide-black/4 dark:divide-white/4'}>
+          <div className={'divide-y divide-black/4 dark:divide-white/6'}>
             {users?.map((user) => (
               <UserRow
                 key={user.id}

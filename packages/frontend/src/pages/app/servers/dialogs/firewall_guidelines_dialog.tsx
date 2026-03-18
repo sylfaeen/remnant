@@ -24,7 +24,7 @@ export function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuideli
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <div className={'divide-y divide-black/4 dark:divide-white/4'}>
+          <div className={'divide-y divide-black/4 dark:divide-white/6'}>
             <div className={'pb-3'}>
               <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
                 {t('settings.firewall.infoPortRangeLabel')}

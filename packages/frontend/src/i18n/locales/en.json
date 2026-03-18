@@ -417,9 +417,16 @@
     "panelDomain": {
       "title": "Panel Domain",
       "description": "Access your panel via a custom domain with HTTPS",
-      "setDomain": "Configure a custom domain",
       "configure": "Configure",
-      "restartWarning": "Enabling SSL or changing the domain will restart the panel service. The access URL will change."
+      "restartWarning": "Enabling SSL or changing the domain will restart the panel service. The access URL will change.",
+      "step1Title": "Add a DNS record at your registrar",
+      "step1Desc": "In your domain registrar's DNS settings (OVH, Cloudflare, etc.), add an A record pointing your subdomain to your server IP.",
+      "step1Hint": "DNS propagation can take a few minutes up to a few hours.",
+      "step2Title": "Enter your domain below",
+      "step2Desc": "Once the DNS record is configured, enter the domain and click Configure. This will update the Nginx configuration.",
+      "step2Label": "Your domain",
+      "step3Title": "Activate SSL",
+      "step3Desc": "After configuration, click \"Enable SSL\" to generate a free Let's Encrypt certificate. Your panel will restart and become available at https://yourdomain.com."
     },
     "java": {
       "title": "Java Runtimes",

@@ -190,45 +190,119 @@ function PanelDomainSection() {
             </div>
           </>
         ) : (
-          <FeatureCard.Row layout={'column'}>
-            <FeatureCard.RowLabel>
-              <div className={'flex items-center gap-2'}>
-                <Globe className={'size-4 text-zinc-500'} />
-                <span>{t('appSettings.panelDomain.setDomain')}</span>
+          <div className={'space-y-0 divide-y divide-black/4 dark:divide-white/6'}>
+            <SetupSteps {...{ serverIp }} />
+            <div className={'px-5 py-4'}>
+              <div className={'flex items-end gap-2'}>
+                <div className={'flex-1'}>
+                  <Label htmlFor={'panel-domain'} className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>
+                    {t('appSettings.panelDomain.step2Label')}
+                  </Label>
+                  <Input
+                    type={'text'}
+                    id={'panel-domain'}
+                    value={domainInput}
+                    onChange={(e) => setDomainInput(e.target.value)}
+                    placeholder={'panel.example.com'}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && isValidDomain) handleSet();
+                    }}
+                  />
+                </div>
+                <Button
+                  onClick={handleSet}
+                  disabled={!isValidDomain || setPanelDomain.isPending}
+                  loading={setPanelDomain.isPending}
+                >
+                  <Globe className={'size-4'} />
+                  {t('appSettings.panelDomain.configure')}
+                </Button>
               </div>
-            </FeatureCard.RowLabel>
-            <div className={'mt-2 flex items-end gap-2'}>
-              <div className={'flex-1'}>
-                <Label htmlFor={'panel-domain'} className={'sr-only'}>
-                  {t('settings.domains.domainName')}
-                </Label>
-                <Input
-                  type={'text'}
-                  id={'panel-domain'}
-                  value={domainInput}
-                  onChange={(e) => setDomainInput(e.target.value)}
-                  placeholder={'panel.example.com'}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && isValidDomain) handleSet();
-                  }}
-                />
-              </div>
-              <Button
-                onClick={handleSet}
-                disabled={!isValidDomain || setPanelDomain.isPending}
-                loading={setPanelDomain.isPending}
-              >
-                <Globe className={'size-4'} />
-                {t('appSettings.panelDomain.configure')}
-              </Button>
+              {domainInput && !isValidDomain && (
+                <p className={'mt-1 text-sm text-red-500'}>{t('settings.domains.invalidDomain')}</p>
+              )}
             </div>
-            {domainInput && !isValidDomain && (
-              <p className={'mt-1 text-sm text-red-500'}>{t('settings.domains.invalidDomain')}</p>
-            )}
-          </FeatureCard.Row>
+          </div>
         )}
       </FeatureCard.Body>
     </FeatureCard>
+  );
+}
+
+type SetupStepsProps = {
+  serverIp: string;
+};
+
+function SetupSteps({ serverIp }: SetupStepsProps) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(serverIp).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className={'px-5 py-4'}>
+      <div className={'space-y-4'}>
+        <div className={'flex gap-3'}>
+          <div
+            className={
+              'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+            }
+          >
+            1
+          </div>
+          <div className={'flex-1'}>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('appSettings.panelDomain.step1Title')}</p>
+            <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.panelDomain.step1Desc')}</p>
+            <div className={'mt-2 rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
+              <div className={'flex items-center justify-between'}>
+                <div className={'font-jetbrains text-sm'}>
+                  <span className={'text-zinc-500'}>A</span>
+                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
+                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>panel.yourdomain.com</span>
+                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
+                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{serverIp}</span>
+                </div>
+                <Button variant={'ghost'} size={'icon-sm'} onClick={handleCopy}>
+                  {copied ? <CheckCircle2 className={'size-3.5 text-green-600'} /> : <Copy className={'size-3.5'} />}
+                </Button>
+              </div>
+            </div>
+            <p className={'mt-1.5 text-xs text-zinc-400 dark:text-zinc-500'}>{t('appSettings.panelDomain.step1Hint')}</p>
+          </div>
+        </div>
+        <div className={'flex gap-3'}>
+          <div
+            className={
+              'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+            }
+          >
+            2
+          </div>
+          <div className={'flex-1'}>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('appSettings.panelDomain.step2Title')}</p>
+            <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.panelDomain.step2Desc')}</p>
+          </div>
+        </div>
+        <div className={'flex gap-3'}>
+          <div
+            className={
+              'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+            }
+          >
+            3
+          </div>
+          <div className={'flex-1'}>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('appSettings.panelDomain.step3Title')}</p>
+            <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.panelDomain.step3Desc')}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
