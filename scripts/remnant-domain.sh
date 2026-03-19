@@ -286,17 +286,19 @@ action_enable_ssl() {
   # Verify DNS points to this server
   verify_dns "$domain"
 
-  # Check if cert already exists
-  if [ -d "/etc/letsencrypt/live/${domain}" ]; then
-    echo "{\"success\":true,\"action\":\"enable-ssl\",\"domain\":\"${domain}\",\"note\":\"Certificate already exists\"}"
-    exit 0
-  fi
-
-  # Run certbot
   local certbot_output
-  certbot_output=$(certbot --nginx -d "$domain" --non-interactive --agree-tos --register-unsafely-without-email --redirect 2>&1) || {
-    json_error "Certbot failed for ${domain}: ${certbot_output}"
-  }
+
+  if [ -d "/etc/letsencrypt/live/${domain}" ]; then
+    # Certificate exists but nginx may not be configured for SSL — install it
+    certbot_output=$(certbot install --nginx -d "$domain" --non-interactive --redirect 2>&1) || {
+      json_error "Failed to install existing certificate into nginx for ${domain}: ${certbot_output}"
+    }
+  else
+    # Obtain new certificate and configure nginx
+    certbot_output=$(certbot --nginx -d "$domain" --non-interactive --agree-tos --register-unsafely-without-email --redirect 2>&1) || {
+      json_error "Certbot failed for ${domain}: ${certbot_output}"
+    }
+  fi
 
   # Extract expiry date
   local expiry=""

@@ -54,7 +54,9 @@ function getServerIp(): string {
 }
 
 function restartService(): void {
-  execFile('sudo', ['systemctl', 'restart', 'remnant'], { shell: false, timeout: 15000 }, () => {});
+  setTimeout(() => {
+    execFile('sudo', ['systemctl', 'restart', 'remnant'], { shell: false, timeout: 15000 }, () => {});
+  }, 2000);
 }
 
 export class DomainService {
@@ -172,10 +174,6 @@ export class DomainService {
     }
 
     const [created] = await db.insert(customDomains).values({ server_id: null, domain, port, type: 'panel' }).returning();
-
-    const serverIp = getServerIp();
-    updateEnvVariable('CORS_ORIGIN', `http://${domain},http://${serverIp}`);
-    restartService();
 
     return created;
   }
