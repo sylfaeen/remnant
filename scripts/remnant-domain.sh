@@ -300,6 +300,19 @@ action_enable_ssl() {
     }
   fi
 
+  # Update fallback vhost to redirect to HTTPS if it exists
+  local fallback_vhost="${SITES_AVAILABLE}/remnant-fallback"
+  if [ -f "$fallback_vhost" ]; then
+    cat > "$fallback_vhost" << FALLBACK
+server {
+    listen 80 default_server;
+    server_name _;
+    return 301 https://${domain}\$request_uri;
+}
+FALLBACK
+    nginx_test_and_reload || true
+  fi
+
   # Extract expiry date
   local expiry=""
   if command -v openssl &>/dev/null && [ -f "/etc/letsencrypt/live/${domain}/cert.pem" ]; then
@@ -424,39 +437,16 @@ action_update_panel() {
   sed -i "s/listen 80 default_server;/listen 80;/" "$panel_vhost"
   sed -i "s/server_name .*/server_name ${domain};/" "$panel_vhost"
 
-  # Ensure a catch-all vhost exists for IP access
+  # Ensure a catch-all vhost exists that redirects IP access to the domain
   local fallback_vhost="${SITES_AVAILABLE}/remnant-fallback"
-  if [ ! -f "$fallback_vhost" ]; then
-    local port
-    port=$(grep -oP 'proxy_pass http://127\.0\.0\.1:\K[0-9]+' "$panel_vhost" | head -1)
-    port="${port:-3001}"
-    cat > "$fallback_vhost" << FALLBACK
+  cat > "$fallback_vhost" << FALLBACK
 server {
     listen 80 default_server;
     server_name _;
-    client_max_body_size 256M;
-
-    location / {
-        proxy_pass http://127.0.0.1:${port};
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-    location /ws/ {
-        proxy_pass http://127.0.0.1:${port};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
+    return 301 http://${domain}\$request_uri;
 }
 FALLBACK
-    ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
-  fi
+  ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
 
   if ! nginx_test_and_reload; then
     # Rollback to catch-all
@@ -534,33 +524,22 @@ action_enable_fallback() {
     exit 0
   fi
 
-  local port
-  port=$(grep -oP 'proxy_pass http://127\.0\.0\.1:\K[0-9]+' "$panel_vhost" | head -1)
-  port="${port:-3001}"
+  # Extract the panel domain from the main vhost
+  local panel_domain
+  panel_domain=$(grep -oP 'server_name \K[^;]+' "$panel_vhost" | head -1)
+  panel_domain="${panel_domain:-_}"
+
+  # Determine redirect scheme based on SSL
+  local scheme="http"
+  if [ -d "/etc/letsencrypt/live/${panel_domain}" ]; then
+    scheme="https"
+  fi
 
   cat > "$fallback_vhost" << FALLBACK
 server {
     listen 80 default_server;
     server_name _;
-    client_max_body_size 256M;
-
-    location / {
-        proxy_pass http://127.0.0.1:${port};
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-
-    location /ws/ {
-        proxy_pass http://127.0.0.1:${port};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
+    return 301 ${scheme}://${panel_domain}\$request_uri;
 }
 FALLBACK
   ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
