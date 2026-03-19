@@ -418,7 +418,8 @@ action_update_panel() {
     json_error "Panel vhost not found at ${panel_vhost}"
   fi
 
-  # Update server_name with the domain only
+  # Update server_name with the domain and remove default_server (fallback handles IP access)
+  sed -i "s/listen 80 default_server;/listen 80;/" "$panel_vhost"
   sed -i "s/server_name .*/server_name ${domain};/" "$panel_vhost"
 
   # Ensure a catch-all vhost exists for IP access
@@ -471,7 +472,8 @@ action_reset_panel() {
     json_error "Panel vhost not found at ${panel_vhost}"
   fi
 
-  # Reset server_name to catch-all
+  # Reset server_name to catch-all and restore default_server
+  sed -i "s/listen 80;/listen 80 default_server;/" "$panel_vhost"
   sed -i "s/server_name .*/server_name _;/" "$panel_vhost"
 
   # Remove any certbot SSL config lines (revert to plain HTTP)
@@ -483,7 +485,7 @@ action_reset_panel() {
     port="${port:-3001}"
     cat > "$panel_vhost" << PANEL_VHOST
 server {
-    listen 80;
+    listen 80 default_server;
     server_name _;
     client_max_body_size 256M;
 

@@ -555,7 +555,7 @@ configure_nginx() {
 
     cat > /etc/nginx/sites-available/remnant << 'NGINX_EOF'
 server {
-    listen 80;
+    listen 80 default_server;
     server_name _;
     client_max_body_size 256M;
 
@@ -588,7 +588,7 @@ NGINX_EOF
 
     if nginx -t 2>/dev/null; then
         systemctl enable nginx >/dev/null 2>&1
-        systemctl start nginx 2>/dev/null || systemctl reload nginx 2>/dev/null || nginx -s reload 2>/dev/null || true
+        systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || nginx -s reload 2>/dev/null || true
         print_ok "Nginx is running"
     else
         print_warn "Nginx config test failed — check: nginx -t"
