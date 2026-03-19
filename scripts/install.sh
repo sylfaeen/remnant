@@ -267,6 +267,28 @@ ask_install_paths() {
     echo ""
     echo -e "${WHITE}What URL will users access Remnant from?${NC}"
     ask_value "Access URL" "http://${server_ip}" CORS_ORIGIN
+
+    # Ask for service user password upfront (only if user doesn't exist yet)
+    if ! id "$SERVICE_USER" &>/dev/null; then
+        echo ""
+        echo -e "${WHITE}Set a password for '${SERVICE_USER}' (used for SFTP access):${NC}"
+        print_warn "This password can only be reset with root access"
+        echo ""
+        while true; do
+            read -sp "  Password: " USER_PASSWORD < /dev/tty
+            echo ""
+            read -sp "  Confirm:  " USER_PASSWORD_CONFIRM < /dev/tty
+            echo ""
+            echo ""
+            if [[ -z "$USER_PASSWORD" ]]; then
+                echo -e "  ${RED}Password cannot be empty.${NC}"
+            elif [[ "$USER_PASSWORD" != "$USER_PASSWORD_CONFIRM" ]]; then
+                echo -e "  ${RED}Passwords do not match. Try again.${NC}"
+            else
+                break
+            fi
+        done
+    fi
 }
 
 # ── Step 1: System check ─────────────────────────────────────────────────────
@@ -393,29 +415,9 @@ download_remnant() {
         print_ok "User '${SERVICE_USER}' exists"
     else
         useradd --system --shell /bin/bash --home-dir "$REMNANT_HOME" "$SERVICE_USER" 2>/dev/null || true
-        print_ok "User '${SERVICE_USER}' created"
-
-        echo ""
-        echo -e "  ${WHITE}Set a password for '${SERVICE_USER}' (used for SFTP access):${NC}"
-        print_warn "This password can only be reset with root access"
-        echo ""
-        while true; do
-            read -sp "  Password: " USER_PASSWORD < /dev/tty
-            echo ""
-            read -sp "  Confirm:  " USER_PASSWORD_CONFIRM < /dev/tty
-            echo ""
-            echo ""
-            if [[ -z "$USER_PASSWORD" ]]; then
-                echo -e "  ${RED}Password cannot be empty.${NC}"
-            elif [[ "$USER_PASSWORD" != "$USER_PASSWORD_CONFIRM" ]]; then
-                echo -e "  ${RED}Passwords do not match. Try again.${NC}"
-            else
-                echo "$SERVICE_USER:$USER_PASSWORD" | chpasswd
-                unset USER_PASSWORD USER_PASSWORD_CONFIRM
-                print_ok "Password set for '${SERVICE_USER}'"
-                break
-            fi
-        done
+        echo "$SERVICE_USER:$USER_PASSWORD" | chpasswd
+        unset USER_PASSWORD USER_PASSWORD_CONFIRM
+        print_ok "User '${SERVICE_USER}' created (password set)"
     fi
 
     # Directories
