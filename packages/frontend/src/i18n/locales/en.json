@@ -348,6 +348,7 @@
         "step3Title": "Enter your domain below",
         "step3Desc": "Once the DNS record is configured, enter the domain and click Configure.",
         "step3Label": "Connection domain",
+        "addDomain": "Add domain",
         "configure": "Configure",
         "connectionInfo": "Players can connect with:",
         "withSrv": "With SRV, no port needed",

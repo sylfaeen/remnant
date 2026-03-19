@@ -348,6 +348,7 @@
         "step3Title": "Saisir votre domaine",
         "step3Desc": "Une fois l'enregistrement DNS configuré, saisissez le domaine et cliquez sur Configurer.",
         "step3Label": "Domaine de connexion",
+        "addDomain": "Ajouter un domaine",
         "configure": "Configurer",
         "connectionInfo": "Les joueurs peuvent se connecter avec :",
         "withSrv": "Avec SRV, sans préciser le port",
