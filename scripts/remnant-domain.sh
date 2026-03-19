@@ -307,7 +307,7 @@ action_enable_ssl() {
 server {
     listen 80 default_server;
     server_name _;
-    return 301 https://${domain}\$request_uri;
+    return 302 https://${domain}\$request_uri;
 }
 FALLBACK
     nginx_test_and_reload || true
@@ -443,7 +443,7 @@ action_update_panel() {
 server {
     listen 80 default_server;
     server_name _;
-    return 301 http://${domain}\$request_uri;
+    return 302 http://${domain}\$request_uri;
 }
 FALLBACK
   ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
@@ -539,7 +539,7 @@ action_enable_fallback() {
 server {
     listen 80 default_server;
     server_name _;
-    return 301 ${scheme}://${panel_domain}\$request_uri;
+    return 302 ${scheme}://${panel_domain}\$request_uri;
 }
 FALLBACK
   ln -sf "$fallback_vhost" "${SITES_ENABLED}/remnant-fallback"
