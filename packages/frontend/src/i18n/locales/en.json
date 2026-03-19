@@ -335,7 +335,24 @@
       "dnsRecords": "DNS Records to configure",
       "dnsHint": "Add this A record in your domain registrar's DNS settings. It may take a few minutes to propagate.",
       "srvHint": "Optional SRV record — allows players to connect without specifying the port",
-      "renewSsl": "Renew SSL"
+      "renewSsl": "Renew SSL",
+      "playerDomain": {
+        "title": "Connection domain",
+        "description": "Configure a custom domain so players can connect to your Minecraft server",
+        "step1Title": "Add a DNS A record",
+        "step1Desc": "Go to your domain registrar and add an A record pointing to your server IP.",
+        "step1Hint": "DNS propagation may take up to 30 minutes.",
+        "step2Title": "Add an SRV record",
+        "step2Desc": "Add an SRV record so players can connect without specifying the port.",
+        "step2Hint": "This SRV record allows direct connection using the domain, without manually adding the port.",
+        "step3Title": "Enter your domain below",
+        "step3Desc": "Once the DNS record is configured, enter the domain and click Configure.",
+        "step3Label": "Connection domain",
+        "configure": "Configure",
+        "connectionInfo": "Players can connect with:",
+        "withSrv": "With SRV, no port needed",
+        "withoutSrv": "Without SRV, port required"
+      }
     },
     "twoFactor": {
       "title": "Two-factor authentication",

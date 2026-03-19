@@ -335,7 +335,24 @@
       "dnsRecords": "Enregistrements DNS à configurer",
       "dnsHint": "Ajoutez cet enregistrement A dans les paramètres DNS de votre registrar. La propagation peut prendre quelques minutes.",
       "srvHint": "Enregistrement SRV optionnel — permet aux joueurs de se connecter sans préciser le port",
-      "renewSsl": "Renouveler SSL"
+      "renewSsl": "Renouveler SSL",
+      "playerDomain": {
+        "title": "Domaine de connexion",
+        "description": "Configurez un domaine personnalisé pour que les joueurs se connectent à votre serveur Minecraft",
+        "step1Title": "Ajouter un enregistrement DNS A",
+        "step1Desc": "Rendez-vous chez votre registrar et ajoutez un enregistrement A pointant vers l'IP de votre serveur.",
+        "step1Hint": "La propagation DNS peut prendre jusqu'à 30 minutes.",
+        "step2Title": "Ajouter un enregistrement SRV",
+        "step2Desc": "Ajoutez un enregistrement SRV pour que les joueurs puissent se connecter sans préciser le port.",
+        "step2Hint": "Cet enregistrement SRV permet de se connecter directement avec le domaine, sans ajouter le port manuellement.",
+        "step3Title": "Saisir votre domaine",
+        "step3Desc": "Une fois l'enregistrement DNS configuré, saisissez le domaine et cliquez sur Configurer.",
+        "step3Label": "Domaine de connexion",
+        "configure": "Configurer",
+        "connectionInfo": "Les joueurs peuvent se connecter avec :",
+        "withSrv": "Avec SRV, sans préciser le port",
+        "withoutSrv": "Sans SRV, port requis"
+      }
     },
     "twoFactor": {
       "title": "Authentification à deux facteurs",
