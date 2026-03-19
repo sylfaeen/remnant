@@ -86,8 +86,8 @@ const start = async () => {
       credentials: true,
     });
 
-    // Register security headers
-    const isHttps = corsOrigins.some((o) => o.startsWith('https://'));
+    // Register security headers (only enforce HTTPS when SSL is actually configured)
+    const isHttps = process.env.SECURE_COOKIES === 'true';
 
     await fastify.register(helmet, {
       contentSecurityPolicy: {

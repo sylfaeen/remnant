@@ -175,6 +175,10 @@ export class DomainService {
 
     const [created] = await db.insert(customDomains).values({ server_id: null, domain, port, type: 'panel' }).returning();
 
+    const serverIp = getServerIp();
+    updateEnvVariable('CORS_ORIGIN', `http://${domain},http://${serverIp}`);
+    restartService();
+
     return created;
   }
 

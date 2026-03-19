@@ -16,7 +16,7 @@ export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token';
 export const refreshTokenCookieOptions = {
   httpOnly: true,
   secure: process.env.SECURE_COOKIES === 'true',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
   path: '/trpc',
   maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
 };
