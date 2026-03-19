@@ -3661,7 +3661,7 @@ So that les joueurs puissent se connecter avec `play.mydomain.com`.
 
 ## Epic 19: Domaine Personnalisé pour le Panel Remnant
 
-L'administrateur peut configurer un domaine custom pour accéder au panel Remnant en HTTPS sécurisé, remplaçant l'accès par IP.
+L'administrateur peut configurer un domaine custom pour accéder au panel Remnant en HTTPS sécurisé, avec accès IP fallback optionnel, validation DNS guidée, et audit logging de toutes les opérations.
 
 **FRs couverts :** FR5, FR6, FR7
 **NFRs couverts :** NFR1, NFR2, NFR5
@@ -3669,8 +3669,8 @@ L'administrateur peut configurer un domaine custom pour accéder au panel Remnan
 ### Story 19.1: Backend — Service Domaine Panel
 
 As a administrateur,
-I want configurer un domaine pour le panel Remnant,
-So that j'accède à mon panel via `panel.mydomain.com` en HTTPS.
+I want configurer un domaine pour le panel Remnant avec gestion SSL et accès IP fallback,
+So that j'accède à mon panel via `panel.mydomain.com` en HTTPS tout en gardant un accès IP de secours.
 
 **Acceptance Criteria:**
 
@@ -3679,13 +3679,18 @@ So that j'accède à mon panel via `panel.mydomain.com` en HTTPS.
 **When** j'appelle `domains.setPanelDomain({ domain })`
 **Then** le vhost Nginx `remnant` est mis à jour avec le `server_name`
 **And** le domaine est stocké en DB avec `server_id = NULL` et `type = 'panel'`
+**And** `CORS_ORIGIN` est mis à jour avec `http://<domain>`
+**And** le service Remnant est redémarré automatiquement
+**And** un audit log est enregistré
 
 ##### AC2: Activation SSL panel
 **Given** un domaine panel configuré
 **When** j'appelle `domains.enableSsl({ id })`
 **Then** certbot est lancé sur le domaine
 **And** en cas de succès, `.env` est mis à jour : `CORS_ORIGIN=https://<domain>`, `SECURE_COOKIES=true`
+**And** la date d'expiration SSL est stockée en DB (`ssl_expires_at`)
 **And** le service Remnant est redémarré automatiquement
+**And** un audit log est enregistré
 
 ##### AC3: Suppression domaine panel
 **Given** un domaine panel existant
@@ -3693,53 +3698,94 @@ So that j'accède à mon panel via `panel.mydomain.com` en HTTPS.
 **Then** le vhost Nginx revient au `server_name _` par défaut
 **And** `.env` est restauré avec l'IP du serveur et `SECURE_COOKIES=false`
 **And** le service est redémarré
+**And** un audit log est enregistré
 
 ##### AC4: Un seul domaine panel
 **Given** un domaine panel déjà configuré
 **When** j'essaie d'en ajouter un autre
-**Then** l'ancien est remplacé (pas d'accumulation)
+**Then** l'ancien est supprimé puis remplacé (pas d'accumulation)
+
+##### AC5: Validation DNS
+**Given** un domaine quelconque
+**When** j'appelle `domains.dnsCheck({ domain })`
+**Then** le script vérifie que le domaine pointe vers l'IP du serveur
+**And** retourne `{ matches, resolvedIp, serverIp }`
+
+##### AC6: Accès IP fallback
+**Given** un domaine panel avec SSL activé
+**When** j'appelle `domains.ipAccess`
+**Then** le statut de l'accès IP fallback est retourné (`{ enabled }`)
+**When** j'appelle `domains.setIpAccess({ enabled })`
+**Then** le vhost fallback IP est activé/désactivé via le script shell
+**And** un audit log est enregistré
+
+##### AC7: Rate limiting et permissions
+**Given** toutes les mutations du router domaines
+**Then** les mutations sont protégées par `rateLimitedPermission(10, 60s, 'users:manage')`
+**And** les queries sont protégées par `requirePermission('users:manage')`
 
 ---
 
 ### Story 19.2: Frontend — Settings Domaine Panel
 
 As a administrateur,
-I want une section dans les settings globaux pour gérer le domaine du panel,
-So that je puisse configurer et surveiller le domaine panel depuis l'interface.
+I want une section dans les settings globaux pour gérer le domaine du panel avec guidage DNS et gestion de l'accès IP,
+So that je puisse configurer, surveiller et maintenir le domaine panel depuis l'interface.
 
 **Acceptance Criteria:**
 
 ##### AC1: Section dans settings globaux
-**Given** la page `/app/settings`
+**Given** la page `/app/settings/general`
 **When** je la visite
-**Then** une section "Domaine du panel" est visible
+**Then** une section "Domaine du panel" (`PanelDomainSection`) est visible dans un `FeatureCard`
 
-##### AC2: Formulaire domaine panel
+##### AC2: Guide de configuration en 3 étapes
 **Given** aucun domaine panel configuré
-**When** je saisis un domaine et valide
-**Then** le domaine est configuré
-**And** les DNS records à ajouter sont affichés
+**When** la section se charge
+**Then** un guide en 3 étapes est affiché (`SetupSteps`) :
+1. Créer un enregistrement DNS A pointant vers l'IP du serveur (avec bouton copier IP)
+2. Saisir le domaine dans le formulaire
+3. Activer SSL après propagation DNS
 
-##### AC3: Statut SSL
+##### AC3: Formulaire domaine panel
+**Given** aucun domaine panel configuré
+**When** je saisis un domaine et valide (bouton ou Enter)
+**Then** le domaine est configuré
+**And** la validation regex empêche les domaines invalides avec message d'erreur
+
+##### AC4: Affichage domaine configuré
 **Given** un domaine panel configuré
 **When** la section se charge
-**Then** le statut SSL est affiché (activé/désactivé, date d'expiration)
-**And** un bouton "Activer SSL" est disponible si pas encore activé
+**Then** le domaine est affiché avec son statut SSL (badge SSL vert ou badge "No SSL" gris)
+**And** la date d'expiration SSL est affichée si applicable
+**And** un badge "Expiring soon" orange apparaît si l'expiration est < 14 jours
+**And** le record DNS A → domaine → IP est affiché avec bouton copier
 
-##### AC4: Suppression
+##### AC5: Activation SSL
+**Given** un domaine panel sans SSL
+**When** je clique "Activer SSL"
+**Then** le certificat est demandé via certbot
+**And** un message de succès avec lien direct `https://<domain>` est affiché
+
+##### AC6: Accès IP fallback
+**Given** un domaine panel avec SSL activé
+**When** la section se charge
+**Then** un toggle "Accès IP" apparaît avec description
+**And** je peux activer/désactiver l'accès au panel via l'IP du serveur
+
+##### AC7: Suppression avec confirmation
 **Given** un domaine panel configuré
-**When** je clique sur supprimer avec confirmation
-**Then** le domaine est supprimé et le panel revient en mode IP
+**When** je clique sur supprimer
+**Then** une confirmation inline (Oui/Non) est demandée
+**And** après confirmation, le domaine est supprimé et le panel revient en mode IP
 
-##### AC5: Avertissement restart
-**Given** l'activation SSL ou le changement de domaine
-**When** l'opération réussit
-**Then** un message informe que le service va redémarrer
-**And** l'URL du panel va changer
+##### AC8: Avertissement restart
+**Given** la section domaine panel
+**Then** un bandeau d'avertissement amber informe que les opérations entraînent un redémarrage du service
 
-##### AC6: i18n
-- [ ] Tous les textes utilisent `t()`
-- [ ] Clés ajoutées à `en.json` et `fr.json`
+##### AC9: i18n
+- [x] Tous les textes utilisent `t()` via `useTranslation()`
+- [x] Clés ajoutées à `en.json` et `fr.json` (namespace `appSettings.panelDomain.*`)
 
 ---
 
