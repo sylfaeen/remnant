@@ -438,7 +438,7 @@ SECURE_COOKIES=false
 | **Manifest** | `public/manifest.webmanifest` — nom "Remnant", display standalone, thème emerald |
 | **Service Worker** | `public/sw.js` — minimal, active l'installabilité PWA |
 | **Icône** | `public/icon.svg` — gradient emerald/amber avec lettre "R" |
-| **Meta tags** | theme-color, apple-mobile-web-app-capable, viewport-fit=cover |
+| **Meta tags** | theme-color, mobile-web-app-capable, viewport-fit=cover |
 
 ---
 
