@@ -461,13 +461,15 @@ download_remnant() {
     # Domain script
     chmod +x "$APP_DIR/scripts/remnant-domain.sh"
 
-    # Sudoers for both scripts
+    # Sudoers for scripts and service management
     cat > /etc/sudoers.d/remnant << SUDOERS_EOF
 ${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-firewall.sh
 ${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-domain.sh
+${SERVICE_USER} ALL=(root) NOPASSWD: /usr/bin/systemctl restart remnant
+${SERVICE_USER} ALL=(root) NOPASSWD: /usr/bin/systemctl reload remnant
 SUDOERS_EOF
     chmod 440 /etc/sudoers.d/remnant
-    print_ok "Sudoers configured (firewall + domains)"
+    print_ok "Sudoers configured (firewall + domains + service)"
 
     # Permissions
     chown -R "$SERVICE_USER:$SERVICE_USER" "$REMNANT_HOME"
