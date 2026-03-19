@@ -200,7 +200,9 @@ function AddJarSection({ serverId }: AddJarSectionProps) {
               <p className={'font-medium'}>{t('settings.jarUpload.dragDrop')}</p>
               <p className={'mt-3 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.jarUpload.or')}</p>
               <Label className={'mt-3 mb-0! inline-block cursor-pointer'}>
-                <Button variant={'secondary'}>{t('settings.jarUpload.browse')}</Button>
+                <Button variant={'secondary'} asChild>
+                  <span>{t('settings.jarUpload.browse')}</span>
+                </Button>
                 <input type={'file'} accept={'.jar'} multiple onChange={handleFileSelect} className={'hidden'} />
               </Label>
               {uploadJar.isPending && (
