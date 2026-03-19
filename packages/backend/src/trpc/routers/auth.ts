@@ -5,7 +5,7 @@ import { rateLimitedProcedure } from '@remnant/backend/trpc/middlewares/rate-lim
 import { AuthService } from '@remnant/backend/services/auth_service';
 import { totpService } from '@remnant/backend/services/totp_service';
 import { auditService } from '@remnant/backend/services/audit_service';
-import { REFRESH_TOKEN_COOKIE_NAME, refreshTokenCookieOptions } from '@remnant/backend/plugins/cookie';
+import { REFRESH_TOKEN_COOKIE_NAME, getRefreshTokenCookieOptions } from '@remnant/backend/plugins/cookie';
 import { loginRequestSchema, verifyTotpLoginRequestSchema, ErrorCodes } from '@remnant/shared';
 
 // 5 attempts per minute for auth routes
@@ -41,7 +41,7 @@ export const authRouter = router({
     const accessToken = authService.generateAccessToken(user);
     const refreshToken = authService.generateRefreshToken();
     await authService.createSession(user.id, refreshToken);
-    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, refreshTokenCookieOptions);
+    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, getRefreshTokenCookieOptions(ctx.req));
 
     await auditService.log({
       userId: user.id,
@@ -113,7 +113,7 @@ export const authRouter = router({
     const accessToken = authService.generateAccessToken(user);
     const refreshToken = authService.generateRefreshToken();
     await authService.createSession(user.id, refreshToken);
-    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, refreshTokenCookieOptions);
+    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, getRefreshTokenCookieOptions(ctx.req));
 
     await auditService.log({
       userId: user.id,
@@ -182,7 +182,7 @@ export const authRouter = router({
       });
     }
 
-    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, result.newRefreshToken, refreshTokenCookieOptions);
+    ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, result.newRefreshToken, getRefreshTokenCookieOptions(ctx.req));
 
     return result.data;
   }),

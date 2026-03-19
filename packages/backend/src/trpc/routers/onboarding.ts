@@ -5,7 +5,7 @@ import { users } from '@remnant/backend/db/schema';
 import { router, publicProcedure } from '@remnant/backend/trpc';
 import { rateLimitedProcedure } from '@remnant/backend/trpc/middlewares/rate-limit';
 import { AuthService } from '@remnant/backend/services/auth_service';
-import { REFRESH_TOKEN_COOKIE_NAME, refreshTokenCookieOptions } from '@remnant/backend/plugins/cookie';
+import { REFRESH_TOKEN_COOKIE_NAME, getRefreshTokenCookieOptions } from '@remnant/backend/plugins/cookie';
 import { setupRequestSchema, ErrorCodes } from '@remnant/shared';
 
 const BCRYPT_ROUNDS = 12;
@@ -51,7 +51,7 @@ export const onboardingRouter = router({
       const refreshToken = authService.generateRefreshToken();
       await authService.createSession(newUser.id, refreshToken);
 
-      ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, refreshTokenCookieOptions);
+      ctx.res.setCookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, getRefreshTokenCookieOptions(ctx.req));
 
       return {
         access_token: accessToken,

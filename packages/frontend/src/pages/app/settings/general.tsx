@@ -38,7 +38,6 @@ function PanelDomainSection() {
   const [domainInput, setDomainInput] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [sslJustEnabled, setSslJustEnabled] = useState(false);
 
   const { data: panelData } = usePanelDomain();
   const { data: ipAccessData } = useIpAccess();
@@ -148,10 +147,7 @@ function PanelDomainSection() {
                         size={'xs'}
                         disabled={enableSsl.isPending}
                         loading={enableSsl.isPending}
-                        onClick={async () => {
-                          await enableSsl.mutateAsync(panelDomain.id);
-                          setSslJustEnabled(true);
-                        }}
+                        onClick={async () => await enableSsl.mutateAsync(panelDomain.id)}
                       >
                         <Lock className={'size-3.5'} />
                         {t('settings.domains.enableSsl')}
@@ -212,7 +208,7 @@ function PanelDomainSection() {
                   </Button>
                 </div>
               )}
-              {sslJustEnabled && panelDomain.ssl_enabled && (
+              {panelDomain.ssl_enabled && (
                 <div className={'mt-3 rounded-lg border border-green-500/20 bg-green-50/50 p-3 dark:bg-green-950/20'}>
                   <div className={'flex items-center gap-2'}>
                     <CheckCircle2 className={'size-4 shrink-0 text-green-600'} strokeWidth={2} />
