@@ -1,7 +1,7 @@
 import { useState, type DragEvent, type ChangeEvent } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Check, Download, Package, Trash2, Upload, UploadCloud } from 'lucide-react';
+import { AlertTriangle, Check, Download, Loader2, Package, Trash2, Upload, UploadCloud } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -207,9 +207,7 @@ function AddJarSection({ serverId }: AddJarSectionProps) {
               </Label>
               {uploadJar.isPending && (
                 <div className={'mt-3 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
-                  <div
-                    className={'size-3.5 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
-                  />
+                  <Loader2 className={'size-5 animate-spin text-zinc-400 dark:text-zinc-500'} />
                   {t('settings.jarUpload.uploading')}
                 </div>
               )}
