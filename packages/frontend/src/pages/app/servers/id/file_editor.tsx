@@ -156,7 +156,7 @@ export function ServerFileEditorPage() {
       <PageContent>
         <div
           className={cn(
-            'min-h-0 flex-1 overflow-hidden rounded-md border border-black/10 shadow-xs dark:border-white/10',
+            'h-200 overflow-hidden rounded-md border border-black/10 shadow-xs min-[960px]:h-auto min-[960px]:min-h-0 min-[960px]:flex-1 dark:border-white/10',
             MONACO_CONTAINER_CLASS
           )}
         >

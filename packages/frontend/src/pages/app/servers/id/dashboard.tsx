@@ -66,10 +66,10 @@ export function ServerDashboardPage() {
         </ServerPageHeader.Actions>
       </ServerPageHeader>
       <PageContent>
-        <div className={'flex h-full min-h-0 flex-1 flex-col space-y-4'}>
+        <div className={'space-y-4 min-[960px]:flex min-[960px]:min-h-0 min-[960px]:flex-1 min-[960px]:flex-col'}>
           <ServerConsole
             error={wsError}
-            className={'min-h-0 flex-1'}
+            className={'h-200 min-[960px]:h-auto min-[960px]:min-h-0 min-[960px]:flex-1'}
             {...{ messages, isConnected, isConnecting, sendCommand, clearMessages }}
           />
           <MetricsBar

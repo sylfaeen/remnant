@@ -152,18 +152,8 @@ function UploadSection({ serverId }: UploadSectionProps) {
             )}
           />
           <div className={'relative flex flex-col items-center py-8'}>
-            <div
-              className={
-                'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors dark:bg-zinc-800'
-              }
-            >
-              <UploadCloud
-                className={cn(
-                  'size-6 transition-colors',
-                  isDragging ? 'text-zinc-600 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-500'
-                )}
-                strokeWidth={1.5}
-              />
+            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-zinc-800'}>
+              <UploadCloud className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
             </div>
             <p className={'font-medium'}>{t('plugins.uploadHint')}</p>
             <p className={'mt-3 text-sm text-zinc-600 dark:text-zinc-400'}>{t('plugins.or')}</p>

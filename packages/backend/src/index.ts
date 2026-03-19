@@ -68,10 +68,12 @@ const start = async () => {
       }
     }
 
-    // Sync firewall rules from database to iptables
-    const syncResult = await firewallService.syncRules();
-    if (syncResult.synced > 0) {
-      fastify.log.info(`Firewall: synced ${syncResult.synced}/${syncResult.total} rules to iptables`);
+    // Sync firewall rules from database to iptables (production only)
+    if (process.env.NODE_ENV === 'production') {
+      const syncResult = await firewallService.syncRules();
+      if (syncResult.synced > 0) {
+        fastify.log.info(`Firewall: synced ${syncResult.synced}/${syncResult.total} rules to iptables`);
+      }
     }
 
     // Register CORS

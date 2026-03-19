@@ -29,15 +29,14 @@ export function ServerConsole({
   const [inputValue, setInputValue] = useState('');
   const [commandHistory, setCommandHistory] = useState<Array<string>>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to the bottom when new messages arrive
   useEffect(() => {
-    if (autoScroll && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (autoScroll && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, autoScroll]);
 
@@ -89,7 +88,7 @@ export function ServerConsole({
           {error}
         </div>
       )}
-      <div className={'flex flex-1 flex-col overflow-hidden rounded-xl border border-black/10 bg-zinc-950'}>
+      <div className={'flex max-w-full flex-1 flex-col overflow-hidden rounded-xl border border-black/10 bg-zinc-950'}>
         <div className={'flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-2'}>
           <div className={'flex items-center gap-2'}>
             <Terminal className={'size-4 text-zinc-600 dark:text-zinc-400'} />
@@ -117,7 +116,6 @@ export function ServerConsole({
           ) : (
             messages.map((message) => <MessageLine key={message.id} {...{ message }} />)
           )}
-          <div ref={messagesEndRef} />
         </div>
         <form onSubmit={handleSubmit} className={'flex gap-2 border-t border-zinc-800 bg-zinc-900 p-3'}>
           <div className={'relative flex-1'}>
@@ -150,7 +148,9 @@ export function ServerConsole({
           size={'sm'}
           onClick={() => {
             setAutoScroll(true);
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            if (messagesContainerRef.current) {
+              messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            }
           }}
           className={
             'absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-green-600/90 shadow-lg backdrop-blur-sm hover:bg-green-600'

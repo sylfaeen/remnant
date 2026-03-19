@@ -12,18 +12,13 @@ export function FeatureCard({ className, ...rest }: FeatureCardProps) {
 type FeatureCardHeaderProps = ComponentProps<'div'>;
 
 FeatureCard.Header = function FeatureCardHeader({ className, ...rest }: FeatureCardHeaderProps) {
-  return (
-    <div
-      className={cn('flex flex-col items-start justify-between gap-x-6 gap-y-3 px-5 py-4 sm:flex-row sm:items-center', className)}
-      {...rest}
-    />
-  );
+  return <div className={cn('flex items-center justify-between gap-x-6 gap-y-3 px-5 py-4', className)} {...rest} />;
 };
 
 type FeatureCardContentProps = ComponentProps<'div'>;
 
 FeatureCard.Content = function FeatureCardContent({ className, ...rest }: FeatureCardContentProps) {
-  return <div className={className} {...rest} />;
+  return <div className={cn('flex-1', className)} {...rest} />;
 };
 
 type FeatureCardTitleProps = ComponentProps<'h3'> & {
@@ -130,7 +125,7 @@ FeatureCard.Empty = function FeatureCardEmpty({ icon: Icon, title, description, 
   return (
     <FeatureCard.Row className={'relative overflow-hidden'}>
       <div className={'absolute inset-0 bg-linear-to-t from-gray-400/10 to-transparent'} />
-      <FeatureCard.Stack className={'items-center gap-y-0 py-10'}>
+      <FeatureCard.Stack className={'items-center gap-y-0 py-10 text-center'}>
         <div className={'flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
           <Icon className={'size-6 text-zinc-600 dark:text-zinc-400'} strokeWidth={1.5} />
         </div>

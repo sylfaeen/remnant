@@ -5,6 +5,7 @@ import { cn } from '@remnant/frontend/lib/cn';
 import { ArrowRight, Download, Menu } from 'lucide-react';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 
 type AppShellProps = {
   children: ReactNode;
@@ -66,7 +67,17 @@ function SidebarToggle() {
   const { setMobileOpen } = useSidebar();
 
   return (
-    <div className={'flex items-center justify-end border-b border-black/10 px-4 py-3 min-[960px]:hidden'}>
+    <div className={'flex items-center justify-between border-b border-black/10 px-4 py-3 min-[960px]:hidden'}>
+      <Link to={'/app'} className={'group flex items-center gap-2.5'}>
+        <div
+          className={
+            'flex size-7 items-center justify-center rounded-md bg-linear-to-br from-green-500 to-amber-500 shadow-sm transition-shadow group-hover:shadow-md'
+          }
+        >
+          <span className={'text-sm font-bold text-white'}>R</span>
+        </div>
+        <span className={'text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100'}>Remnant</span>
+      </Link>
       <Button type={'button'} variant={'secondary'} size={'icon-sm'} onClick={() => setMobileOpen(true)}>
         <Menu className={'size-4'} strokeWidth={2} />
       </Button>

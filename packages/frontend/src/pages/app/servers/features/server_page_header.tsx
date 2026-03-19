@@ -17,7 +17,7 @@ export function ServerPageHeader({ children }: { children: ReactNode }) {
 }
 
 ServerPageHeader.Left = function ServerPageHeaderLeft({ children }: { children: ReactNode }) {
-  return <div className={'flex items-start gap-3'}>{children}</div>;
+  return <div className={'flex min-w-0 items-start gap-3'}>{children}</div>;
 };
 
 ServerPageHeader.Icon = function ServerPageHeaderIcon({ icon: IconComponent }: { icon: LucideIcon }) {
@@ -29,7 +29,7 @@ ServerPageHeader.Icon = function ServerPageHeaderIcon({ icon: IconComponent }: {
 };
 
 ServerPageHeader.Info = function ServerPageHeaderInfo({ children }: { children: ReactNode }) {
-  return <div>{children}</div>;
+  return <div className={'min-w-0'}>{children}</div>;
 };
 
 ServerPageHeader.Heading = function ServerPageHeaderHeading({ children }: { children: ReactNode }) {

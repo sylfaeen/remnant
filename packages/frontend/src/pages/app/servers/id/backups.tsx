@@ -188,7 +188,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
 
   return (
     <FeatureCard.Row interactive className={'items-center gap-8 py-3'}>
-      <div className={'flex items-center gap-3'}>
+      <div className={'flex min-w-0 items-center gap-3'}>
         <div
           className={cn(
             'flex size-8 shrink-0 items-center justify-center rounded-lg',
@@ -200,7 +200,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
             strokeWidth={2}
           />
         </div>
-        <div>
+        <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{backup.name}</span>
             {isNewest && (

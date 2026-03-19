@@ -194,18 +194,8 @@ function AddJarSection({ serverId }: AddJarSectionProps) {
               )}
             />
             <div className={'relative flex flex-col items-center py-8'}>
-              <div
-                className={
-                  'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 transition-colors dark:bg-zinc-800'
-                }
-              >
-                <UploadCloud
-                  className={cn(
-                    'size-6 transition-colors',
-                    isDragging ? 'text-zinc-600 dark:text-zinc-400' : 'text-zinc-300 dark:text-zinc-500'
-                  )}
-                  strokeWidth={1.5}
-                />
+              <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-zinc-800'}>
+                <UploadCloud className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
               </div>
               <p className={'font-medium'}>{t('settings.jarUpload.dragDrop')}</p>
               <p className={'mt-3 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.jarUpload.or')}</p>
@@ -325,7 +315,7 @@ function JarListSection({ serverId }: JarListSectionProps) {
           <FeatureCard.Description>{t('settings.availableJarsDescription')}</FeatureCard.Description>
         </FeatureCard.Content>
         {activeJarFile && (
-          <FeatureCard.Actions>
+          <FeatureCard.Actions className={'hidden md:flex'}>
             <div className={'flex items-center gap-2'}>
               <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.currentJar')}:</span>
               <Badge size={'md'} className={'font-jetbrains'}>
@@ -345,8 +335,8 @@ function JarListSection({ serverId }: JarListSectionProps) {
         <div className={'bg-default shadow-xs-with-border relative overflow-hidden rounded-lg py-12'}>
           <div className={'absolute inset-0 bg-linear-to-b from-zinc-600/2 to-transparent'} />
           <div className={'relative flex flex-col items-center'}>
-            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800'}>
-              <Package className={'size-6 text-zinc-300 dark:text-zinc-500'} strokeWidth={1.5} />
+            <div className={'mb-3 flex size-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-zinc-800'}>
+              <Package className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
             </div>
             <p className={'mt-2 font-medium text-zinc-600 dark:text-zinc-400'}>{t('settings.noJarsFound')}</p>
           </div>
