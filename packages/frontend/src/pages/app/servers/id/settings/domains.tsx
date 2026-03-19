@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, ChevronDown, Copy, Globe, Gamepad2, Lock, Plus, RotateCcw, ShieldAlert, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  Copy,
+  Globe,
+  Gamepad2,
+  Lock,
+  Plus,
+  RotateCcw,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { Button } from '@remnant/frontend/features/ui/button';
 import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
 import { Input } from '@remnant/frontend/features/ui/input';
-import { Label } from '@remnant/frontend/features/ui/label';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -32,6 +43,16 @@ const TYPE_BADGE_VARIANT: Record<string, BadgeProps['variant']> = {
   http: 'success',
   tcp: 'blue',
 };
+
+function getSrvSubdomain(domain: string): string | null {
+  const parts = domain.split('.');
+  return parts.length > 2 ? parts[0] : null;
+}
+
+function getSrvProtocol(domain: string): string {
+  const sub = getSrvSubdomain(domain);
+  return sub ? `_tcp.${sub}` : '_tcp';
+}
 
 export function ServerSettingsDomainsPage() {
   const { t } = useTranslation();
@@ -120,16 +141,13 @@ function PlayerDomainSection({ serverId }: PlayerDomainSectionProps) {
       </FeatureCard.Header>
       <FeatureCard.Body>
         {tcpDomains.length === 0 ? (
-          <div className={'space-y-0 divide-y divide-black/4 dark:divide-white/6'}>
-            <PlayerDomainSetupSteps port={serverPort} {...{ serverIp }} />
-            <PlayerDomainForm
-              value={domainInput}
-              onChange={setDomainInput}
-              onSubmit={handleAdd}
-              isPending={addDomain.isPending}
-              {...{ isValidDomain }}
-            />
-          </div>
+          <PlayerDomainSetupSteps
+            port={serverPort}
+            onDomainInputChange={setDomainInput}
+            onSubmit={handleAdd}
+            isPending={addDomain.isPending}
+            {...{ serverIp, domainInput, isValidDomain }}
+          />
         ) : (
           <>
             {tcpDomains.map((domain) => (
@@ -137,12 +155,12 @@ function PlayerDomainSection({ serverId }: PlayerDomainSectionProps) {
             ))}
             {showForm && (
               <div className={'border-t border-black/6 dark:border-white/6'}>
-                <PlayerDomainForm
-                  value={domainInput}
-                  onChange={setDomainInput}
+                <PlayerDomainSetupSteps
+                  port={serverPort}
+                  onDomainInputChange={setDomainInput}
                   onSubmit={handleAdd}
                   isPending={addDomain.isPending}
-                  {...{ isValidDomain }}
+                  {...{ serverIp, domainInput, isValidDomain }}
                 />
               </div>
             )}
@@ -150,45 +168,6 @@ function PlayerDomainSection({ serverId }: PlayerDomainSectionProps) {
         )}
       </FeatureCard.Body>
     </FeatureCard>
-  );
-}
-
-type PlayerDomainFormProps = {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-  isValidDomain: boolean;
-  isPending: boolean;
-};
-
-function PlayerDomainForm({ value, onChange, onSubmit, isValidDomain, isPending }: PlayerDomainFormProps) {
-  const { t } = useTranslation();
-
-  return (
-    <div className={'px-5 py-4'}>
-      <div className={'flex items-end gap-2'}>
-        <div className={'flex-1'}>
-          <Label htmlFor={'player-domain'} className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>
-            {t('settings.domains.playerDomain.step3Label')}
-          </Label>
-          <Input
-            type={'text'}
-            id={'player-domain'}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={'play.example.com'}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && isValidDomain) onSubmit();
-            }}
-          />
-        </div>
-        <Button onClick={onSubmit} disabled={!isValidDomain || isPending} loading={isPending}>
-          <Gamepad2 className={'size-4'} />
-          {t('settings.domains.playerDomain.configure')}
-        </Button>
-      </div>
-      {value && !isValidDomain && <p className={'mt-1 text-sm text-red-500'}>{t('settings.domains.invalidDomain')}</p>}
-    </div>
   );
 }
 
@@ -290,16 +269,7 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
                 </Button>
               </div>
             </div>
-            <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
-              <div className={'font-jetbrains text-sm'}>
-                <span className={'text-zinc-500'}>SRV</span>
-                <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{`_minecraft._tcp.${domain.domain}`}</span>
-                <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{`0 5 ${domain.port} ${domain.domain}`}</span>
-              </div>
-              <p className={'mt-1 text-xs text-zinc-400'}>{t('settings.domains.srvHint')}</p>
-            </div>
+            <SrvRegistrarTable domain={domain.domain} port={domain.port} />
           </div>
           <div className={'mt-3 rounded-lg border border-blue-500/20 bg-blue-50/50 p-3 dark:bg-blue-950/20'}>
             <p className={'text-sm font-medium text-blue-800 dark:text-blue-200'}>
@@ -332,11 +302,25 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
 type PlayerDomainSetupStepsProps = {
   serverIp: string;
   port: number;
+  domainInput: string;
+  onDomainInputChange: (value: string) => void;
+  onSubmit: () => void;
+  isValidDomain: boolean;
+  isPending: boolean;
 };
 
-function PlayerDomainSetupSteps({ serverIp, port }: PlayerDomainSetupStepsProps) {
+function PlayerDomainSetupSteps({
+  serverIp,
+  port,
+  domainInput,
+  onDomainInputChange,
+  onSubmit,
+  isValidDomain,
+  isPending,
+}: PlayerDomainSetupStepsProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const displayDomain = domainInput.trim() || 'play.example.com';
 
   const handleCopy = () => {
     navigator.clipboard.writeText(serverIp).then(() => {
@@ -360,22 +344,22 @@ function PlayerDomainSetupSteps({ serverIp, port }: PlayerDomainSetupStepsProps)
             <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
               {t('settings.domains.playerDomain.step1Title')}
             </p>
-            <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.domains.playerDomain.step1Desc')}</p>
-            <div className={'mt-2 rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
-              <div className={'flex items-center justify-between'}>
-                <div className={'font-jetbrains text-sm'}>
-                  <span className={'text-zinc-500'}>A</span>
-                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>play.yourdomain.com</span>
-                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{serverIp}</span>
-                </div>
-                <Button variant={'ghost'} size={'icon-sm'} onClick={handleCopy}>
-                  {copied ? <CheckCircle2 className={'size-3.5 text-green-600'} /> : <Copy className={'size-3.5'} />}
-                </Button>
-              </div>
+            <div className={'mt-2 max-w-md'}>
+              <Input
+                inputSize={'sm'}
+                type={'text'}
+                id={'player-domain'}
+                value={domainInput}
+                onChange={(e) => onDomainInputChange(e.target.value)}
+                placeholder={'play.example.com'}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && isValidDomain) onSubmit();
+                }}
+              />
+              {domainInput && !isValidDomain && (
+                <p className={'mt-1 text-sm text-red-500'}>{t('settings.domains.invalidDomain')}</p>
+              )}
             </div>
-            <p className={'mt-1.5 text-xs text-zinc-400 dark:text-zinc-500'}>{t('settings.domains.playerDomain.step1Hint')}</p>
           </div>
         </div>
         <div className={'flex gap-3'}>
@@ -392,12 +376,17 @@ function PlayerDomainSetupSteps({ serverIp, port }: PlayerDomainSetupStepsProps)
             </p>
             <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.domains.playerDomain.step2Desc')}</p>
             <div className={'mt-2 rounded-lg border border-black/6 bg-zinc-50/50 p-3 dark:border-white/6 dark:bg-zinc-800/50'}>
-              <div className={'font-jetbrains text-sm'}>
-                <span className={'text-zinc-500'}>SRV</span>
-                <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{'_minecraft._tcp.yourdomain.com'}</span>
-                <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
-                <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{`0 5 ${port} yourdomain.com`}</span>
+              <div className={'flex items-center justify-between'}>
+                <div className={'font-jetbrains text-sm'}>
+                  <span className={'text-zinc-500'}>A</span>
+                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
+                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{displayDomain}</span>
+                  <span className={'mx-3 text-zinc-300 dark:text-zinc-600'}>&rarr;</span>
+                  <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{serverIp}</span>
+                </div>
+                <Button variant={'ghost'} size={'icon-sm'} onClick={handleCopy}>
+                  {copied ? <CheckCircle2 className={'size-3.5 text-green-600'} /> : <Copy className={'size-3.5'} />}
+                </Button>
               </div>
             </div>
             <p className={'mt-1.5 text-xs text-zinc-400 dark:text-zinc-500'}>{t('settings.domains.playerDomain.step2Hint')}</p>
@@ -416,7 +405,117 @@ function PlayerDomainSetupSteps({ serverIp, port }: PlayerDomainSetupStepsProps)
               {t('settings.domains.playerDomain.step3Title')}
             </p>
             <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.domains.playerDomain.step3Desc')}</p>
+            <div className={'mt-2'}>
+              <SrvRegistrarTable domain={displayDomain} {...{ port }} />
+            </div>
+            <p className={'mt-1.5 text-xs text-zinc-400 dark:text-zinc-500'}>{t('settings.domains.playerDomain.step3Hint')}</p>
           </div>
+        </div>
+        <div className={'flex gap-3'}>
+          <div
+            className={
+              'flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+            }
+          >
+            4
+          </div>
+          <div className={'flex-1'}>
+            <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
+              {t('settings.domains.playerDomain.step4Title')}
+            </p>
+            <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.domains.playerDomain.step4Desc')}</p>
+            <div className={'mt-2'}>
+              <Button size={'sm'} onClick={onSubmit} disabled={!isValidDomain || isPending} loading={isPending}>
+                <Gamepad2 className={'size-3.5'} />
+                {t('settings.domains.playerDomain.configure')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type SrvRegistrarTableProps = {
+  domain: string;
+  port: number;
+};
+
+function SrvRegistrarTable({ domain, port }: SrvRegistrarTableProps) {
+  const { t } = useTranslation();
+  const protocol = getSrvProtocol(domain);
+  const subdomain = getSrvSubdomain(domain);
+
+  const fields = [
+    { label: t('settings.domains.playerDomain.srvPriority'), value: '0' },
+    { label: t('settings.domains.playerDomain.srvWeight'), value: '5' },
+    { label: t('settings.domains.playerDomain.srvPort'), value: String(port) },
+    { label: t('settings.domains.playerDomain.srvTarget'), value: `${domain}.` },
+    { label: t('settings.domains.playerDomain.srvTtl'), value: '600' },
+  ];
+
+  return (
+    <div className={'rounded-lg border border-black/6 bg-zinc-50/50 dark:border-white/6 dark:bg-zinc-800/50'}>
+      <div className={'px-3 py-2'}>
+        <span className={'text-xs font-medium tracking-wide text-zinc-500 uppercase dark:text-zinc-400'}>
+          {t('settings.domains.playerDomain.srvFields')}
+        </span>
+      </div>
+      <div className={'divide-y divide-black/4 border-t border-black/6 dark:divide-white/6 dark:border-white/6'}>
+        <div className={'flex items-center justify-between px-3 py-1.5'}>
+          <span className={'text-xs text-zinc-500 dark:text-zinc-400'}>
+            {t('settings.domains.playerDomain.srvService')} / {t('settings.domains.playerDomain.srvProtocol')}
+          </span>
+          <Tooltip.Provider delayDuration={200}>
+            <span className={'font-jetbrains text-sm font-medium'}>
+              <Tooltip>
+                <Tooltip.Trigger asChild>
+                  <span className={'cursor-help text-zinc-800 dark:text-zinc-200'}>_minecraft.</span>
+                </Tooltip.Trigger>
+                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  {t('settings.domains.playerDomain.srvService')}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger asChild>
+                  <span
+                    className={cn(
+                      'cursor-help',
+                      subdomain ? 'text-amber-700 dark:text-amber-300' : 'text-zinc-800 dark:text-zinc-200'
+                    )}
+                  >
+                    {protocol}
+                  </span>
+                </Tooltip.Trigger>
+                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  {t('settings.domains.playerDomain.srvProtocol')}
+                </Tooltip.Content>
+              </Tooltip>
+            </span>
+          </Tooltip.Provider>
+        </div>
+        {fields.map((field) => (
+          <div key={field.label} className={'flex items-center justify-between px-3 py-1.5'}>
+            <span className={'text-xs text-zinc-500 dark:text-zinc-400'}>{field.label}</span>
+            <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{field.value}</span>
+          </div>
+        ))}
+      </div>
+      <div className={'space-y-0 border-t border-black/6 dark:border-white/6'}>
+        {subdomain && (
+          <div className={'flex items-start gap-2 border-b border-amber-500/20 bg-amber-50/50 px-3 py-2 dark:bg-amber-950/20'}>
+            <AlertTriangle className={'mt-0.5 size-3.5 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
+            <p className={'text-xs text-amber-800 dark:text-amber-200'}>
+              {t('settings.domains.playerDomain.srvWarning', { subdomain })}
+            </p>
+          </div>
+        )}
+        <div className={'px-3 py-2'}>
+          <p className={'text-xs text-zinc-400 dark:text-zinc-500'}>
+            {t('settings.domains.playerDomain.srvTargetHint', { domain })}
+          </p>
+          <p className={'mt-1 text-xs text-zinc-400 dark:text-zinc-500'}>{t('settings.domains.playerDomain.srvTtlHint')}</p>
         </div>
       </div>
     </div>
