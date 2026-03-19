@@ -290,7 +290,7 @@ action_enable_ssl() {
 
   if [ -d "/etc/letsencrypt/live/${domain}" ]; then
     # Certificate exists but nginx may not be configured for SSL — install it
-    certbot_output=$(certbot install --nginx -d "$domain" --non-interactive --redirect 2>&1) || {
+    certbot_output=$(certbot install --nginx -d "$domain" --cert-name "$domain" --non-interactive --redirect 2>&1) || {
       json_error "Failed to install existing certificate into nginx for ${domain}: ${certbot_output}"
     }
   else
