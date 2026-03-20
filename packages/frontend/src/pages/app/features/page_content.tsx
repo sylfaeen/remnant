@@ -1,8 +1,13 @@
 import type { PropsWithChildren } from 'react';
+import { cn } from '@remnant/frontend/lib/cn';
 
-export function PageContent({ children }: PropsWithChildren) {
+type PageContentProps = PropsWithChildren<{
+  fill?: boolean;
+}>;
+
+export function PageContent({ children, fill }: PageContentProps) {
   return (
-    <div className={'content'}>
+    <div className={cn('content', fill && 'fill')}>
       <div className={'content-container'}>{children}</div>
     </div>
   );

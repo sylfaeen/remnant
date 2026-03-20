@@ -65,7 +65,7 @@ export function ServerDashboardPage() {
           <ServerActions status={server.status} {...{ serverId }} />
         </ServerPageHeader.Actions>
       </ServerPageHeader>
-      <PageContent>
+      <PageContent fill>
         <div className={'flex min-h-0 flex-1 flex-col space-y-4'}>
           <ServerConsole
             error={wsError}

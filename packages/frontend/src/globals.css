@@ -84,6 +84,7 @@
 }
 
 html {
+  overflow-x: hidden;
   font-family: var(--font-inter), serif;
   color: #1a1a1b;
   font-size: 14px;
@@ -99,7 +100,7 @@ html.dark {
 }
 
 body {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 ::selection {
