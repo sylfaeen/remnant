@@ -15,6 +15,7 @@ export interface Context {
   user: TRPCUser | null;
 }
 
+
 export const createContext = async ({ req, res }: { req: FastifyRequest; res: FastifyReply }): Promise<Context> => {
   let user: TRPCUser | null = null;
 
@@ -43,4 +44,3 @@ const t = initTRPC.context<Context>().create({
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
-export const middleware = t.middleware;

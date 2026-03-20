@@ -28,6 +28,7 @@
     "settingsJars": "JAR Management",
     "settingsJvm": "Java & JVM",
     "settingsFirewall": "Firewall Rules",
+    "settingsFtp": "FTP Access",
     "settingsDomains": "Domains",
     "users": "Users",
     "docs": "Documentation",
@@ -366,6 +367,50 @@
         "srvTtlHint": "A TTL of 600 seconds (10 min) is recommended for stable ping in the Minecraft launcher."
       }
     },
+    "ftp": {
+      "title": "FTP Access",
+      "description": "Manage SFTP accounts and connection details for this server",
+      "connectionInfo": {
+        "title": "Connection details",
+        "description": "Use these details in your SFTP client to connect to this server",
+        "host": "Host",
+        "sftpPort": "SFTP Port",
+        "serverPath": "Server path",
+        "copied": "Copied!"
+      },
+      "accounts": {
+        "title": "SFTP Accounts",
+        "description": "Manage SFTP user accounts for this server",
+        "addAccount": "Add account",
+        "noAccounts": "No SFTP accounts",
+        "noAccountsHint": "Create an SFTP account to allow file transfers to this server",
+        "readOnly": "Read only",
+        "readWrite": "Read-write",
+        "allFolders": "All folders",
+        "createdAt": "Created {{date}}"
+      },
+      "dialog": {
+        "createTitle": "Create SFTP account",
+        "createDescription": "Create a new SFTP account for file transfers",
+        "editTitle": "Edit SFTP account",
+        "editDescription": "Update SFTP account settings",
+        "username": "Username",
+        "usernamePlaceholder": "e.g., builder",
+        "usernameHint": "Lowercase letters, numbers, dashes or underscores",
+        "password": "Password",
+        "passwordPlaceholder": "Minimum 8 characters",
+        "passwordEditPlaceholder": "Leave empty to keep current",
+        "permissions": "Permissions",
+        "permissionReadOnly": "Read only",
+        "permissionReadWrite": "Read-write",
+        "allowedPaths": "Allowed paths",
+        "allowedPathsHint": "Relative paths from the server root. Leave empty to allow all folders.",
+        "addPath": "Add path",
+        "pathPlaceholder": "e.g., plugins/",
+        "create": "Create account",
+        "save": "Save changes"
+      }
+    },
     "twoFactor": {
       "title": "Two-factor authentication",
       "enabled": "2FA is enabled on your account",
@@ -468,6 +513,16 @@
       "description": "Pre-bundled Java versions available for your servers",
       "default": "Recommended",
       "noVersions": "No Java versions found"
+    },
+    "ftp": {
+      "title": "FTP Access",
+      "description": "SFTP connection details for file transfer",
+      "host": "Host",
+      "port": "SFTP Port",
+      "username": "Username",
+      "password": "Password",
+      "passwordHint": "Set during Remnant installation",
+      "changePasswordHint": "To change the remnant user password, log in as root on the server and run: sudo passwd remnant"
     }
   },
   "authErrors": {
@@ -577,7 +632,13 @@
     "sslRenewError": "Failed to renew SSL certificates",
     "ipAccessEnabled": "IP access enabled",
     "ipAccessDisabled": "IP access disabled",
-    "ipAccessError": "Failed to update IP access"
+    "ipAccessError": "Failed to update IP access",
+    "sftpAccountCreated": "SFTP account created",
+    "sftpAccountUpdated": "SFTP account updated",
+    "sftpAccountDeleted": "SFTP account deleted",
+    "sftpAccountCreateError": "Failed to create SFTP account",
+    "sftpAccountUpdateError": "Failed to update SFTP account",
+    "sftpAccountDeleteError": "Failed to delete SFTP account"
   },
   "onboarding": {
     "welcome": {

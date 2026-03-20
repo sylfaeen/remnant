@@ -49,6 +49,7 @@ function getServerNavSections(serverId: string, serverName: string): Array<Sideb
             { key: 'settingsJars', path: `${basePath}/settings/jars` },
             { key: 'settingsJvm', path: `${basePath}/settings/jvm` },
             { key: 'settingsFirewall', path: `${basePath}/settings/firewall` },
+            { key: 'settingsFtp', path: `${basePath}/settings/ftp` },
             { key: 'settingsDomains', path: `${basePath}/settings/domains` },
           ],
         },

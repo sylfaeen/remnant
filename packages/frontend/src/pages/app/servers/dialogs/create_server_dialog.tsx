@@ -26,13 +26,6 @@ type CreateServerDialogProps = {
 export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: CreateServerDialogProps) {
   const { t } = useTranslation();
 
-  const [name, setName] = useState('');
-  const [minRam, setMinRam] = useState('2G');
-  const [maxRam, setMaxRam] = useState('4G');
-  const [jvmFlags, setJvmFlags] = useState('');
-  const [javaPort, setJavaPort] = useState(25565);
-  const [autoStart, setAutoStart] = useState(true);
-
   return (
     <Dialog
       open={true}
@@ -53,24 +46,7 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <CreateServerForm
-            {...{
-              name,
-              setName,
-              minRam,
-              setMinRam,
-              maxRam,
-              setMaxRam,
-              jvmFlags,
-              setJvmFlags,
-              javaPort,
-              setJavaPort,
-              autoStart,
-              setAutoStart,
-              error,
-              onSubmit,
-            }}
-          />
+          <CreateServerForm {...{ onSubmit, error }} />
         </Dialog.Body>
         <Dialog.Footer>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
@@ -85,38 +61,17 @@ export function CreateServerDialog({ onSubmit, onCancel, isLoading, error }: Cre
   );
 }
 
-type CreateServerFormProps = Pick<CreateServerDialogProps, 'onSubmit' | 'error'> & {
-  name: string;
-  setName: (name: string) => void;
-  minRam: string;
-  setMinRam: (minRam: string) => void;
-  maxRam: string;
-  setMaxRam: (maxRam: string) => void;
-  jvmFlags: string;
-  setJvmFlags: (jvmFlags: string) => void;
-  javaPort: number;
-  setJavaPort: (javaPort: number) => void;
-  autoStart: boolean;
-  setAutoStart: (autoStart: boolean) => void;
-};
+type CreateServerFormProps = Pick<CreateServerDialogProps, 'onSubmit' | 'error'>;
 
-function CreateServerForm({
-  name,
-  setName,
-  minRam,
-  setMinRam,
-  maxRam,
-  setMaxRam,
-  jvmFlags,
-  setJvmFlags,
-  javaPort,
-  setJavaPort,
-  autoStart,
-  setAutoStart,
-  error,
-  onSubmit,
-}: CreateServerFormProps) {
+function CreateServerForm({ onSubmit, error }: CreateServerFormProps) {
   const { t } = useTranslation();
+
+  const [name, setName] = useState('');
+  const [minRam, setMinRam] = useState('2G');
+  const [maxRam, setMaxRam] = useState('4G');
+  const [jvmFlags, setJvmFlags] = useState('');
+  const [javaPort, setJavaPort] = useState(25565);
+  const [autoStart, setAutoStart] = useState(true);
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();

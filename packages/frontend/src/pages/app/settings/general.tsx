@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, Copy, Globe, Lock, Coffee, Trash2, Loader2
 import { cn } from '@remnant/frontend/lib/cn';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useInstalledJava } from '@remnant/frontend/hooks/use_java';
+import { useSftpInfo } from '@remnant/frontend/hooks/use_sftp';
 import {
   usePanelDomain,
   useSetPanelDomain,
@@ -26,6 +27,7 @@ export function SettingsGeneralPage() {
         <FeatureCard.Stack>
           <PanelDomainSection />
           <JavaSection />
+          <SftpSection />
         </FeatureCard.Stack>
       </div>
     </PageContent>
@@ -392,6 +394,59 @@ function JavaSection() {
           ))
         )}
       </FeatureCard.Body>
+    </FeatureCard>
+  );
+}
+
+function SftpSection() {
+  const { t } = useTranslation();
+  const { data: sftpInfo, isLoading } = useSftpInfo();
+
+  return (
+    <FeatureCard>
+      <FeatureCard.Header>
+        <FeatureCard.Content>
+          <FeatureCard.Title>{t('appSettings.ftp.title')}</FeatureCard.Title>
+          <FeatureCard.Description>{t('appSettings.ftp.description')}</FeatureCard.Description>
+        </FeatureCard.Content>
+      </FeatureCard.Header>
+      <FeatureCard.Body>
+        {isLoading ? (
+          <div className={'py-8'}>
+            <Loader2 className={'mx-auto size-5 animate-spin text-zinc-400 dark:text-zinc-500'} />
+          </div>
+        ) : (
+          <>
+            <FeatureCard.Row>
+              <FeatureCard.RowLabel>{t('appSettings.ftp.host')}</FeatureCard.RowLabel>
+              <FeatureCard.RowControl>
+                <span className={'font-jetbrains text-sm text-zinc-500 dark:text-zinc-400'}>{sftpInfo?.host ?? '—'}</span>
+              </FeatureCard.RowControl>
+            </FeatureCard.Row>
+            <FeatureCard.Row>
+              <FeatureCard.RowLabel>{t('appSettings.ftp.port')}</FeatureCard.RowLabel>
+              <FeatureCard.RowControl>
+                <span className={'font-jetbrains text-sm text-zinc-500 dark:text-zinc-400'}>{sftpInfo?.port ?? '—'}</span>
+              </FeatureCard.RowControl>
+            </FeatureCard.Row>
+            <FeatureCard.Row>
+              <FeatureCard.RowLabel>{t('appSettings.ftp.username')}</FeatureCard.RowLabel>
+              <FeatureCard.RowControl>
+                <span className={'font-jetbrains text-sm text-zinc-500 dark:text-zinc-400'}>remnant</span>
+              </FeatureCard.RowControl>
+            </FeatureCard.Row>
+            <FeatureCard.Row>
+              <FeatureCard.RowLabel>{t('appSettings.ftp.password')}</FeatureCard.RowLabel>
+              <FeatureCard.RowControl>
+                <span className={'text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.ftp.passwordHint')}</span>
+              </FeatureCard.RowControl>
+            </FeatureCard.Row>
+          </>
+        )}
+      </FeatureCard.Body>
+      <FeatureCard.Footer>
+        <p className={'text-sm text-zinc-500 dark:text-zinc-400'}>{t('appSettings.ftp.changePasswordHint')}</p>
+      </FeatureCard.Footer>
     </FeatureCard>
   );
 }

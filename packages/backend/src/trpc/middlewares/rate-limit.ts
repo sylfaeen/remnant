@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { ErrorCodes, type Permission } from '@remnant/shared';
-import { middleware, publicProcedure, type TRPCUser } from '@remnant/backend/trpc';
+import { publicProcedure } from '@remnant/backend/trpc';
 import { protectedProcedure, requirePermission } from '@remnant/backend/trpc/middlewares/auth';
 
 interface RateLimitEntry {
@@ -40,32 +40,24 @@ function checkRateLimit(key: string, max: number, windowMs: number): void {
 
 /** Rate-limited public procedure (keyed by IP) */
 export function rateLimitedProcedure(max: number, windowMs: number) {
-  return publicProcedure.use(
-    middleware(async ({ ctx, next, path }) => {
-      checkRateLimit(`ip:${ctx.req.ip}:${path}`, max, windowMs);
-      return next({ ctx });
-    })
-  );
+  return publicProcedure.use(async ({ ctx, next, path }) => {
+    checkRateLimit(`ip:${ctx.req.ip}:${path}`, max, windowMs);
+    return next({ ctx });
+  });
 }
 
 /** Rate-limited protected procedure (keyed by user ID) */
 export function rateLimitedProtectedProcedure(max: number, windowMs: number) {
-  return protectedProcedure.use(
-    middleware(async ({ ctx, next, path }) => {
-      const user = ctx.user as TRPCUser;
-      checkRateLimit(`user:${user.sub}:${path}`, max, windowMs);
-      return next({ ctx });
-    })
-  );
+  return protectedProcedure.use(async ({ ctx, next, path }) => {
+    checkRateLimit(`user:${ctx.user.sub}:${path}`, max, windowMs);
+    return next({ ctx });
+  });
 }
 
 /** Rate-limited procedure with permission check (keyed by user ID) */
 export function rateLimitedPermission(max: number, windowMs: number, ...permissions: Array<Permission>) {
-  return requirePermission(...permissions).use(
-    middleware(async ({ ctx, next, path }) => {
-      const user = ctx.user as TRPCUser;
-      checkRateLimit(`user:${user.sub}:${path}`, max, windowMs);
-      return next({ ctx });
-    })
-  );
+  return requirePermission(...permissions).use(async ({ ctx, next, path }) => {
+    checkRateLimit(`user:${ctx.user.sub}:${path}`, max, windowMs);
+    return next({ ctx });
+  });
 }

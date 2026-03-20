@@ -216,3 +216,12 @@ development_status:
   # Epic 20: Renouvellement Automatique SSL
   epic-20: done
   20-1-renouvellement-monitoring-ssl: done
+
+  # Epic 21: Gestion des Accès SFTP
+  epic-21: done
+  21-1-bloc-acces-ftp-settings-globaux: done
+  21-2-schema-api-comptes-sftp: done
+  21-3-gestion-systeme-utilisateurs-sftp: done
+  21-4-page-acces-ftp-settings-serveur: done
+  21-5-dialog-creation-modification-sftp: done
+  21-6-informations-connexion-serveur: done

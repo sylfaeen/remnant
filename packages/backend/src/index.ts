@@ -63,7 +63,7 @@ const start = async () => {
             fastify.log.warn(`Failed to auto-start server ${server.name}: ${result.error}`);
           }
         } catch (err) {
-          fastify.log.error(`Error auto-starting server ${server.name}:`, err);
+          fastify.log.error(`Error auto-starting server ${server.name}: ${err instanceof Error ? err.message : String(err)}`);
         }
       }
     }

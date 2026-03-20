@@ -19,15 +19,8 @@ type AddFirewallRuleDialogProps = {
   onAdd: (rule: { port: number; protocol: Protocol; label: string }) => void;
 };
 
-export function AddFirewallRuleDialog({ open, onOpenChange, ...rest }: AddFirewallRuleDialogProps) {
+export function AddFirewallRuleDialog({ open, onOpenChange, onAdd }: AddFirewallRuleDialogProps) {
   const { t } = useTranslation();
-
-  const [port, setPort] = useState('');
-  const [label, setLabel] = useState('');
-
-  const portNum = parseInt(port, 10);
-  const isValidPort = !isNaN(portNum) && portNum >= 1024 && portNum <= 65535;
-  const canSubmit = isValidPort && label.trim().length > 0;
 
   return (
     <Dialog {...{ open, onOpenChange }}>
@@ -42,13 +35,13 @@ export function AddFirewallRuleDialog({ open, onOpenChange, ...rest }: AddFirewa
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <CreateFirewallForm {...{ port, setPort, label, setLabel, portNum, isValidPort, canSubmit, ...rest }} />
+          <CreateFirewallForm {...{ onAdd }} />
         </Dialog.Body>
         <Dialog.Footer>
           <Button type={'button'} variant={'secondary'} onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
           </Button>
-          <Button type={'submit'} form={'add-firewall-rule'} disabled={!canSubmit}>
+          <Button type={'submit'} form={'add-firewall-rule'}>
             {t('settings.firewall.addRule')}
           </Button>
         </Dialog.Footer>
@@ -57,20 +50,18 @@ export function AddFirewallRuleDialog({ open, onOpenChange, ...rest }: AddFirewa
   );
 }
 
-type CreateFirewallFormProps = Pick<AddFirewallRuleDialogProps, 'onAdd'> & {
-  port: string;
-  setPort: (port: string) => void;
-  label: string;
-  setLabel: (label: string) => void;
-  portNum: number;
-  isValidPort: boolean;
-  canSubmit: boolean;
-};
+type CreateFirewallFormProps = Pick<AddFirewallRuleDialogProps, 'onAdd'>;
 
-function CreateFirewallForm({ port, setPort, label, setLabel, portNum, isValidPort, canSubmit, onAdd }: CreateFirewallFormProps) {
+function CreateFirewallForm({ onAdd }: CreateFirewallFormProps) {
   const { t } = useTranslation();
 
+  const [port, setPort] = useState('');
+  const [label, setLabel] = useState('');
   const [protocol, setProtocol] = useState<Protocol>('tcp');
+
+  const portNum = parseInt(port, 10);
+  const isValidPort = !isNaN(portNum) && portNum >= 1024 && portNum <= 65535;
+  const canSubmit = isValidPort && label.trim().length > 0;
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();

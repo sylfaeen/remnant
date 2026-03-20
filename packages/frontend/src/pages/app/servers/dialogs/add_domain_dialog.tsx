@@ -18,16 +18,6 @@ type AddDomainDialogProps = {
 export function AddDomainDialog({ open, onOpenChange, ...rest }: AddDomainDialogProps) {
   const { t } = useTranslation();
 
-  const [domain, setDomain] = useState('');
-  const [port, setPort] = useState(String(rest.serverPort));
-  const [type, setType] = useState<DomainType>('http');
-
-  const portNum = parseInt(port, 10);
-  const isValidPort = !isNaN(portNum) && portNum >= 1024 && portNum <= 65535;
-  const isValidDomain =
-    /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(domain);
-  const canSubmit = isValidDomain && isValidPort;
-
   return (
     <Dialog {...{ open, onOpenChange }}>
       <Dialog.Content>
@@ -41,16 +31,13 @@ export function AddDomainDialog({ open, onOpenChange, ...rest }: AddDomainDialog
           </div>
         </Dialog.Header>
         <Dialog.Body>
-          <AddDomainForm
-            onAdd={rest.onAdd}
-            {...{ domain, setDomain, port, setPort, type, setType, portNum, isValidPort, isValidDomain, canSubmit }}
-          />
+          <AddDomainForm onAdd={rest.onAdd} serverPort={rest.serverPort} />
         </Dialog.Body>
         <Dialog.Footer>
           <Button type={'button'} variant={'secondary'} onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
           </Button>
-          <Button type={'submit'} form={'add-domain'} disabled={!canSubmit}>
+          <Button type={'submit'} form={'add-domain'}>
             {t('settings.domains.addDomain')}
           </Button>
         </Dialog.Footer>
@@ -59,34 +46,20 @@ export function AddDomainDialog({ open, onOpenChange, ...rest }: AddDomainDialog
   );
 }
 
-type AddDomainFormProps = {
-  domain: string;
-  setDomain: (value: string) => void;
-  port: string;
-  setPort: (value: string) => void;
-  type: DomainType;
-  setType: (value: DomainType) => void;
-  portNum: number;
-  isValidPort: boolean;
-  isValidDomain: boolean;
-  canSubmit: boolean;
-  onAdd: (domain: { domain: string; port: number; type: DomainType }) => void;
-};
+type AddDomainFormProps = Pick<AddDomainDialogProps, 'onAdd' | 'serverPort'>;
 
-function AddDomainForm({
-  domain,
-  setDomain,
-  port,
-  setPort,
-  type,
-  setType,
-  portNum,
-  isValidPort,
-  isValidDomain,
-  canSubmit,
-  onAdd,
-}: AddDomainFormProps) {
+function AddDomainForm({ onAdd, serverPort }: AddDomainFormProps) {
   const { t } = useTranslation();
+
+  const [domain, setDomain] = useState('');
+  const [port, setPort] = useState(String(serverPort));
+  const [type, setType] = useState<DomainType>('http');
+
+  const portNum = parseInt(port, 10);
+  const isValidPort = !isNaN(portNum) && portNum >= 1024 && portNum <= 65535;
+  const isValidDomain =
+    /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(domain);
+  const canSubmit = isValidDomain && isValidPort;
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();

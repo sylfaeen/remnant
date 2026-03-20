@@ -28,6 +28,7 @@
     "settingsJars": "Gestion du JAR",
     "settingsJvm": "Java & JVM",
     "settingsFirewall": "Règles Firewall",
+    "settingsFtp": "Accès FTP",
     "settingsDomains": "Domaines",
     "users": "Utilisateurs",
     "docs": "Documentation",
@@ -366,6 +367,50 @@
         "srvTtlHint": "Un TTL de 600 secondes (10 min) est recommandé pour un ping stable dans le launcher Minecraft."
       }
     },
+    "ftp": {
+      "title": "Accès FTP",
+      "description": "Gérer les comptes SFTP et les informations de connexion de ce serveur",
+      "connectionInfo": {
+        "title": "Informations de connexion",
+        "description": "Utilisez ces informations dans votre client SFTP pour vous connecter à ce serveur",
+        "host": "Hôte",
+        "sftpPort": "Port SFTP",
+        "serverPath": "Chemin du serveur",
+        "copied": "Copié !"
+      },
+      "accounts": {
+        "title": "Comptes SFTP",
+        "description": "Gérer les comptes utilisateurs SFTP de ce serveur",
+        "addAccount": "Ajouter un compte",
+        "noAccounts": "Aucun compte SFTP",
+        "noAccountsHint": "Créez un compte SFTP pour permettre le transfert de fichiers vers ce serveur",
+        "readOnly": "Lecture seule",
+        "readWrite": "Lecture-écriture",
+        "allFolders": "Tous les dossiers",
+        "createdAt": "Créé le {{date}}"
+      },
+      "dialog": {
+        "createTitle": "Créer un compte SFTP",
+        "createDescription": "Créer un nouveau compte SFTP pour le transfert de fichiers",
+        "editTitle": "Modifier le compte SFTP",
+        "editDescription": "Modifier les paramètres du compte SFTP",
+        "username": "Nom d'utilisateur",
+        "usernamePlaceholder": "ex. builder",
+        "usernameHint": "Lettres minuscules, chiffres, tirets ou underscores",
+        "password": "Mot de passe",
+        "passwordPlaceholder": "Minimum 8 caractères",
+        "passwordEditPlaceholder": "Laisser vide pour conserver l'actuel",
+        "permissions": "Permissions",
+        "permissionReadOnly": "Lecture seule",
+        "permissionReadWrite": "Lecture-écriture",
+        "allowedPaths": "Chemins autorisés",
+        "allowedPathsHint": "Chemins relatifs depuis la racine du serveur. Laisser vide pour autoriser tous les dossiers.",
+        "addPath": "Ajouter un chemin",
+        "pathPlaceholder": "ex. plugins/",
+        "create": "Créer le compte",
+        "save": "Enregistrer les modifications"
+      }
+    },
     "twoFactor": {
       "title": "Authentification à deux facteurs",
       "enabled": "Le 2FA est activé sur votre compte",
@@ -468,6 +513,16 @@
       "description": "Versions Java pré-installées disponibles pour vos serveurs",
       "default": "Recommandé",
       "noVersions": "Aucune version Java trouvée"
+    },
+    "ftp": {
+      "title": "Accès FTP",
+      "description": "Informations de connexion SFTP pour le transfert de fichiers",
+      "host": "Hôte",
+      "port": "Port SFTP",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "passwordHint": "Défini lors de l'installation de Remnant",
+      "changePasswordHint": "Pour modifier le mot de passe de l'utilisateur remnant, connectez-vous en root sur le serveur et exécutez : sudo passwd remnant"
     }
   },
   "authErrors": {
@@ -577,7 +632,13 @@
     "sslRenewError": "Échec du renouvellement des certificats SSL",
     "ipAccessEnabled": "Accès IP activé",
     "ipAccessDisabled": "Accès IP désactivé",
-    "ipAccessError": "Échec de la mise à jour de l'accès IP"
+    "ipAccessError": "Échec de la mise à jour de l'accès IP",
+    "sftpAccountCreated": "Compte SFTP créé",
+    "sftpAccountUpdated": "Compte SFTP mis à jour",
+    "sftpAccountDeleted": "Compte SFTP supprimé",
+    "sftpAccountCreateError": "Échec de la création du compte SFTP",
+    "sftpAccountUpdateError": "Échec de la mise à jour du compte SFTP",
+    "sftpAccountDeleteError": "Échec de la suppression du compte SFTP"
   },
   "onboarding": {
     "welcome": {

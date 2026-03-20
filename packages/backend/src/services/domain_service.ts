@@ -10,7 +10,7 @@ import type { DomainType } from '@remnant/shared';
 
 const SCRIPT_PATH = process.env.DOMAIN_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-domain.sh');
 
-interface ScriptResult {
+export interface ScriptResult {
   success: boolean;
   error?: string;
   ssl_expires_at?: string;
@@ -32,7 +32,7 @@ function runDomainScript(args: Array<string>): Promise<ScriptResult> {
 
       try {
         const result = JSON.parse(stdout) as ScriptResult;
-        resolve({ success: result.success !== false, ...result });
+        resolve({ ...result, success: result.success !== false });
       } catch {
         resolve({ success: true });
       }

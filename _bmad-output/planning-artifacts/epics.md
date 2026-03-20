@@ -3826,3 +3826,244 @@ So that mes domaines restent sécurisés sans intervention manuelle.
 **Given** un renouvellement certbot réussi (auto ou manuel)
 **When** le certificat est renouvelé
 **Then** le champ `ssl_expires_at` est mis à jour en DB
+
+---
+
+## Epic 21: Gestion des Accès SFTP
+
+L'administrateur peut visualiser les informations de connexion SFTP globales, modifier le mot de passe du compte remnant, et gérer des comptes SFTP par serveur avec permissions granulaires.
+
+### Story 21.1: Bloc "Accès FTP" dans les paramètres globaux
+
+#### Story
+**As a** administrateur,
+**I want** voir un bloc récapitulatif de la connexion SFTP remnant dans les paramètres globaux et pouvoir modifier le mot de passe,
+**So that** je connaisse les informations de connexion du compte principal et puisse le sécuriser.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Epic 9 (page settings globale existante)
+
+#### Acceptance Criteria
+
+##### AC1: Affichage du bloc Accès FTP
+**Given** la page Settings > General
+**When** la page se charge
+**Then** un FeatureCard "Accès FTP" est affiché
+**And** il affiche : hôte, port SFTP, utilisateur (`remnant`)
+**And** le mot de passe est masqué (dots/bullets), jamais révélé
+
+##### AC2: Dialog modification du mot de passe
+**Given** le bloc "Accès FTP" affiché
+**When** je clique sur "Modifier le mot de passe"
+**Then** un dialog s'ouvre avec les champs : nouveau mot de passe (requis), confirmation (requis)
+**And** la validation inline vérifie la longueur minimale et la correspondance des champs
+
+##### AC3: Changement de mot de passe système
+**Given** le dialog de modification rempli correctement
+**When** je valide le formulaire
+**Then** un endpoint backend exécute le changement de mot de passe système en root
+**And** un feedback de succès "Mot de passe modifié" est affiché
+**And** en cas d'erreur système, un message d'erreur explicite est affiché
+
+##### AC4: Sécurité mot de passe
+**Given** l'opération de changement de mot de passe
+**Then** aucun mot de passe (ancien ou nouveau) n'est stocké en DB côté panel
+**And** l'opération est purement système (chpasswd via sudo)
+
+##### AC5: i18n
+- [ ] Tous les textes utilisent `t()` via `useTranslation()`
+- [ ] Clés ajoutées à `en.json` et `fr.json` (namespace `appSettings.ftp.*`)
+
+---
+
+### Story 21.2: Schema & API des comptes SFTP
+
+#### Story
+**As a** développeur,
+**I want** un modèle de données et des endpoints pour les comptes SFTP,
+**So that** le CRUD des accès SFTP par serveur soit supporté.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Story 21.1
+
+#### Acceptance Criteria
+
+##### AC1: Table sftp_accounts
+**Given** la base de données
+**When** la migration est exécutée
+**Then** une table `sftp_accounts` est créée avec : `id`, `server_id` (FK → servers), `username`, `password` (hashé), `permissions` (enum: read-only, read-write), `allowed_paths` (JSON array de chemins relatifs), `created_at`, `updated_at`
+
+##### AC2: Schemas Zod
+**Given** le package shared
+**When** les schemas sont définis
+**Then** `sftpAccountSchema`, `createSftpAccountSchema`, `updateSftpAccountSchema` sont exportés
+**And** les validations incluent : username unique par serveur, password requis à la création
+
+##### AC3: Router tRPC
+**Given** le backend
+**When** le router sftp est créé
+**Then** les procédures `sftp.list(serverId)`, `sftp.create(...)`, `sftp.update(...)`, `sftp.delete(id)` sont disponibles
+**And** les mots de passe ne sont jamais renvoyés par l'API (uniquement un booléen `hasPassword`)
+
+---
+
+### Story 21.3: Gestion système des utilisateurs SFTP
+
+#### Story
+**As a** système,
+**I want** que les opérations CRUD déclenchent la création/modification/suppression réelle des utilisateurs SFTP sur le serveur,
+**So that** les comptes soient fonctionnels immédiatement.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Story 21.2
+
+#### Acceptance Criteria
+
+##### AC1: Création utilisateur système
+**Given** une requête de création de compte SFTP
+**When** le backend traite la requête
+**Then** un utilisateur système SFTP est créé avec les bons droits
+**And** le home directory est restreint au dossier du serveur Minecraft concerné (chroot)
+
+##### AC2: Modification permissions
+**Given** une requête de modification d'un compte SFTP
+**When** les permissions sont mises à jour
+**Then** les droits fichiers/dossiers sont mis à jour sur le système
+
+##### AC3: Suppression utilisateur
+**Given** une requête de suppression d'un compte SFTP
+**When** le backend traite la requête
+**Then** l'utilisateur système est supprimé
+
+##### AC4: Restriction par chemins
+**Given** un compte SFTP avec `allowed_paths` définis
+**When** l'utilisateur se connecte en SFTP
+**Then** l'accès est restreint aux sous-dossiers spécifiés
+**And** si `allowed_paths` est vide, l'accès au dossier racine du serveur est accordé
+
+##### AC5: Gestion d'erreurs
+**Given** une opération système qui échoue
+**When** le backend détecte l'erreur
+**Then** un message d'erreur explicite est renvoyé au frontend
+
+---
+
+### Story 21.4: Page "Accès FTP" dans les paramètres serveur
+
+#### Story
+**As a** administrateur,
+**I want** une page dédiée dans les paramètres serveur pour gérer les comptes SFTP,
+**So that** je puisse créer, modifier et supprimer des accès SFTP pour chaque serveur.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Story 21.3
+
+#### Acceptance Criteria
+
+##### AC1: Navigation et routing
+**Given** la sidebar serveur
+**When** la page se charge
+**Then** une entrée "FTP" apparaît dans Settings (entre Firewall et Domains)
+**And** la route `/app/servers/$id/settings/ftp` est fonctionnelle
+
+##### AC2: Page header
+**Given** la page FTP
+**When** elle se charge
+**Then** un `ServerPageHeader` avec icône, titre "Accès FTP" et description est affiché
+
+##### AC3: Liste des comptes
+**Given** des comptes SFTP existants pour le serveur
+**When** la page se charge
+**Then** un `FeatureCard` "Comptes SFTP" affiche la liste des comptes
+**And** chaque ligne affiche : username, permissions (badge), chemins autorisés, date de création
+**And** des actions modifier et supprimer (avec confirmation) sont disponibles par ligne
+
+##### AC4: Bouton ajout
+**Given** la page FTP
+**When** je clique sur "Ajouter un compte"
+**Then** le dialog de création s'ouvre (Story 21.5)
+
+##### AC5: i18n
+- [ ] Tous les textes utilisent `t()` via `useTranslation()`
+- [ ] Clés ajoutées à `en.json` et `fr.json` (namespace `serverSettings.ftp.*`)
+
+---
+
+### Story 21.5: Dialog création/modification de compte SFTP
+
+#### Story
+**As a** administrateur,
+**I want** un formulaire pour créer ou modifier un compte SFTP,
+**So that** je puisse configurer les accès avec les bonnes permissions.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Story 21.4
+
+#### Acceptance Criteria
+
+##### AC1: Formulaire de création
+**Given** le dialog de création ouvert
+**When** le formulaire s'affiche
+**Then** les champs sont : username (requis), password (requis), permissions (select : lecture seule / lecture-écriture), chemins autorisés (multi-input de chemins relatifs)
+
+##### AC2: Formulaire d'édition
+**Given** le dialog d'édition ouvert
+**When** le formulaire s'affiche
+**Then** les champs sont pré-remplis
+**And** le password est vide (laisser vide = pas de changement)
+
+##### AC3: Validation
+**Given** un formulaire rempli
+**When** je soumets
+**Then** la validation inline vérifie les champs requis
+**And** le username doit être unique pour ce serveur
+
+##### AC4: Feedback
+**Given** une soumission réussie
+**When** l'API répond
+**Then** un feedback de succès est affiché
+**And** le dialog se ferme
+**And** la liste des comptes est rafraîchie
+
+##### AC5: i18n
+- [ ] Tous les textes utilisent `t()` via `useTranslation()`
+- [ ] Clés ajoutées à `en.json` et `fr.json` (namespace `serverSettings.ftp.*`)
+
+---
+
+### Story 21.6: Informations de connexion serveur
+
+#### Story
+**As a** administrateur,
+**I want** voir les informations de connexion SFTP propres à chaque serveur sur la page FTP,
+**So that** je puisse les communiquer aux utilisateurs.
+
+#### Context
+- Epic: 21 - Gestion des Accès SFTP
+- Dependencies: Story 21.4
+
+#### Acceptance Criteria
+
+##### AC1: Bloc connexion
+**Given** la page FTP d'un serveur
+**When** la page se charge
+**Then** un `FeatureCard` "Connexion" est affiché en haut, au-dessus de la liste des comptes
+**And** il affiche : hôte, port SFTP, chemin du serveur
+
+##### AC2: Boutons copier
+**Given** le bloc connexion affiché
+**When** je clique sur "Copier" à côté d'une information
+**Then** la valeur est copiée dans le presse-papier
+
+##### AC3: Contexte serveur
+**Given** la page FTP d'un serveur spécifique
+**Then** les informations affichées sont contextuelles au serveur sélectionné (chemin propre au serveur)
+
+##### AC4: i18n
+- [ ] Tous les textes utilisent `t()` via `useTranslation()`
+- [ ] Clés ajoutées à `en.json` et `fr.json` (namespace `serverSettings.ftp.*`)
