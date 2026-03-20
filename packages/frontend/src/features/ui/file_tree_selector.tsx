@@ -24,9 +24,16 @@ type FileTreeSelectorProps = {
   enabled: boolean;
   selectedPaths: Set<string>;
   onSelectedPathsChange: (paths: Set<string>) => void;
+  directoriesOnly?: boolean;
 };
 
-export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedPathsChange }: FileTreeSelectorProps) {
+export function FileTreeSelector({
+  serverId,
+  enabled,
+  selectedPaths,
+  onSelectedPathsChange,
+  directoriesOnly,
+}: FileTreeSelectorProps) {
   const { t } = useTranslation();
 
   const [tree, setTree] = useState<Array<TreeNode>>([]);
@@ -37,17 +44,18 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
 
   useEffect(() => {
     if (filesQuery.data && enabled) {
-      const nodes: Array<TreeNode> = filesQuery.data.map((f) => ({
+      const entries = directoriesOnly ? filesQuery.data.filter((f) => f.type === 'directory') : filesQuery.data;
+      const nodes: Array<TreeNode> = entries.map((f) => ({
         ...f,
         loaded: f.type === 'file',
         expanded: false,
       }));
       setTree(nodes);
-      const allPaths = new Set(filesQuery.data.map((f) => f.path));
+      const allPaths = new Set(entries.map((f) => f.path));
       onSelectedPathsChange(allPaths);
       setLoading(false);
     }
-  }, [filesQuery.data, enabled, onSelectedPathsChange]);
+  }, [filesQuery.data, enabled, directoriesOnly, onSelectedPathsChange]);
 
   useEffect(() => {
     if (!enabled) {
@@ -62,12 +70,14 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
       try {
         const children = await trpcUtils.files.list.fetch({ serverId, path: dirPath });
 
+        const filtered = directoriesOnly ? children.filter((c) => c.type === 'directory') : children;
+
         setTree((prev) =>
           updateTreeNode(prev, dirPath, (node) => ({
             ...node,
             loaded: true,
             expanded: true,
-            children: children.map((c) => ({
+            children: filtered.map((c) => ({
               ...c,
               loaded: c.type === 'file',
               expanded: false,
@@ -78,7 +88,7 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
         onSelectedPathsChange(
           (() => {
             const next = new Set(selectedPaths);
-            for (const child of children) {
+            for (const child of filtered) {
               next.add(child.path);
             }
             return next;
@@ -95,7 +105,7 @@ export function FileTreeSelector({ serverId, enabled, selectedPaths, onSelectedP
         );
       }
     },
-    [serverId, trpcUtils, selectedPaths, onSelectedPathsChange]
+    [serverId, trpcUtils, selectedPaths, onSelectedPathsChange, directoriesOnly]
   );
 
   const handleExpand = useCallback(
@@ -293,7 +303,7 @@ function FileTreeNode({ node, selectedPaths, depth, onExpand, onSelect }: FileTr
           </span>
         )}
         {isDirectory && !node.loaded && !node.expanded && (
-          <span className={'ml-auto shrink-0 text-[10px] tracking-wide text-zinc-300 uppercase dark:text-zinc-600'}>dir</span>
+          <span className={'ml-auto shrink-0 text-[10px] tracking-wide text-zinc-400 uppercase dark:text-zinc-600'}>dir</span>
         )}
       </div>
       {isDirectory && node.expanded && node.children && (

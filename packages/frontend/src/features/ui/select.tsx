@@ -5,7 +5,7 @@ import { cn } from '@remnant/frontend/lib/cn';
 
 const selectVariants = cva(
   [
-    'flex w-full appearance-none text-zinc-900 transition-all duration-(--duration-fast) disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-offset-0 pr-9',
+    'flex w-full appearance-none text-zinc-900 dark:text-zinc-100 transition-all duration-(--duration-fast) disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-offset-0 pr-9',
   ],
   {
     variants: {

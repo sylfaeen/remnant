@@ -408,6 +408,7 @@
         "allowedPathsHint": "Chemins relatifs depuis la racine du serveur. Laisser vide pour autoriser tous les dossiers.",
         "addPath": "Ajouter un chemin",
         "pathPlaceholder": "ex. plugins/",
+        "generate": "Générer",
         "create": "Créer le compte",
         "save": "Enregistrer les modifications"
       }

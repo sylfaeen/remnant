@@ -408,6 +408,7 @@
         "allowedPathsHint": "Relative paths from the server root. Leave empty to allow all folders.",
         "addPath": "Add path",
         "pathPlaceholder": "e.g., plugins/",
+        "generate": "Generate",
         "create": "Create account",
         "save": "Save changes"
       }
