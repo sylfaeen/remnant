@@ -180,7 +180,7 @@ function SftpAccountForm({ serverId, account, isEditing, onClose }: SftpAccountF
               }
             }}
           />
-          <Button type={'button'} variant={'secondary'} size={'sm'} onClick={handleAddPath} disabled={!newPath.trim()}>
+          <Button type={'button'} variant={'secondary'} size={'lg'} onClick={handleAddPath} disabled={!newPath.trim()}>
             <Plus className={'size-3.5'} />
             {t('settings.ftp.dialog.addPath')}
           </Button>

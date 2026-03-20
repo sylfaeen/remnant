@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Cpu, RotateCcw, Save, TriangleAlert } from 'lucide-react';
+import { Cpu, RotateCcw, Save } from 'lucide-react';
+import { Alert } from '@remnant/frontend/features/ui/alert';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer, useUpdateServer } from '@remnant/frontend/hooks/use_servers';
@@ -325,12 +326,8 @@ function RestartBanner() {
   const { t } = useTranslation();
 
   return (
-    <div className={'flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-50 px-4 py-3 dark:bg-amber-950/30'}>
-      <TriangleAlert className={'size-4 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
-      <p
-        className={'text-sm text-amber-800 dark:text-amber-200'}
-        dangerouslySetInnerHTML={{ __html: t('settings.restartRequired') }}
-      />
-    </div>
+    <Alert>
+      <Alert.Text dangerouslySetInnerHTML={{ __html: t('settings.restartRequired') }} />
+    </Alert>
   );
 }

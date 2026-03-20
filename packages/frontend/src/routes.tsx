@@ -32,6 +32,7 @@ import { DocsLayout } from '@remnant/frontend/pages/app/features/layouts/docs_la
 import { MarkdownPage } from '@remnant/frontend/pages/app/docs/markdown';
 import { DEFAULT_DOC_SLUG } from '@remnant/frontend/pages/app/docs/features/docs_content';
 import { SettingsGeneralPage } from '@remnant/frontend/pages/app/settings/general';
+import { SettingsFtpPage } from '@remnant/frontend/pages/app/settings/ftp';
 import { SettingsPage } from '@remnant/frontend/pages/app/settings/settings';
 
 const queryClient = new QueryClient({
@@ -170,6 +171,12 @@ const appSettingsEnvironmentRoute = createRoute({
   component: SettingsEnvironmentPage,
 });
 
+const appSettingsFtpRoute = createRoute({
+  getParentRoute: () => mainLayoutRoute,
+  path: 'settings/ftp',
+  component: SettingsFtpPage,
+});
+
 const accountRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
   path: 'account',
@@ -295,6 +302,7 @@ const routeTree = rootRoute.addChildren([
       appSettingsRoute,
       appSettingsGeneralRoute,
       appSettingsEnvironmentRoute,
+      appSettingsFtpRoute,
       accountRoute,
     ]),
     docsLayoutRoute.addChildren([docsIndexRoute, docsSlugRoute]),

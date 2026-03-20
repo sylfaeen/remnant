@@ -25,6 +25,7 @@
     "settings": "Settings",
     "settingsGeneral": "General",
     "settingsEnvironment": "Environment",
+    "settingsFtp": "FTP Access",
     "settingsJars": "JAR Management",
     "settingsJvm": "Java & JVM",
     "settingsFirewall": "Firewall Rules",

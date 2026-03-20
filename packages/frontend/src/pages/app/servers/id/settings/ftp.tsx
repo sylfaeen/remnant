@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Copy, FolderOpen, HardDrive, Pencil, Plus, Trash2, Upload } from 'lucide-react';
+import { Check, Copy, FolderOpen, HardDrive, Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { Button } from '@remnant/frontend/features/ui/button';
@@ -58,12 +58,9 @@ function ConnectionInfoSection() {
   const { t } = useTranslation();
   const { data: sftpInfo } = useSftpInfo();
 
-  const address = sftpInfo?.host ?? '';
-  const port = sftpInfo?.port;
-
   const fields = [
-    { label: t('settings.ftp.connectionInfo.host'), value: address },
-    { label: t('settings.ftp.connectionInfo.sftpPort'), value: String(port) },
+    { label: t('settings.ftp.connectionInfo.host'), value: sftpInfo?.host ?? '—' },
+    { label: t('settings.ftp.connectionInfo.sftpPort'), value: String(sftpInfo?.port ?? '—') },
   ];
 
   return (
@@ -75,41 +72,47 @@ function ConnectionInfoSection() {
         </FeatureCard.Content>
       </FeatureCard.Header>
       <FeatureCard.Body>
-        {fields.map((field) => (
-          <ConnectionInfoRow key={field.label} label={field.label} value={field.value} />
-        ))}
+        <div className={'grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-black/5 dark:bg-white/5'}>
+          {fields.map((field) => (
+            <ConnectionInfoCell key={field.label} {...field} />
+          ))}
+        </div>
       </FeatureCard.Body>
     </FeatureCard>
   );
 }
 
-type ConnectionInfoRowProps = {
+type ConnectionInfoCellProps = {
   label: string;
   value: string;
 };
 
-function ConnectionInfoRow({ label, value }: ConnectionInfoRowProps) {
+function ConnectionInfoCell({ label, value }: ConnectionInfoCellProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(value).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1500);
     });
-  };
+  }, [value]);
 
   return (
-    <FeatureCard.Row className={'items-center'}>
-      <div className={'min-w-0'}>
-        <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{label}</span>
-        <p className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{value}</p>
-      </div>
-      <FeatureCard.RowControl>
-        <Button variant={'ghost'} size={'icon-sm'} onClick={handleCopy}>
-          {copied ? <CheckCircle2 className={'size-3.5 text-green-600'} /> : <Copy className={'size-3.5'} />}
-        </Button>
-      </FeatureCard.RowControl>
-    </FeatureCard.Row>
+    <button
+      type={'button'}
+      onClick={handleCopy}
+      className={'group flex flex-col gap-1 bg-white px-5 py-3.5 text-left transition-colors hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/80'}
+    >
+      <span className={'text-xs font-medium text-zinc-400 dark:text-zinc-500'}>{label}</span>
+      <span className={'flex items-center gap-2'}>
+        <span className={'font-jetbrains text-sm font-semibold text-zinc-800 dark:text-zinc-200'}>{value}</span>
+        {copied ? (
+          <Check className={'size-3 text-green-500'} strokeWidth={3} />
+        ) : (
+          <Copy className={'size-3 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400'} />
+        )}
+      </span>
+    </button>
   );
 }
 

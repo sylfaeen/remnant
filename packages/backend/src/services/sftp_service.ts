@@ -9,6 +9,19 @@ import { APP_DIR } from '@remnant/backend/services/paths';
 import type { CreateSftpAccountRequest, UpdateSftpAccountRequest, SftpAccountResponse } from '@remnant/shared';
 
 const BCRYPT_ROUNDS = 12;
+
+function getServerIp(): string {
+  const interfaces = os.networkInterfaces();
+  for (const entries of Object.values(interfaces)) {
+    if (!entries) continue;
+    for (const entry of entries) {
+      if (!entry.internal && entry.family === 'IPv4') {
+        return entry.address;
+      }
+    }
+  }
+  return 'localhost';
+}
 const SCRIPT_PATH = process.env.SFTP_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-sftp.sh');
 
 export interface SftpInfo {
@@ -67,7 +80,7 @@ function formatAccount(account: typeof sftpAccounts.$inferSelect): SftpAccountRe
 export class SftpService {
   getSftpInfo(): SftpInfo {
     return {
-      host: os.hostname(),
+      host: getServerIp(),
       port: 22,
       username: 'remnant',
       hasPassword: true,

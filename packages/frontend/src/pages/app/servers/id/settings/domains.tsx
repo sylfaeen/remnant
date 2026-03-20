@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
-  AlertTriangle,
   CheckCircle2,
   ChevronDown,
   Copy,
@@ -14,6 +13,7 @@ import {
   ShieldAlert,
   Trash2,
 } from 'lucide-react';
+import { Alert } from '@remnant/frontend/features/ui/alert';
 import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
@@ -504,12 +504,9 @@ function SrvRegistrarTable({ domain, port }: SrvRegistrarTableProps) {
       </div>
       <div className={'space-y-0 border-t border-black/6 dark:border-white/6'}>
         {subdomain && (
-          <div className={'flex items-start gap-2 border-b border-amber-500/20 bg-amber-50/50 px-3 py-2 dark:bg-amber-950/20'}>
-            <AlertTriangle className={'mt-0.5 size-3.5 shrink-0 text-amber-600 dark:text-amber-500'} strokeWidth={2} />
-            <p className={'text-xs text-amber-800 dark:text-amber-200'}>
-              {t('settings.domains.playerDomain.srvWarning', { subdomain })}
-            </p>
-          </div>
+          <Alert className={'rounded-none border-x-0 border-t-0 border-b border-amber-500/20 px-3 py-2'}>
+            <Alert.Text className={'text-xs'}>{t('settings.domains.playerDomain.srvWarning', { subdomain })}</Alert.Text>
+          </Alert>
         )}
         <div className={'px-3 py-2'}>
           <p className={'text-xs text-zinc-400 dark:text-zinc-500'}>

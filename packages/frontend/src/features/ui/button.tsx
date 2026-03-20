@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -27,7 +27,7 @@ const buttonVariants = cva(
         xs: 'h-7 px-2.5 text-xs',
         sm: 'h-8 px-3 text-sm',
         md: 'h-9 px-4 py-2 text-sm',
-        lg: 'h-10 px-8',
+        lg: 'h-10 px-8 text-sm',
         xl: 'h-11 px-8',
         icon: 'size-9',
         'icon-xs': 'size-6',
@@ -42,7 +42,7 @@ const buttonVariants = cva(
   }
 );
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+export interface ButtonProps extends ComponentProps<'button'>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
   icon?: LucideIcon;
@@ -63,7 +63,7 @@ export function Button({
 
   if (asChild) {
     return (
-      <Slot className={cn(buttonVariants({ variant, size, className }))} disabled={isDisabled} {...rest}>
+      <Slot className={cn(buttonVariants({ variant, size, className }))} aria-disabled={isDisabled} {...rest}>
         {children}
       </Slot>
     );

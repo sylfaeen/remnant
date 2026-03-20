@@ -16,6 +16,7 @@ const mainNavItems: Array<SidebarNavSection> = [
         children: [
           { key: 'settingsGeneral', path: '/app/settings/general' },
           { key: 'settingsEnvironment', path: '/app/settings/environment' },
+          { key: 'settingsFtp', path: '/app/settings/ftp' },
         ],
       },
       { key: 'docs', path: '/app/docs', icon: BookOpen, bottom: true },
