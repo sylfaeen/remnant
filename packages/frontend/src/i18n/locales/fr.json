@@ -503,11 +503,7 @@
       "step3Title": "Activez le SSL",
       "step3Desc": "Après la configuration, cliquez sur « Activer SSL » pour générer un certificat Let's Encrypt gratuit. Le panel redémarrera et sera accessible via https://votredomaine.com.",
       "sslSuccess": "Certificat SSL activé ! Votre panel est maintenant accessible en HTTPS.",
-      "goToPanel": "Ouvrir https://{{domain}}",
-      "ipAccess": "Accès par adresse IP",
-      "ipAccessDesc": "Autoriser l'accès au panel via l'adresse IP du serveur (HTTP)",
-      "enableIpAccess": "Activer",
-      "disableIpAccess": "Désactiver"
+      "goToPanel": "Ouvrir https://{{domain}}"
     },
     "java": {
       "title": "Environnements Java",
@@ -631,9 +627,6 @@
     "panelDomainRemoveError": "Échec de la suppression du domaine panel",
     "sslRenewed": "Certificats SSL renouvelés",
     "sslRenewError": "Échec du renouvellement des certificats SSL",
-    "ipAccessEnabled": "Accès IP activé",
-    "ipAccessDisabled": "Accès IP désactivé",
-    "ipAccessError": "Échec de la mise à jour de l'accès IP",
     "sftpAccountCreated": "Compte SFTP créé",
     "sftpAccountUpdated": "Compte SFTP mis à jour",
     "sftpAccountDeleted": "Compte SFTP supprimé",

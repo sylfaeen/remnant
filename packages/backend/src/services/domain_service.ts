@@ -240,21 +240,6 @@ export class DomainService {
     return runDomainScript(['ensure-timer']);
   }
 
-  async getIpAccessStatus(): Promise<boolean> {
-    const result = await runDomainScript(['fallback-status']);
-    const parsed = result as unknown as { ip_access?: boolean };
-    return parsed.ip_access ?? true;
-  }
-
-  async setIpAccess(enabled: boolean) {
-    const action = enabled ? 'enable-fallback' : 'disable-fallback';
-    const result = await runDomainScript([action]);
-    if (!result.success) {
-      throw new Error(result.error || `Failed to ${enabled ? 'enable' : 'disable'} IP access`);
-    }
-    return result;
-  }
-
   async cleanupServerDomains(serverId: number) {
     const domains = await db.select().from(customDomains).where(eq(customDomains.server_id, serverId));
 

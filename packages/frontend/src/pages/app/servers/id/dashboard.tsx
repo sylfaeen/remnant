@@ -99,7 +99,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const config = STATUS_BADGE[status];
 
   return (
-    <Badge variant={config.variant} size={'md'} className={cn('font-semibold tracking-wider uppercase', config.className)}>
+    <Badge variant={config.variant} size={'sm'} className={cn('font-semibold tracking-wider uppercase', config.className)}>
       {t(config.labelKey)}
     </Badge>
   );
