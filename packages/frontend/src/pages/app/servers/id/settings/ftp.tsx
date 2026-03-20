@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Check, Copy, FolderOpen, HardDrive, Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import { useSftpInfo, useSftpAccounts, useDeleteSftpAccount } from '@remnant/frontend/hooks/use_sftp';
@@ -101,7 +101,9 @@ function ConnectionInfoCell({ label, value }: ConnectionInfoCellProps) {
     <button
       type={'button'}
       onClick={handleCopy}
-      className={'group flex flex-col gap-1 bg-white px-5 py-3.5 text-left transition-colors hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/80'}
+      className={
+        'group flex flex-col gap-1 bg-white px-5 py-3.5 text-left transition-colors hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800/80'
+      }
     >
       <span className={'text-xs font-medium text-zinc-400 dark:text-zinc-500'}>{label}</span>
       <span className={'flex items-center gap-2'}>
@@ -109,7 +111,11 @@ function ConnectionInfoCell({ label, value }: ConnectionInfoCellProps) {
         {copied ? (
           <Check className={'size-3 text-green-500'} strokeWidth={3} />
         ) : (
-          <Copy className={'size-3 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400'} />
+          <Copy
+            className={
+              'size-3 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400'
+            }
+          />
         )}
       </span>
     </button>
@@ -211,7 +217,7 @@ function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains text-sm font-semibold text-zinc-800 dark:text-zinc-200'}>{account.username}</span>
-            <Badge variant={isReadOnly ? 'muted' : 'success'} size={'xs'} className={'font-semibold'}>
+            <Badge variant={isReadOnly ? 'secondary' : 'default'} className={'font-semibold'}>
               {isReadOnly ? t('settings.ftp.accounts.readOnly') : t('settings.ftp.accounts.readWrite')}
             </Badge>
           </div>
@@ -227,7 +233,7 @@ function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
-              variant={'danger'}
+              variant={'destructive'}
               size={'xs'}
               onClick={() => {
                 onDelete();
@@ -245,7 +251,7 @@ function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
             <Button variant={'ghost'} size={'icon-sm'} onClick={onEdit}>
               <Pencil className={'size-4'} />
             </Button>
-            <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+            <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
               <Trash2 className={'size-4'} />
             </Button>
           </>

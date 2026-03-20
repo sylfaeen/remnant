@@ -32,14 +32,14 @@ import {
   type TaskExecution,
   type CreateTaskInput,
 } from '@remnant/frontend/hooks/use_tasks';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { CreateTaskDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_task_dialog';
 import { EditTaskDialog } from '@remnant/frontend/pages/app/servers/dialogs/edit_task_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
-import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
 export function ServerTasksPage() {
   const { t } = useTranslation();
@@ -236,14 +236,10 @@ function TaskRow({
           <div className={cn('min-w-0', !task.enabled && 'opacity-50')}>
             <div className={'flex items-center gap-2'}>
               <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{task.name}</span>
-              <Badge variant={typeConfig.badgeVariant} size={'xs'} className={'font-semibold'}>
+              <Badge variant={typeConfig.badgeVariant} className={'font-semibold'}>
                 {t(`tasks.types.${task.type}`)}
               </Badge>
-              {!task.enabled && (
-                <Badge variant={'muted'} size={'xs'}>
-                  {t('tasks.disabled')}
-                </Badge>
-              )}
+              {!task.enabled && <Badge variant={'secondary'}>{t('tasks.disabled')}</Badge>}
               <ChevronDown
                 className={cn('size-3.5 text-zinc-400 transition-transform dark:text-zinc-500', expanded && 'rotate-180')}
               />
@@ -294,7 +290,7 @@ function TaskRow({
             <div className={'flex items-center gap-1.5'}>
               <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
               <Button
-                variant={'danger'}
+                variant={'destructive'}
                 size={'xs'}
                 onClick={() => onDelete(task.id)}
                 disabled={deletePending}
@@ -308,9 +304,9 @@ function TaskRow({
             </div>
           ) : (
             <>
-              <Tooltip.Provider delayDuration={300}>
+              <TooltipProvider delayDuration={300}>
                 <Tooltip>
-                  <Tooltip.Trigger asChild>
+                  <TooltipTrigger asChild>
                     <Button
                       variant={task.enabled ? 'ghost' : 'success'}
                       size={task.enabled ? 'icon-sm' : 'sm'}
@@ -328,13 +324,13 @@ function TaskRow({
                         </>
                       )}
                     </Button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  </TooltipTrigger>
+                  <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                     {task.enabled ? t('tasks.tooltipDisable') : t('tasks.tooltipEnable')}
-                  </Tooltip.Content>
+                  </TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <Tooltip.Trigger asChild>
+                  <TooltipTrigger asChild>
                     <Button
                       variant={'ghost'}
                       size={'icon-sm'}
@@ -343,18 +339,18 @@ function TaskRow({
                     >
                       <Pencil className={'size-4'} />
                     </Button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipEdit')}</Tooltip.Content>
+                  </TooltipTrigger>
+                  <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipEdit')}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <Tooltip.Trigger asChild>
-                    <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(task.id)}>
+                  <TooltipTrigger asChild>
+                    <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => onDeleteConfirm(task.id)}>
                       <Trash2 className={'size-4'} />
                     </Button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipDelete')}</Tooltip.Content>
+                  </TooltipTrigger>
+                  <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('tasks.tooltipDelete')}</TooltipContent>
                 </Tooltip>
-              </Tooltip.Provider>
+              </TooltipProvider>
             </>
           )}
         </FeatureCard.RowControl>
@@ -417,7 +413,7 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
 }
 
 function getTaskTypeConfig(type: string) {
-  const neutral = { badgeVariant: 'default' as BadgeProps['variant'] };
+  const neutral = { badgeVariant: 'secondary' as const };
   switch (type) {
     case 'restart':
       return { icon: RotateCcw, ...neutral };

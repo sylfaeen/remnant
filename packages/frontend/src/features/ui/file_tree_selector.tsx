@@ -3,8 +3,8 @@ import { ChevronRight, File, Folder, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@remnant/frontend/lib/cn';
 import { trpc } from '@remnant/frontend/lib/trpc';
-import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 
 type FileEntry = {
   name: string;

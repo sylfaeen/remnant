@@ -7,9 +7,9 @@ import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { cn } from '@remnant/frontend/lib/cn';
 import { useServer, useStartServer, useStopServer, useRestartServer } from '@remnant/frontend/hooks/use_servers';
 import { useConsoleWebSocket } from '@remnant/frontend/hooks/use_console';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
-import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { ServerConsole } from '@remnant/frontend/pages/app/servers/features/server_console';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { formatUptime } from '@remnant/frontend/lib/uptime';
@@ -83,11 +83,14 @@ export function ServerDashboardPage() {
   );
 }
 
-const STATUS_BADGE: Record<ServerStatus, { variant: BadgeProps['variant']; labelKey: string; className?: string }> = {
-  stopped: { variant: 'muted', labelKey: 'servers.status.offline' },
-  starting: { variant: 'warning', labelKey: 'servers.status.starting', className: 'animate-pulse' },
-  running: { variant: 'success', labelKey: 'servers.status.online' },
-  stopping: { variant: 'warning', labelKey: 'servers.status.stopping', className: 'animate-pulse' },
+const STATUS_BADGE: Record<
+  ServerStatus,
+  { variant: 'default' | 'secondary' | 'destructive' | 'outline'; labelKey: string; className?: string }
+> = {
+  stopped: { variant: 'secondary', labelKey: 'servers.status.offline' },
+  starting: { variant: 'outline', labelKey: 'servers.status.starting', className: 'animate-pulse' },
+  running: { variant: 'default', labelKey: 'servers.status.online' },
+  stopping: { variant: 'outline', labelKey: 'servers.status.stopping', className: 'animate-pulse' },
 };
 
 type StatusBadgeProps = {
@@ -99,7 +102,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const config = STATUS_BADGE[status];
 
   return (
-    <Badge variant={config.variant} size={'sm'} className={cn('font-semibold tracking-wider uppercase', config.className)}>
+    <Badge variant={config.variant} className={cn('font-semibold tracking-wider uppercase', config.className)}>
       {t(config.labelKey)}
     </Badge>
   );
@@ -134,7 +137,7 @@ function ServerActions({ serverId, status }: ServerActionsProps) {
 
   if (isTransitioning) {
     return (
-      <Badge variant={'warning'} size={'md'} className={'animate-pulse rounded-lg px-4 py-2'}>
+      <Badge variant={'outline'} className={'animate-pulse rounded-lg px-4 py-2'}>
         {status === 'starting' ? t('servers.status.starting') : t('servers.status.stopping')}...
       </Badge>
     );
@@ -156,7 +159,7 @@ function ServerActions({ serverId, status }: ServerActionsProps) {
       {isRunning && (
         <>
           <Button
-            variant={'danger'}
+            variant={'destructive'}
             onClick={() => handleAction(stopServer)}
             disabled={isActionPending}
             loading={stopServer.isPending}
@@ -220,23 +223,23 @@ function MetricsBar({ isRunning, metrics, playerCount, players, uptime }: Metric
         detail={isRunning && metrics ? `${metrics.memory_percent.toFixed(0)}%` : undefined}
       />
       <div className={'hidden h-4 w-px bg-black/6 sm:block'} />
-      <Tooltip.Provider delayDuration={200}>
+      <TooltipProvider delayDuration={200}>
         <Tooltip>
-          <Tooltip.Trigger>
+          <TooltipTrigger>
             <MetricItem
               icon={Users}
               iconColor={'text-zinc-600 dark:text-zinc-400'}
               label={t('dashboard.players')}
               value={isRunning ? `${playerCount}` : '-'}
             />
-          </Tooltip.Trigger>
-          <Tooltip.Content>
+          </TooltipTrigger>
+          <TooltipContent>
             {isRunning && players.length > 0
               ? players.slice(0, 3).join(', ') + (players.length > 3 ? ` +${players.length - 3}` : '')
               : 'No players online'}
-          </Tooltip.Content>
+          </TooltipContent>
         </Tooltip>
-      </Tooltip.Provider>
+      </TooltipProvider>
       <div className={'hidden h-4 w-px bg-black/6 sm:block'} />
       <MetricItem
         icon={Activity}
@@ -269,14 +272,14 @@ function MetricItem({ icon: Icon, iconColor, label, value, detail, tooltip }: Me
 
   if (tooltip) {
     return (
-      <Tooltip.Provider delayDuration={300}>
+      <TooltipProvider delayDuration={300}>
         <Tooltip>
-          <Tooltip.Trigger asChild>
+          <TooltipTrigger asChild>
             <div className={'cursor-default'}>{content}</div>
-          </Tooltip.Trigger>
-          <Tooltip.Content className={'max-w-xs rounded-lg px-3 py-2 text-sm whitespace-pre-line'}>{tooltip}</Tooltip.Content>
+          </TooltipTrigger>
+          <TooltipContent className={'max-w-xs rounded-lg px-3 py-2 text-sm whitespace-pre-line'}>{tooltip}</TooltipContent>
         </Tooltip>
-      </Tooltip.Provider>
+      </TooltipProvider>
     );
   }
 

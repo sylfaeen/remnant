@@ -1,12 +1,25 @@
-import { useState, type SubmitEvent } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserPlus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { AVAILABLE_PERMISSIONS } from '@remnant/shared';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
-import { Label } from '@remnant/frontend/features/ui/label';
-import { Button } from '@remnant/frontend/features/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  DialogError,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
 
 type CreateUserFormData = {
   username: string;
@@ -21,12 +34,28 @@ type CreateUserDialogProps = {
   error: string | null;
 };
 
+const createUserSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(32)
+    .regex(/^[a-zA-Z0-9_-]+$/),
+  password: z.string().min(8).max(128),
+});
+
+type CreateUserFormValues = z.infer<typeof createUserSchema>;
+
 export function CreateUserDialog({ onSubmit, onCancel, isLoading, error }: CreateUserDialogProps) {
   const { t } = useTranslation();
-
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [permissions, setPermissions] = useState<Array<string>>([]);
+
+  const form = useForm<CreateUserFormValues>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  });
 
   const togglePermission = (permission: string) => {
     if (permission === '*') {
@@ -41,9 +70,8 @@ export function CreateUserDialog({ onSubmit, onCancel, isLoading, error }: Creat
     }
   };
 
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit({ username, password, permissions }).then();
+  const handleSubmit = (data: CreateUserFormValues) => {
+    onSubmit({ ...data, permissions }).then();
   };
 
   return (
@@ -53,69 +81,72 @@ export function CreateUserDialog({ onSubmit, onCancel, isLoading, error }: Creat
         if (!open) onCancel();
       }}
     >
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-green-600/10 text-green-600'}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcon className={'bg-green-600/10 text-green-600'}>
             <UserPlus className={'size-4'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('users.addUser')}</Dialog.Title>
+            <DialogTitle>{t('users.addUser')}</DialogTitle>
           </div>
-        </Dialog.Header>
-        <form id={'create-user'} onSubmit={handleSubmit}>
-          <Dialog.Body>
-            {error && <Dialog.Error>{error}</Dialog.Error>}
-            <div>
-              <Label htmlFor={'username'}>{t('users.username')} *</Label>
-              <Input
-                type={'text'}
-                id={'username'}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                maxLength={32}
-                pattern={'^[a-zA-Z0-9_-]+$'}
+        </DialogHeader>
+        <Form {...form}>
+          <form id={'create-user'} onSubmit={form.handleSubmit(handleSubmit)}>
+            <DialogBody>
+              {error && <DialogError>{error}</DialogError>}
+              <FormField
+                control={form.control}
+                name={'username'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('users.username')} *</FormLabel>
+                    <FormControl>
+                      <Input type={'text'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <Label htmlFor={'password'}>{t('users.password')} *</Label>
-              <Input
-                type={'password'}
-                id={'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                maxLength={128}
+              <FormField
+                control={form.control}
+                name={'password'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('users.password')} *</FormLabel>
+                    <FormControl>
+                      <Input type={'password'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <span className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
-                {t('users.permissions')}
-              </span>
-              <div className={'space-y-2'}>
-                {AVAILABLE_PERMISSIONS.map((permission) => (
-                  <Label key={permission} className={'flex cursor-pointer items-center gap-2'}>
-                    <Checkbox checked={permissions.includes(permission)} onCheckedChange={() => togglePermission(permission)} />
-                    <span className={'text-zinc-600 dark:text-zinc-400'}>
-                      {permission === '*' ? t('users.allPermissions') : permission}
-                    </span>
-                  </Label>
-                ))}
+              <div>
+                <span className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
+                  {t('users.permissions')}
+                </span>
+                <div className={'space-y-2'}>
+                  {AVAILABLE_PERMISSIONS.map((permission) => (
+                    <Label key={permission} className={'flex cursor-pointer items-center gap-2'}>
+                      <Checkbox checked={permissions.includes(permission)} onCheckedChange={() => togglePermission(permission)} />
+                      <span className={'text-zinc-600 dark:text-zinc-400'}>
+                        {permission === '*' ? t('users.allPermissions') : permission}
+                      </span>
+                    </Label>
+                  ))}
+                </div>
               </div>
-            </div>
-          </Dialog.Body>
-        </form>
-        <Dialog.Footer>
+            </DialogBody>
+          </form>
+        </Form>
+        <DialogFooter>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
             {t('common.cancel')}
           </Button>
           <Button type={'submit'} form={'create-user'} disabled={isLoading} loading={isLoading}>
             {isLoading ? t('users.creating', 'Creating...') : t('common.create')}
           </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -166,5 +166,4 @@ export const domainsRouter = router({
   ensureTimer: adminOnly.query(async () => {
     return domainService.ensureCertbotTimer();
   }),
-
 });

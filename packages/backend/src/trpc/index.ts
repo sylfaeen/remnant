@@ -15,7 +15,6 @@ export interface Context {
   user: TRPCUser | null;
 }
 
-
 export const createContext = async ({ req, res }: { req: FastifyRequest; res: FastifyReply }): Promise<Context> => {
   let user: TRPCUser | null = null;
 

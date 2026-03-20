@@ -2,9 +2,16 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info, Plus, Power, PowerOff, Shield, ShieldOff, Trash2 } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
 import { ServerSection } from '@remnant/frontend/pages/app/servers/features/server_section';
 import { AddFirewallRuleDialog } from '@remnant/frontend/pages/app/servers/dialogs/add_firewall_rule_dialog';
 
@@ -18,10 +25,10 @@ type FirewallRule = {
   enabled: boolean;
 };
 
-const PROTOCOL_BADGE_VARIANT: Record<Protocol, BadgeProps['variant']> = {
-  tcp: 'success',
-  udp: 'blue',
-  both: 'violet',
+const PROTOCOL_BADGE_VARIANT: Record<Protocol, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  tcp: 'default',
+  udp: 'secondary',
+  both: 'secondary',
 };
 
 const PROTOCOL_LABELS: Record<Protocol, string> = {
@@ -210,11 +217,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
           {PROTOCOL_LABELS[rule.protocol]}
         </Badge>
         <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{rule.label}</span>
-        {!rule.enabled && (
-          <Badge variant={'muted'} size={'xs'}>
-            {t('settings.firewall.disabled')}
-          </Badge>
-        )}
+        {!rule.enabled && <Badge variant={'secondary'}>{t('settings.firewall.disabled')}</Badge>}
       </div>
       <div className={'flex shrink-0 items-center gap-1.5'}>
         {toggleConfirm === rule.id ? (
@@ -237,7 +240,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
         ) : deleteConfirm === rule.id ? (
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
-            <Button variant={'danger'} size={'xs'} onClick={() => onDelete(rule.id)}>
+            <Button variant={'destructive'} size={'xs'} onClick={() => onDelete(rule.id)}>
               {t('common.yes')}
             </Button>
             <Button variant={'ghost'} size={'xs'} onClick={() => onDeleteConfirm(null)}>
@@ -261,7 +264,7 @@ FirewallCard.RuleRow = function FirewallCardRuleRow({
                 </>
               )}
             </Button>
-            <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(rule.id)}>
+            <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => onDeleteConfirm(rule.id)}>
               <Trash2 className={'size-4'} />
             </Button>
           </>
@@ -281,10 +284,10 @@ function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuidelinesDial
 
   return (
     <Dialog {...{ open, onOpenChange }}>
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Title>{t('settings.firewall.infoTitle')}</Dialog.Title>
-        </Dialog.Header>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('settings.firewall.infoTitle')}</DialogTitle>
+        </DialogHeader>
         <div className={'mt-4 divide-y divide-black/4'}>
           <div className={'pb-3'}>
             <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.firewall.infoPortRangeLabel')}</p>
@@ -296,7 +299,7 @@ function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuidelinesDial
             </p>
             <div className={'mt-1.5 flex flex-wrap gap-1.5'}>
               {[22, 80, 443, 3000, 3001].map((port) => (
-                <Badge key={port} variant={'muted'} className={'font-jetbrains'}>
+                <Badge key={port} variant={'secondary'} className={'font-jetbrains'}>
                   {port}
                 </Badge>
               ))}
@@ -307,14 +310,14 @@ function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuidelinesDial
             <p className={'mt-0.5 text-sm text-zinc-500'}>{t('settings.firewall.infoProtocolDesc')}</p>
           </div>
         </div>
-        <Dialog.Footer>
-          <Dialog.Close asChild>
+        <DialogFooter>
+          <DialogClose asChild>
             <Button variant={'ghost'} size={'sm'}>
               {t('common.close')}
             </Button>
-          </Dialog.Close>
-        </Dialog.Footer>
-      </Dialog.Content>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

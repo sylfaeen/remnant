@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { cn } from '@remnant/frontend/lib/cn';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -30,9 +30,9 @@ import {
   isEditableFile,
   type FileInfo,
 } from '@remnant/frontend/hooks/use_files';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 import { UploadFileDialog } from '@remnant/frontend/pages/app/servers/dialogs/upload_file_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
@@ -215,12 +215,12 @@ function FilesSection({ serverId, currentPath, onNavigate }: FilesSectionProps) 
             {files && files.length > 0 && (
               <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
                 {dirCount > 0 && (
-                  <Badge size={'md'}>
+                  <Badge>
                     {dirCount} {dirCount === 1 ? t('files.folder', 'folder') : t('files.folders', 'folders')}
                   </Badge>
                 )}
                 {fileCount > 0 && (
-                  <Badge variant={'muted'} size={'md'}>
+                  <Badge variant={'secondary'}>
                     {fileCount} {fileCount === 1 ? t('files.file', 'file') : t('files.files', 'files')}
                   </Badge>
                 )}
@@ -457,7 +457,7 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
         ) : action === 'delete' ? (
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
-            <Button variant={'danger'} size={'xs'} onClick={() => onDelete(file)}>
+            <Button variant={'destructive'} size={'xs'} onClick={() => onDelete(file)}>
               {t('common.yes')}
             </Button>
             <Button variant={'ghost'} size={'xs'} onClick={() => setAction('idle')}>
@@ -465,9 +465,9 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
             </Button>
           </div>
         ) : (
-          <Tooltip.Provider delayDuration={300}>
+          <TooltipProvider delayDuration={300}>
             <Tooltip>
-              <Tooltip.Trigger asChild>
+              <TooltipTrigger asChild>
                 <Button
                   variant={'ghost'}
                   size={'icon-sm'}
@@ -480,11 +480,11 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                 >
                   <Pencil className={'size-4'} />
                 </Button>
-              </Tooltip.Trigger>
-              <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.edit')}</Tooltip.Content>
+              </TooltipTrigger>
+              <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.edit')}</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <Tooltip.Trigger asChild>
+              <TooltipTrigger asChild>
                 <Button
                   variant={'ghost'}
                   size={'icon-sm'}
@@ -493,18 +493,18 @@ function FileRow({ file, onNavigate, onEdit, onDelete, onRename }: FileRowProps)
                 >
                   <TextCursorInput className={'size-4'} />
                 </Button>
-              </Tooltip.Trigger>
-              <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.rename')}</Tooltip.Content>
+              </TooltipTrigger>
+              <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('files.rename')}</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <Tooltip.Trigger asChild>
-                <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setAction('delete')}>
+              <TooltipTrigger asChild>
+                <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setAction('delete')}>
                   <Trash2 className={'size-4'} />
                 </Button>
-              </Tooltip.Trigger>
-              <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('common.delete')}</Tooltip.Content>
+              </TooltipTrigger>
+              <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('common.delete')}</TooltipContent>
             </Tooltip>
-          </Tooltip.Provider>
+          </TooltipProvider>
         )}
       </div>
     </div>

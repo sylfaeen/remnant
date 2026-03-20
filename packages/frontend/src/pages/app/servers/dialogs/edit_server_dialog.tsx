@@ -1,25 +1,39 @@
-import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { FolderOpen, Package, Pencil } from 'lucide-react';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
-import { Label } from '@remnant/frontend/features/ui/label';
-import { Button } from '@remnant/frontend/features/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  DialogError,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import type { ServerResponse } from '@remnant/shared';
 
-type EditServerFormData = {
-  name: string;
-  min_ram: string;
-  max_ram: string;
-  jvm_flags: string;
-  java_port: number;
-  auto_start: boolean;
-};
+const editServerSchema = z.object({
+  name: z.string().min(1),
+  min_ram: z.string().default('2G'),
+  max_ram: z.string().default('4G'),
+  jvm_flags: z.string().default(''),
+  java_port: z.coerce.number().min(1024).max(65535).default(25565),
+  auto_start: z.boolean().default(true),
+});
+
+type EditServerFormValues = z.infer<typeof editServerSchema>;
 
 type EditServerDialogProps = {
   server: ServerResponse;
-  onSubmit: (data: EditServerFormData) => Promise<void>;
+  onSubmit: (data: EditServerFormValues) => Promise<void>;
   onCancel: () => void;
   isLoading: boolean;
   error: string | null;
@@ -28,16 +42,20 @@ type EditServerDialogProps = {
 export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error }: EditServerDialogProps) {
   const { t } = useTranslation();
 
-  const [name, setName] = useState(server.name);
-  const [minRam, setMinRam] = useState(server.min_ram);
-  const [maxRam, setMaxRam] = useState(server.max_ram);
-  const [jvmFlags, setJvmFlags] = useState(server.jvm_flags);
-  const [javaPort, setJavaPort] = useState(server.java_port);
-  const [autoStart, setAutoStart] = useState(server.auto_start);
+  const form = useForm<EditServerFormValues>({
+    resolver: zodResolver(editServerSchema),
+    defaultValues: {
+      name: server.name,
+      min_ram: server.min_ram,
+      max_ram: server.max_ram,
+      jvm_flags: server.jvm_flags,
+      java_port: server.java_port,
+      auto_start: server.auto_start,
+    },
+  });
 
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    onSubmit({ name, min_ram: minRam, max_ram: maxRam, jvm_flags: jvmFlags, java_port: javaPort, auto_start: autoStart });
+  const onFormSubmit = (data: EditServerFormValues) => {
+    onSubmit(data);
   };
 
   return (
@@ -47,117 +65,146 @@ export function EditServerDialog({ server, onSubmit, onCancel, isLoading, error 
         if (!open) onCancel();
       }}
     >
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
             <Pencil className={'size-4'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('servers.editServer')}</Dialog.Title>
+            <DialogTitle>{t('servers.editServer')}</DialogTitle>
           </div>
-        </Dialog.Header>
-        <form id={'edit-server'} onSubmit={handleSubmit}>
-          <Dialog.Body>
-            {error && <Dialog.Error>{error}</Dialog.Error>}
-            <div>
-              <Label htmlFor={'name'}>{t('servers.serverName')} *</Label>
-              <Input
-                type={'text'}
-                id={'name'}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('servers.serverNamePlaceholder')}
-                required
+        </DialogHeader>
+        <Form {...form}>
+          <form id={'edit-server'} onSubmit={form.handleSubmit(onFormSubmit)}>
+            <DialogBody>
+              {error && <DialogError>{error}</DialogError>}
+              <FormField
+                control={form.control}
+                name={'name'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('servers.serverName')} *</FormLabel>
+                    <FormControl>
+                      <Input type={'text'} placeholder={t('servers.serverNamePlaceholder')} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            {server.path && (
-              <div>
-                <Label>{t('servers.serverPath')}</Label>
-                <div
-                  className={
-                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
-                  }
-                >
-                  <FolderOpen className={'size-4 shrink-0'} />
-                  <span className={'truncate'}>{server.path}</span>
+              {server.path && (
+                <div>
+                  <Label>{t('servers.serverPath')}</Label>
+                  <div
+                    className={
+                      'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
+                    }
+                  >
+                    <FolderOpen className={'size-4 shrink-0'} />
+                    <span className={'truncate'}>{server.path}</span>
+                  </div>
                 </div>
-              </div>
-            )}
-            {server.jar_file && (
-              <div>
-                <Label>{t('servers.jarFile')}</Label>
-                <div
-                  className={
-                    'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
-                  }
-                >
-                  <Package className={'size-4 shrink-0'} />
-                  <span className={'truncate'}>{server.jar_file}</span>
+              )}
+              {server.jar_file && (
+                <div>
+                  <Label>{t('servers.jarFile')}</Label>
+                  <div
+                    className={
+                      'font-jetbrains flex items-center gap-2 rounded-lg border border-black/10 bg-zinc-100 px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400'
+                    }
+                  >
+                    <Package className={'size-4 shrink-0'} />
+                    <span className={'truncate'}>{server.jar_file}</span>
+                  </div>
+                  <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
+                    {t('servers.jarHint', 'Change the active JAR file in server settings')}
+                  </p>
                 </div>
-                <p className={'mt-1 text-sm text-zinc-600 dark:text-zinc-400'}>
-                  {t('servers.jarHint', 'Change the active JAR file in server settings')}
-                </p>
-              </div>
-            )}
-            <div className={'grid grid-cols-2 gap-4'}>
-              <div>
-                <Label htmlFor={'minRam'}>{t('servers.minRam')}</Label>
-                <Input
-                  type={'text'}
-                  id={'minRam'}
-                  value={minRam}
-                  onChange={(e) => setMinRam(e.target.value)}
-                  placeholder={'2G'}
+              )}
+              <div className={'grid grid-cols-2 gap-4'}>
+                <FormField
+                  control={form.control}
+                  name={'min_ram'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('servers.minRam')}</FormLabel>
+                      <FormControl>
+                        <Input type={'text'} placeholder={'2G'} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={'max_ram'}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('servers.maxRam')}</FormLabel>
+                      <FormControl>
+                        <Input type={'text'} placeholder={'4G'} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div>
-                <Label htmlFor={'maxRam'}>{t('servers.maxRam')}</Label>
-                <Input
-                  type={'text'}
-                  id={'maxRam'}
-                  value={maxRam}
-                  onChange={(e) => setMaxRam(e.target.value)}
-                  placeholder={'4G'}
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor={'javaPort'}>{t('servers.port')}</Label>
-              <Input
-                type={'number'}
-                id={'javaPort'}
-                value={javaPort}
-                onChange={(e) => setJavaPort(parseInt(e.target.value, 10))}
-                min={1024}
-                max={65535}
-                className={'w-32'}
+              <FormField
+                control={form.control}
+                name={'java_port'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('servers.port')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type={'number'}
+                        min={1024}
+                        max={65535}
+                        className={'w-32'}
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value, 10) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <Label htmlFor={'jvmFlags'}>{t('servers.jvmFlagsAdditional')}</Label>
-              <Input
-                type={'text'}
-                id={'jvmFlags'}
-                value={jvmFlags}
-                onChange={(e) => setJvmFlags(e.target.value)}
-                placeholder={'-XX:+UseG1GC'}
+              <FormField
+                control={form.control}
+                name={'jvm_flags'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('servers.jvmFlagsAdditional')}</FormLabel>
+                    <FormControl>
+                      <Input type={'text'} placeholder={'-XX:+UseG1GC'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Label className={'flex cursor-pointer items-center gap-2'}>
-              <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
-              <span className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</span>
-            </Label>
-          </Dialog.Body>
-        </form>
-        <Dialog.Footer>
+              <FormField
+                control={form.control}
+                name={'auto_start'}
+                render={({ field }) => (
+                  <FormItem className={'flex cursor-pointer items-center gap-2'}>
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.autoStartDesc')}</FormLabel>
+                  </FormItem>
+                )}
+              />
+            </DialogBody>
+          </form>
+        </Form>
+        <DialogFooter>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
             {t('common.cancel')}
           </Button>
           <Button type={'submit'} form={'edit-server'} disabled={isLoading} loading={isLoading}>
             {isLoading ? t('servers.saving') : t('common.save')}
           </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

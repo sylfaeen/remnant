@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield, Loader2 } from 'lucide-react';
 import { TotpQrDisplay, TotpCodeInput, RecoveryCodesDisplay } from '@remnant/frontend/features/totp/totp_setup_display';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 
 type SecuritySubStep = 'prompt' | 'setup' | 'recovery';
 
@@ -62,13 +62,13 @@ export function TotpOnboardingStep({
               <p className={'mt-1.5 max-w-xs text-sm text-zinc-500 dark:text-zinc-400'}>{t('onboarding.security.subtitle')}</p>
             </div>
             <div className={'mt-6 space-y-2.5'}>
-              <Button size={'md'} onClick={handleSetupStart} loading={setupLoading} className={'w-full'}>
+              <Button size={'default'} onClick={handleSetupStart} loading={setupLoading} className={'w-full'}>
                 <Shield className={'size-4'} />
                 {t('onboarding.security.enable')}
               </Button>
               <Button
                 variant={'link'}
-                size={'md'}
+                size={'default'}
                 onClick={onSkip}
                 className={'w-full text-zinc-500 no-underline hover:text-zinc-700 dark:hover:text-zinc-300'}
               >

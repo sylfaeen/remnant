@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, type SubmitEvent, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Terminal, Send, Trash2, ArrowDown } from 'lucide-react';
+import { Terminal, Send, Trash2, ArrowDown, Info } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import type { ConsoleMessage } from '@remnant/frontend/hooks/use_console';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
 
 type ServerConsoleProps = {
   messages: Array<ConsoleMessage>;
@@ -84,9 +85,10 @@ export function ServerConsole({
   return (
     <div className={cn('relative flex flex-col', className)}>
       {error && (
-        <div className={'mb-4 shrink-0 rounded-lg border border-red-600/30 bg-red-600/10 px-4 py-2 text-sm text-red-600'}>
-          {error}
-        </div>
+        <Alert variant={'destructive'} className={'mb-4'}>
+          <Info className={'size-4'} />
+          <AlertDescription dangerouslySetInnerHTML={{ __html: error }} />
+        </Alert>
       )}
       <div className={'flex max-w-full flex-1 flex-col overflow-hidden rounded-xl border border-black/10 bg-zinc-950'}>
         <div className={'flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-2'}>

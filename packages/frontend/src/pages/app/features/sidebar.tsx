@@ -2,7 +2,13 @@ import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, LogOut, Settings, ChevronUp } from 'lucide-react';
-import { DropdownMenu } from '@remnant/frontend/features/ui/dropdown_menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@remnant/frontend/features/ui/shadcn/dropdown-menu';
 import { cn } from '@remnant/frontend/lib/cn';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { useLogout } from '@remnant/frontend/hooks/use_auth';
@@ -98,7 +104,7 @@ function UserDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenu.Trigger asChild>
+      <DropdownMenuTrigger asChild>
         <button
           type={'button'}
           className={
@@ -108,21 +114,21 @@ function UserDropdown() {
           <span className={'truncate text-sm font-medium'}>{user?.username || 'User'}</span>
           <ChevronUp className={'size-3 shrink-0 text-zinc-400 dark:text-zinc-500'} />
         </button>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content side={'top'} align={'start'}>
-        <DropdownMenu.Item onSelect={() => navigate({ to: '/app/account' }).then()}>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side={'top'} align={'start'}>
+        <DropdownMenuItem onSelect={() => navigate({ to: '/app/account' }).then()}>
           <Settings className={'size-4'} strokeWidth={2} />
           <span className={'font-medium'}>{t('account.menuSettings')}</span>
-        </DropdownMenu.Item>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
           onSelect={() => logout.mutate()}
           className={'text-red-600 data-highlighted:bg-red-50 dark:data-highlighted:bg-red-950'}
         >
           <LogOut className={'size-4'} strokeWidth={2} />
           <span className={'font-medium'}>{t('common.logout')}</span>
-        </DropdownMenu.Item>
-      </DropdownMenu.Content>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 }

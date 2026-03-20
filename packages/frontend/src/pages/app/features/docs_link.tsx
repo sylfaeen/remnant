@@ -1,7 +1,7 @@
 import { BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
 type DocsLinkProps = {
   path: string;
@@ -12,9 +12,9 @@ export function DocsLink({ path }: DocsLinkProps) {
   const slug = path.replace(/^\/guide\//, '').replace(/^\//, '');
 
   return (
-    <Tooltip.Provider delayDuration={200}>
+    <TooltipProvider delayDuration={200}>
       <Tooltip>
-        <Tooltip.Trigger asChild>
+        <TooltipTrigger asChild>
           <Link
             to={'/app/docs/$slug'}
             params={{ slug }}
@@ -24,11 +24,11 @@ export function DocsLink({ path }: DocsLinkProps) {
           >
             <BookOpen className={'size-4'} strokeWidth={2} />
           </Link>
-        </Tooltip.Trigger>
-        <Tooltip.Content>
+        </TooltipTrigger>
+        <TooltipContent>
           <p>{t('common.documentation')}</p>
-        </Tooltip.Content>
+        </TooltipContent>
       </Tooltip>
-    </Tooltip.Provider>
+    </TooltipProvider>
   );
 }

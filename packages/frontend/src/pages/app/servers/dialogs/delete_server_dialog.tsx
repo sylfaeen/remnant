@@ -1,8 +1,16 @@
 import type { ServerResponse } from '@remnant/shared';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Archive, Loader2, Trash2 } from 'lucide-react';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Button } from '@remnant/frontend/features/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 
 type DeleteServerDialogProps = {
   server: ServerResponse;
@@ -21,30 +29,30 @@ export function DeleteServerDialog({ server, isDeleting, onConfirm, onCancel }: 
         if (!open) onCancel();
       }}
     >
-      <Dialog.Content className={'max-w-md'}>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-red-600/10 text-red-600'}>
+      <DialogContent className={'max-w-md'}>
+        <DialogHeader>
+          <DialogIcon className={'bg-red-600/10 text-red-600'}>
             <AlertTriangle className={'size-4'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('servers.deleteServer')}</Dialog.Title>
+            <DialogTitle>{t('servers.deleteServer')}</DialogTitle>
           </div>
-        </Dialog.Header>
-        <Dialog.Body>
+        </DialogHeader>
+        <DialogBody>
           <p className={'text-zinc-600 dark:text-zinc-400'}>{t('servers.deleteConfirmMessage', { name: server.name })}</p>
           <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('servers.deleteWarningFolder')}</p>
           <div className={'rounded-lg border border-black/10 bg-white p-3'}>
             <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('servers.backupQuestion')}</p>
           </div>
-        </Dialog.Body>
-        <Dialog.Footer>
+        </DialogBody>
+        <DialogFooter>
           <div className={'flex w-full flex-col gap-2'}>
             <Button onClick={() => onConfirm(true)} disabled={isDeleting} loading={isDeleting} className={'w-full'}>
               {isDeleting ? <Loader2 className={'size-4 animate-spin'} /> : <Archive className={'size-4'} />}
               {t('servers.deleteWithBackup')}
             </Button>
             <Button
-              variant={'danger'}
+              variant={'destructive'}
               onClick={() => onConfirm(false)}
               disabled={isDeleting}
               loading={isDeleting}
@@ -57,8 +65,8 @@ export function DeleteServerDialog({ server, isDeleting, onConfirm, onCancel }: 
               {t('common.cancel')}
             </Button>
           </div>
-        </Dialog.Footer>
-      </Dialog.Content>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

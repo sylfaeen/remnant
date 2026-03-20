@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@remnant/frontend/features/ui/toast';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
-import { useToast } from '@remnant/frontend/features/ui/toast';
 
 export type PluginInfo = {
   name: string;
@@ -24,7 +24,6 @@ export function usePlugins(serverId: number | null) {
 export function useUploadPlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const queryClient = useQueryClient();
 
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -67,7 +66,6 @@ export function useUploadPlugin(serverId: number) {
 export function useTogglePlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.plugins.toggle.useMutation({
@@ -89,7 +87,6 @@ export function useTogglePlugin(serverId: number) {
 export function useDeletePlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.plugins.delete.useMutation({

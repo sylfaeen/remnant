@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { trpc } from '@remnant/frontend/lib/trpc';
 import { useToast } from '@remnant/frontend/features/ui/toast';
+import { trpc } from '@remnant/frontend/lib/trpc';
 import type { CreateSftpAccountRequest, UpdateSftpAccountRequest } from '@remnant/shared';
 
 export function useSftpInfo() {

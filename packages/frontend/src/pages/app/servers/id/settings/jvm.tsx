@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Cpu, RotateCcw, Save } from 'lucide-react';
-import { Alert } from '@remnant/frontend/features/ui/alert';
+import { Cpu, Info, RotateCcw } from 'lucide-react';
+import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer, useUpdateServer } from '@remnant/frontend/hooks/use_servers';
 import { useInstalledJava } from '@remnant/frontend/hooks/use_java';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Label } from '@remnant/frontend/features/ui/label';
-import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
-import { Select } from '@remnant/frontend/features/ui/select';
-import { Textarea } from '@remnant/frontend/features/ui/textarea';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@remnant/frontend/features/ui/shadcn/select';
+import { Textarea } from '@remnant/frontend/features/ui/shadcn/textarea';
 import { AIKAR_FLAGS_STRING, DEFAULT_JAVA_PORT } from '@remnant/shared';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 
 type ServerValues = {
   minRam: string;
@@ -63,7 +63,10 @@ export function ServerSettingsJvmPage() {
       </ServerPageHeader>
       <PageContent>
         <div className={'space-y-4'}>
-          <RestartBanner />
+          <Alert variant={'warning'}>
+            <Info className={'size-4'} />
+            <AlertDescription dangerouslySetInnerHTML={{ __html: t('settings.restartRequired') }} />
+          </Alert>
           <FeatureCard.Stack>
             <JvmConfigSection {...{ serverId }} />
           </FeatureCard.Stack>
@@ -257,10 +260,8 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
             <FeatureCard.RowLabel>{t('settings.javaVersion')}</FeatureCard.RowLabel>
             <div className={'w-full'}>
               <Select
-                name={'java-version'}
                 value={javaMode === 'bundled' ? javaPath : javaMode}
-                onChange={(e) => {
-                  const val = e.target.value;
+                onValueChange={(val) => {
                   if (val === 'custom') {
                     setJavaMode('custom');
                     setJavaPath('');
@@ -270,12 +271,17 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
                   }
                 }}
               >
-                {javaVersions?.map((java) => (
-                  <option key={java.name} value={java.path}>
-                    {java.name} (Java {java.version}){java.isDefault ? ` — ${t('appSettings.java.default')}` : ''}
-                  </option>
-                ))}
-                <option value={'custom'}>{t('settings.customJavaPath')}</option>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {javaVersions?.map((java) => (
+                    <SelectItem key={java.name} value={java.path}>
+                      {java.name} (Java {java.version}){java.isDefault ? ` — ${t('appSettings.java.default')}` : ''}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value={'custom'}>{t('settings.customJavaPath')}</SelectItem>
+                </SelectContent>
               </Select>
             </div>
             {javaMode === 'custom' && (
@@ -313,21 +319,10 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
             {t('settings.cancel')}
           </Button>
           <Button size={'sm'} onClick={handleSave} disabled={saveStatus === 'saving'} loading={saveStatus === 'saving'}>
-            <Save className={'size-4'} />
             {saveStatus === 'saving' ? t('files.saving') : t('settings.saveConfig')}
           </Button>
         </div>
       </FeatureCard.Footer>
     </FeatureCard>
-  );
-}
-
-function RestartBanner() {
-  const { t } = useTranslation();
-
-  return (
-    <Alert>
-      <Alert.Text dangerouslySetInnerHTML={{ __html: t('settings.restartRequired') }} />
-    </Alert>
   );
 }

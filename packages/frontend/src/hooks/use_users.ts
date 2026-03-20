@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { trpc } from '@remnant/frontend/lib/trpc';
 import { useToast } from '@remnant/frontend/features/ui/toast';
+import { trpc } from '@remnant/frontend/lib/trpc';
 
 export function useUsers() {
   return trpc.users.list.useQuery();
@@ -13,7 +13,6 @@ export function useUser(id: number) {
 export function useCreateUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   return trpc.users.create.useMutation({
@@ -30,7 +29,6 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   return trpc.users.update.useMutation({
@@ -47,7 +45,6 @@ export function useUpdateUser() {
 export function useDeleteUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.users.delete.useMutation({

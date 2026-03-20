@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as monaco from 'monaco-editor';
-import { Eye, Save } from 'lucide-react';
-import { Alert } from '@remnant/frontend/features/ui/alert';
+import { Eye, Info, Save } from 'lucide-react';
+import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { useThemeStore } from '@remnant/frontend/stores/theme_store';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -27,10 +27,15 @@ const ENV_THEME_DARK = 'env-dark';
 let envRegistered = false;
 
 export function SettingsEnvironmentPage() {
+  const { t } = useTranslation();
+
   return (
     <PageContent>
       <div className={'space-y-4'}>
-        <RestartBanner />
+        <Alert variant={'default'}>
+          <Info className={'size-4'} />
+          <AlertDescription dangerouslySetInnerHTML={{ __html: t('environment.restartWarning') }} />
+        </Alert>
         <FeatureCard.Stack>
           <EnvironmentSection />
         </FeatureCard.Stack>
@@ -202,16 +207,6 @@ function EnvironmentSection() {
         </FeatureCard>
       )}
     </>
-  );
-}
-
-function RestartBanner() {
-  const { t } = useTranslation();
-
-  return (
-    <Alert>
-      <Alert.Text dangerouslySetInnerHTML={{ __html: t('environment.restartWarning') }} />
-    </Alert>
   );
 }
 

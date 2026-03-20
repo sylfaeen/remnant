@@ -9,10 +9,10 @@ import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '@remnant/
 import { CreateUserDialog } from '@remnant/frontend/pages/app/users/dialogs/create_user_dialog';
 import { EditUserDialog } from '@remnant/frontend/pages/app/users/dialogs/edit_user_dialog';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { ApiError } from '@remnant/frontend/lib/api';
 import { DocsLink } from '@remnant/frontend/pages/app/features/docs_link';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import type { UserResponse } from '@remnant/shared';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 
@@ -186,16 +186,8 @@ function UserRow({
           <div>
             <div className={'flex items-center gap-2'}>
               <span className={'font-semibold text-zinc-900 dark:text-zinc-100'}>{user.username}</span>
-              {isAdmin && (
-                <Badge variant={'warning'} size={'xs'}>
-                  {t('users.admin')}
-                </Badge>
-              )}
-              {user.id === currentUserId && (
-                <Badge variant={'info'} size={'xs'}>
-                  {t('users.you')}
-                </Badge>
-              )}
+              {isAdmin && <Badge variant={'outline'}>{t('users.admin')}</Badge>}
+              {user.id === currentUserId && <Badge variant={'secondary'}>{t('users.you')}</Badge>}
             </div>
             <div className={'mt-2 flex flex-wrap gap-1.5'}>
               {specificPermissions.map((permission) => (
@@ -217,7 +209,7 @@ function UserRow({
               {deleteConfirm === user.id ? (
                 <div className={'flex gap-2'}>
                   <Button
-                    variant={'danger'}
+                    variant={'destructive'}
                     size={'sm'}
                     onClick={() => onDelete(user.id)}
                     disabled={deleteIsPending}

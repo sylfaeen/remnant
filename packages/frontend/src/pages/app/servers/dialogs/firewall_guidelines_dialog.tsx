@@ -1,8 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  DialogClose,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 
 type FirewallGuidelinesDialogProps = {
   open: boolean;
@@ -14,16 +23,16 @@ export function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuideli
 
   return (
     <Dialog {...{ open, onOpenChange }}>
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-blue-600/10 text-blue-600'}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcon className={'bg-blue-600/10 text-blue-600'}>
             <Info className={'size-4'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('settings.firewall.infoTitle')}</Dialog.Title>
+            <DialogTitle>{t('settings.firewall.infoTitle')}</DialogTitle>
           </div>
-        </Dialog.Header>
-        <Dialog.Body>
+        </DialogHeader>
+        <DialogBody>
           <div className={'divide-y divide-black/4 dark:divide-white/6'}>
             <div className={'pb-3'}>
               <p className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>
@@ -37,7 +46,7 @@ export function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuideli
               </p>
               <div className={'mt-1.5 flex flex-wrap gap-1.5'}>
                 {[22, 80, 443, 3000, 3001].map((port) => (
-                  <Badge key={port} variant={'muted'} className={'font-jetbrains'}>
+                  <Badge key={port} variant={'secondary'} className={'font-jetbrains'}>
                     {port}
                   </Badge>
                 ))}
@@ -48,13 +57,13 @@ export function FirewallGuidelinesDialog({ open, onOpenChange }: FirewallGuideli
               <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.firewall.infoProtocolDesc')}</p>
             </div>
           </div>
-        </Dialog.Body>
-        <Dialog.Footer>
-          <Dialog.Close asChild>
+        </DialogBody>
+        <DialogFooter>
+          <DialogClose asChild>
             <Button variant={'secondary'}>{t('common.close')}</Button>
-          </Dialog.Close>
-        </Dialog.Footer>
-      </Dialog.Content>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

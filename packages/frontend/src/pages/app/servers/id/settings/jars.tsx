@@ -16,14 +16,14 @@ import {
   useUploadJar,
   formatJarSize,
 } from '@remnant/frontend/hooks/use_jars';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Label } from '@remnant/frontend/features/ui/label';
-import { Select } from '@remnant/frontend/features/ui/select';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@remnant/frontend/features/ui/shadcn/select';
 import { ApiError } from '@remnant/frontend/lib/api';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 
 export function ServerSettingsJarsPage() {
   const { t } = useTranslation();
@@ -228,34 +228,42 @@ function AddJarSection({ serverId }: AddJarSectionProps) {
                   {t('settings.minecraftVersion')}
                 </Label>
                 <Select
-                  value={selectedVersion || ''}
-                  onChange={(e) => {
-                    setSelectedVersion(e.target.value || null);
+                  value={selectedVersion || undefined}
+                  onValueChange={(value) => {
+                    setSelectedVersion(value || null);
                     setSelectedBuild(null);
                   }}
                   disabled={versionsLoading || isDownloading}
                 >
-                  <option value={''}>{t('settings.papermc.selectVersion')}</option>
-                  {versions?.map((version) => (
-                    <option key={version} value={version}>
-                      {version}
-                    </option>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('settings.papermc.selectVersion')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {versions?.map((version) => (
+                      <SelectItem key={version} value={version}>
+                        {version}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.buildOptional')}</Label>
                 <Select
-                  value={selectedBuild || ''}
-                  onChange={(e) => setSelectedBuild(e.target.value ? parseInt(e.target.value) : null)}
+                  value={selectedBuild?.toString() || undefined}
+                  onValueChange={(value) => setSelectedBuild(value ? parseInt(value) : null)}
                   disabled={!selectedVersion || buildsLoading || isDownloading}
                 >
-                  <option value={''}>{t('settings.latestBuild')}</option>
-                  {builds?.map((build) => (
-                    <option key={build} value={build}>
-                      Build #{build}
-                    </option>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('settings.latestBuild')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {builds?.map((build) => (
+                      <SelectItem key={build} value={build.toString()}>
+                        Build #{build}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className={'flex items-end'}>
@@ -318,7 +326,7 @@ function JarListSection({ serverId }: JarListSectionProps) {
           <FeatureCard.Actions className={'hidden md:flex'}>
             <div className={'flex items-center gap-2'}>
               <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.currentJar')}:</span>
-              <Badge size={'md'} className={'font-jetbrains'}>
+              <Badge variant={'secondary'} className={'font-jetbrains'}>
                 {activeJarFile}
               </Badge>
             </div>
@@ -391,16 +399,8 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
         <div>
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{jar.name}</span>
-            {jar.isActive && (
-              <Badge variant={'success'} size={'xs'} className={'font-semibold'}>
-                {t('settings.active')}
-              </Badge>
-            )}
-            {jar.source === 'custom' && (
-              <Badge size={'xs'} className={'font-semibold'}>
-                {t('settings.customJar')}
-              </Badge>
-            )}
+            {jar.isActive && <Badge variant={'success'}>{t('settings.active')}</Badge>}
+            {jar.source === 'custom' && <Badge variant={'secondary'}>{t('settings.customJar')}</Badge>}
           </div>
           <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span className={'font-jetbrains tabular-nums'}>{formatJarSize(jar.size)}</span>
@@ -430,7 +430,7 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
-              variant={'danger'}
+              variant={'destructive'}
               size={'xs'}
               onClick={handleDelete}
               disabled={deleteJar.isPending}
@@ -448,7 +448,7 @@ function JarRow({ jar, setActiveJar, deleteJar }: JarRowProps) {
               <Check className={'size-4'} />
               {t('settings.activate')}
             </Button>
-            <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+            <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
               <Trash2 className={'size-4'} />
             </Button>
           </>

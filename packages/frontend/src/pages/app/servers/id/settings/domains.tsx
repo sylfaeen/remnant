@@ -1,25 +1,13 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import {
-  CheckCircle2,
-  ChevronDown,
-  Copy,
-  Globe,
-  Gamepad2,
-  Lock,
-  Plus,
-  RotateCcw,
-  ShieldAlert,
-  Trash2,
-} from 'lucide-react';
-import { Alert } from '@remnant/frontend/features/ui/alert';
+import { CheckCircle2, ChevronDown, Copy, Globe, Gamepad2, Lock, Plus, RotateCcw, ShieldAlert, Trash2 } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
-import { Input } from '@remnant/frontend/features/ui/input';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -33,15 +21,15 @@ import {
 import { AddDomainDialog } from '@remnant/frontend/pages/app/servers/dialogs/add_domain_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 import type { DomainType } from '@remnant/shared';
 
 const DOMAIN_REGEX =
   /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
-const TYPE_BADGE_VARIANT: Record<string, BadgeProps['variant']> = {
-  http: 'success',
-  tcp: 'blue',
+const TYPE_BADGE_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  http: 'default',
+  tcp: 'secondary',
 };
 
 function getSrvSubdomain(domain: string): string | null {
@@ -216,7 +204,7 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
           <div className={'min-w-0 flex-1'}>
             <div className={'flex items-center gap-2'}>
               <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{domain.domain}</span>
-              <Badge variant={'blue'} size={'xs'} className={'font-semibold uppercase'}>
+              <Badge variant={'secondary'} className={'font-semibold uppercase'}>
                 TCP
               </Badge>
             </div>
@@ -233,7 +221,7 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
             <div className={'flex items-center gap-1.5'}>
               <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
               <Button
-                variant={'danger'}
+                variant={'destructive'}
                 size={'xs'}
                 onClick={handleDelete}
                 disabled={onRemove.isPending}
@@ -246,7 +234,7 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
               </Button>
             </div>
           ) : (
-            <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+            <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
               <Trash2 className={'size-4'} />
             </Button>
           )}
@@ -346,7 +334,6 @@ function PlayerDomainSetupSteps({
             </p>
             <div className={'mt-2 max-w-md'}>
               <Input
-                inputSize={'sm'}
                 type={'text'}
                 id={'player-domain'}
                 value={domainInput}
@@ -426,7 +413,6 @@ function PlayerDomainSetupSteps({
             <p className={'mt-0.5 text-sm text-zinc-500 dark:text-zinc-400'}>{t('settings.domains.playerDomain.step4Desc')}</p>
             <div className={'mt-2'}>
               <Button size={'sm'} onClick={onSubmit} disabled={!isValidDomain || isPending} loading={isPending}>
-                <Gamepad2 className={'size-3.5'} />
                 {t('settings.domains.playerDomain.configure')}
               </Button>
             </div>
@@ -467,18 +453,18 @@ function SrvRegistrarTable({ domain, port }: SrvRegistrarTableProps) {
           <span className={'text-xs text-zinc-500 dark:text-zinc-400'}>
             {t('settings.domains.playerDomain.srvService')} / {t('settings.domains.playerDomain.srvProtocol')}
           </span>
-          <Tooltip.Provider delayDuration={200}>
+          <TooltipProvider delayDuration={200}>
             <span className={'font-jetbrains text-sm font-medium'}>
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <span className={'cursor-help text-zinc-800 dark:text-zinc-200'}>_minecraft.</span>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {t('settings.domains.playerDomain.srvService')}
-                </Tooltip.Content>
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <span
                     className={cn(
                       'cursor-help',
@@ -487,13 +473,13 @@ function SrvRegistrarTable({ domain, port }: SrvRegistrarTableProps) {
                   >
                     {protocol}
                   </span>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {t('settings.domains.playerDomain.srvProtocol')}
-                </Tooltip.Content>
+                </TooltipContent>
               </Tooltip>
             </span>
-          </Tooltip.Provider>
+          </TooltipProvider>
         </div>
         {fields.map((field) => (
           <div key={field.label} className={'flex items-center justify-between px-3 py-1.5'}>
@@ -503,16 +489,9 @@ function SrvRegistrarTable({ domain, port }: SrvRegistrarTableProps) {
         ))}
       </div>
       <div className={'space-y-0 border-t border-black/6 dark:border-white/6'}>
-        {subdomain && (
-          <Alert className={'rounded-none border-x-0 border-t-0 border-b border-amber-500/20 px-3 py-2'}>
-            <Alert.Text className={'text-xs'}>{t('settings.domains.playerDomain.srvWarning', { subdomain })}</Alert.Text>
-          </Alert>
-        )}
-        <div className={'px-3 py-2'}>
-          <p className={'text-xs text-zinc-400 dark:text-zinc-500'}>
-            {t('settings.domains.playerDomain.srvTargetHint', { domain })}
-          </p>
-          <p className={'mt-1 text-xs text-zinc-400 dark:text-zinc-500'}>{t('settings.domains.playerDomain.srvTtlHint')}</p>
+        <div className={'px-3 py-2 text-xs text-zinc-400 dark:text-zinc-500'}>
+          <p>{t('settings.domains.playerDomain.srvTargetHint', { domain })}</p>
+          <p>{t('settings.domains.playerDomain.srvTtlHint')}</p>
         </div>
       </div>
     </div>
@@ -641,15 +620,15 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
           <div className={'min-w-0'}>
             <div className={'flex items-center gap-2'}>
               <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{domain.domain}</span>
-              <Badge variant={TYPE_BADGE_VARIANT[domain.type]} size={'xs'} className={'font-semibold uppercase'}>
+              <Badge variant={TYPE_BADGE_VARIANT[domain.type]} className={'font-semibold uppercase'}>
                 {domain.type}
               </Badge>
               {domain.ssl_enabled ? (
-                <Badge variant={isExpiringSoon ? 'warning' : 'success'} size={'xs'} className={'font-semibold'}>
+                <Badge variant={isExpiringSoon ? 'outline' : 'default'} className={'font-semibold'}>
                   {isExpiringSoon ? t('settings.domains.sslExpiringSoon') : 'SSL'}
                 </Badge>
               ) : (
-                <Badge variant={'muted'} size={'xs'} className={'font-semibold'}>
+                <Badge variant={'secondary'} className={'font-semibold'}>
                   {t('settings.domains.noSsl')}
                 </Badge>
               )}
@@ -670,7 +649,7 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
             <div className={'flex items-center gap-1.5'}>
               <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
               <Button
-                variant={'danger'}
+                variant={'destructive'}
                 size={'xs'}
                 onClick={handleDelete}
                 disabled={onRemove.isPending}
@@ -684,22 +663,22 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
             </div>
           ) : (
             <>
-              <Tooltip.Provider delayDuration={300}>
+              <TooltipProvider delayDuration={300}>
                 {!domain.ssl_enabled && (
                   <Tooltip>
-                    <Tooltip.Trigger asChild>
+                    <TooltipTrigger asChild>
                       <Button variant={'success'} size={'xs'} onClick={() => onEnableSsl.mutateAsync(domain.id)}>
                         <Lock className={'size-3.5'} />
                         {t('settings.domains.enableSsl')}
                       </Button>
-                    </Tooltip.Trigger>
-                    <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                    </TooltipTrigger>
+                    <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                       {t('settings.domains.enableSslTooltip')}
-                    </Tooltip.Content>
+                    </TooltipContent>
                   </Tooltip>
                 )}
                 <Tooltip>
-                  <Tooltip.Trigger asChild>
+                  <TooltipTrigger asChild>
                     <Button
                       variant={'ghost'}
                       size={'icon-sm'}
@@ -708,22 +687,22 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
                     >
                       <ShieldAlert className={'size-4'} />
                     </Button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  </TooltipTrigger>
+                  <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                     {t('settings.domains.showDnsRecords')}
-                  </Tooltip.Content>
+                  </TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <Tooltip.Trigger asChild>
-                    <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+                  <TooltipTrigger asChild>
+                    <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
                       <Trash2 className={'size-4'} />
                     </Button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                  </TooltipTrigger>
+                  <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                     {t('settings.domains.removeDomain')}
-                  </Tooltip.Content>
+                  </TooltipContent>
                 </Tooltip>
-              </Tooltip.Provider>
+              </TooltipProvider>
             </>
           )}
         </FeatureCard.RowControl>

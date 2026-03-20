@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Archive, RotateCcw, Terminal } from 'lucide-react';
-import { trpc } from '@remnant/frontend/lib/trpc';
 import { useToast } from '@remnant/frontend/features/ui/toast';
+import { trpc } from '@remnant/frontend/lib/trpc';
 
 export type TaskExecution = {
   id: number;
@@ -60,7 +60,6 @@ export interface CreateTaskInput {
 export function useCreateTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.tasks.create.useMutation({
@@ -110,7 +109,6 @@ export function useUpdateTask(serverId: number) {
 export function useDeleteTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.tasks.delete.useMutation({
@@ -132,7 +130,6 @@ export function useDeleteTask(serverId: number) {
 export function useToggleTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.tasks.toggle.useMutation({

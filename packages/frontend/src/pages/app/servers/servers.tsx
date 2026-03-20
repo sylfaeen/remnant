@@ -3,10 +3,10 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Server, Plus } from 'lucide-react';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
-import { Skeleton } from '@remnant/frontend/features/ui/skeleton';
+import { Skeleton } from '@remnant/frontend/features/ui/shadcn/skeleton';
 import { useServers, useCreateServer } from '@remnant/frontend/hooks/use_servers';
 import { CreateServerDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_server_dialog';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { ApiError } from '@remnant/frontend/lib/api';
 import { DocsLink } from '@remnant/frontend/pages/app/features/docs_link';
 import { ServerStatusIcon } from '@remnant/frontend/pages/app/servers/features/server_status_badge';
@@ -158,10 +158,10 @@ function ServerCardSkeletons() {
         >
           <div className={'px-4 py-3'}>
             <div className={'flex items-start gap-3 sm:gap-4'}>
-              <Skeleton variant={'circular'} className={'size-5 shrink-0'} />
+              <Skeleton className={'size-5 shrink-0 rounded-full'} />
               <div className={'space-y-2'}>
-                <Skeleton variant={'text'} className={'h-5 w-32'} />
-                <Skeleton variant={'text'} className={'h-4 w-56'} />
+                <Skeleton className={'h-5 w-32'} />
+                <Skeleton className={'h-4 w-56'} />
               </div>
             </div>
           </div>

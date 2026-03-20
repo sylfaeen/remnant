@@ -1,12 +1,25 @@
-import { useState, type SubmitEvent } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pencil } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { AVAILABLE_PERMISSIONS, type UserResponse } from '@remnant/shared';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Checkbox } from '@remnant/frontend/features/ui/checkbox';
-import { Label } from '@remnant/frontend/features/ui/label';
-import { Button } from '@remnant/frontend/features/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  DialogError,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
 
 type EditUserFormData = {
   username: string;
@@ -22,12 +35,33 @@ type EditUserDialogProps = {
   error: string | null;
 };
 
+const editUserSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(32)
+    .regex(/^[a-zA-Z0-9_-]+$/),
+  password: z
+    .string()
+    .max(128)
+    .optional()
+    .refine((val) => !val || val.length >= 8, { message: 'Minimum 8 characters' })
+    .or(z.literal('')),
+});
+
+type EditUserFormValues = z.infer<typeof editUserSchema>;
+
 export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: EditUserDialogProps) {
   const { t } = useTranslation();
-
-  const [username, setUsername] = useState(user.username);
-  const [password, setPassword] = useState('');
   const [permissions, setPermissions] = useState<Array<string>>(user.permissions);
+
+  const form = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      username: user.username,
+      password: '',
+    },
+  });
 
   const togglePermission = (permission: string) => {
     if (permission === '*') {
@@ -42,13 +76,12 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
     }
   };
 
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data: EditUserFormData = { username, permissions };
-    if (password) {
-      data.password = password;
+  const handleSubmit = (data: EditUserFormValues) => {
+    const formData: EditUserFormData = { username: data.username, permissions };
+    if (data.password) {
+      formData.password = data.password;
     }
-    onSubmit(data).then();
+    onSubmit(formData).then();
   };
 
   return (
@@ -58,70 +91,74 @@ export function EditUserDialog({ user, onSubmit, onCancel, isLoading, error }: E
         if (!open) onCancel();
       }}
     >
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcon className={'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400'}>
             <Pencil className={'size-4'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('users.editUser')}</Dialog.Title>
+            <DialogTitle>{t('users.editUser')}</DialogTitle>
           </div>
-        </Dialog.Header>
-        <form id={'edit-user'} onSubmit={handleSubmit}>
-          <Dialog.Body>
-            {error && <Dialog.Error>{error}</Dialog.Error>}
-            <div>
-              <Label htmlFor={'username'}>{t('users.username')} *</Label>
-              <Input
-                type={'text'}
-                id={'username'}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                maxLength={32}
-                pattern={'^[a-zA-Z0-9_-]+$'}
+        </DialogHeader>
+        <Form {...form}>
+          <form id={'edit-user'} onSubmit={form.handleSubmit(handleSubmit)}>
+            <DialogBody>
+              {error && <DialogError>{error}</DialogError>}
+              <FormField
+                control={form.control}
+                name={'username'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('users.username')} *</FormLabel>
+                    <FormControl>
+                      <Input type={'text'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <Label htmlFor={'password'}>
-                {t('users.password')} {t('users.passwordHint')}
-              </Label>
-              <Input
-                type={'password'}
-                id={'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={8}
-                maxLength={128}
+              <FormField
+                control={form.control}
+                name={'password'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('users.password')} {t('users.passwordHint')}
+                    </FormLabel>
+                    <FormControl>
+                      <Input type={'password'} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div>
-              <span className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
-                {t('users.permissions')}
-              </span>
-              <div className={'space-y-2'}>
-                {AVAILABLE_PERMISSIONS.map((permission) => (
-                  <Label key={permission} className={'flex cursor-pointer items-center gap-2'}>
-                    <Checkbox checked={permissions.includes(permission)} onCheckedChange={() => togglePermission(permission)} />
-                    <span className={'text-zinc-600 dark:text-zinc-400'}>
-                      {permission === '*' ? t('users.allPermissions') : permission}
-                    </span>
-                  </Label>
-                ))}
+              <div>
+                <span className={'mb-1.5 block text-sm font-medium text-zinc-600 dark:text-zinc-400'}>
+                  {t('users.permissions')}
+                </span>
+                <div className={'space-y-2'}>
+                  {AVAILABLE_PERMISSIONS.map((permission) => (
+                    <Label key={permission} className={'flex cursor-pointer items-center gap-2'}>
+                      <Checkbox checked={permissions.includes(permission)} onCheckedChange={() => togglePermission(permission)} />
+                      <span className={'text-zinc-600 dark:text-zinc-400'}>
+                        {permission === '*' ? t('users.allPermissions') : permission}
+                      </span>
+                    </Label>
+                  ))}
+                </div>
               </div>
-            </div>
-          </Dialog.Body>
-        </form>
-        <Dialog.Footer>
+            </DialogBody>
+          </form>
+        </Form>
+        <DialogFooter>
           <Button type={'button'} variant={'secondary'} onClick={onCancel}>
             {t('common.cancel')}
           </Button>
           <Button type={'submit'} form={'edit-user'} disabled={isLoading} loading={isLoading}>
             {isLoading ? t('users.saving') : t('common.save', 'Save')}
           </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

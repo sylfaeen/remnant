@@ -1,6 +1,9 @@
-import { useState, useEffect, useMemo, type SubmitEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Check, CircleX, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import { TRPCClientError } from '@trpc/client';
 import { ErrorCodes } from '@remnant/shared';
@@ -8,8 +11,9 @@ import { useNeedsSetup, useSetup } from '@remnant/frontend/hooks/use_onboarding'
 import { useTotpSetup, useTotpVerify } from '@remnant/frontend/hooks/use_totp';
 import { BrandPanel } from '@remnant/frontend/pages/web/features/brand_panel';
 import { TotpOnboardingStep } from '@remnant/frontend/features/totp/totp_onboarding_step';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Input, InputGroup } from '@remnant/frontend/features/ui/input';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
 import { cn } from '@remnant/frontend/lib/cn';
 import { getDetectedLanguage } from '@remnant/frontend/lib/lang';
 import { getPasswordStrength } from '@remnant/frontend/lib/password';
@@ -21,6 +25,23 @@ type AccountData = {
   password: string;
   confirmPassword: string;
 };
+
+const accountSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3)
+      .max(32)
+      .regex(/^[a-zA-Z0-9_-]+$/),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must match',
+    path: ['confirmPassword'],
+  });
+
+type AccountFormValues = z.infer<typeof accountSchema>;
 
 const ONBOARDING_PENDING_KEY = 'remnant_onboarding_pending';
 
@@ -135,16 +156,26 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
   const { t, i18n } = useTranslation();
   const setup = useSetup();
 
+  const form = useForm<AccountFormValues>({
+    resolver: zodResolver(accountSchema),
+    defaultValues: {
+      username: accountData.username,
+      password: accountData.password,
+      confirmPassword: accountData.confirmPassword,
+    },
+    mode: 'onBlur',
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [touched, setTouched] = useState({ username: false, password: false, confirmPassword: false });
   const [selectedLang, setSelectedLang] = useState(getDetectedLanguage);
 
-  const strength = getPasswordStrength(accountData.password);
+  const watchedPassword = form.watch('password');
+  const strength = getPasswordStrength(watchedPassword);
 
   const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'fr', name: 'Fran\u00e7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
+    { code: 'en', name: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
   ];
 
   const handleLanguageChange = (code: string) => {
@@ -152,38 +183,13 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
     i18n.changeLanguage(code).then();
   };
 
-  const errors = useMemo(() => {
-    const errs: { username?: string; password?: string; confirmPassword?: string } = {};
-    if (touched.username && (accountData.username.length < 3 || accountData.username.length > 32)) {
-      errs.username = t('onboarding.account.usernameInvalid');
-    }
-    if (touched.username && accountData.username && !/^[a-zA-Z0-9_-]+$/.test(accountData.username)) {
-      errs.username = t('onboarding.account.usernameInvalid');
-    }
-    if (touched.password && accountData.password.length > 0 && accountData.password.length < 8) {
-      errs.password = t('onboarding.account.passwordTooShort');
-    }
-    if (touched.confirmPassword && accountData.confirmPassword && accountData.password !== accountData.confirmPassword) {
-      errs.confirmPassword = t('onboarding.account.passwordMismatch');
-    }
-    return errs;
-  }, [accountData, touched, t]);
-
-  const isValid =
-    accountData.username.length >= 3 &&
-    accountData.username.length <= 32 &&
-    /^[a-zA-Z0-9_-]+$/.test(accountData.username) &&
-    accountData.password.length >= 8 &&
-    accountData.password === accountData.confirmPassword;
-
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!isValid) return;
+  const handleFormSubmit = (data: AccountFormValues) => {
     onSetupError(null);
+    onChange({ username: data.username, password: data.password, confirmPassword: data.confirmPassword });
     setup
       .mutateAsync({
-        username: accountData.username,
-        password: accountData.password,
+        username: data.username,
+        password: data.password,
         locale: selectedLang,
       })
       .then(() => onComplete())
@@ -220,163 +226,190 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
         </div>
         <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
           <h2 className={'mb-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.account.title')}</h2>
-          <form onSubmit={handleSubmit} className={'space-y-4'}>
-            <InputGroup label={t('onboarding.account.username')} error={errors.username}>
-              <Input
-                id={'setup-username'}
-                type={'text'}
-                autoComplete={'username'}
-                required
-                value={accountData.username}
-                onChange={(e) => onChange({ ...accountData, username: e.target.value })}
-                onBlur={() => setTouched((prev) => ({ ...prev, username: true }))}
-                placeholder={t('onboarding.account.usernamePlaceholder')}
-                error={!!errors.username}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleFormSubmit)} className={'space-y-4'}>
+              <FormField
+                control={form.control}
+                name={'username'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('onboarding.account.username')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type={'text'}
+                        autoComplete={'username'}
+                        placeholder={t('onboarding.account.usernamePlaceholder')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </InputGroup>
-            <InputGroup label={t('onboarding.account.password')} error={errors.password}>
-              <div className={'relative'}>
-                <Input
-                  id={'setup-password'}
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete={'new-password'}
-                  required
-                  value={accountData.password}
-                  onChange={(e) => onChange({ ...accountData, password: e.target.value })}
-                  onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
-                  placeholder={t('onboarding.account.passwordPlaceholder')}
-                  className={'pr-10'}
-                  error={!!errors.password}
-                />
-                <Button
-                  variant={'ghost'}
-                  size={'icon-sm'}
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={
-                    'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
-                  }
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
-                </Button>
-              </div>
-              {accountData.password.length > 0 && strength && (
-                <div className={'mt-2 flex items-center gap-2'}>
-                  <div className={'flex flex-1 gap-1'}>
-                    <div
-                      className={cn(
-                        'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'weak' && 'bg-red-500',
-                        strength === 'medium' && 'bg-amber-500',
-                        strength === 'strong' && 'bg-green-500'
-                      )}
-                    />
-                    <div
-                      className={cn(
-                        'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'medium'
-                          ? 'bg-amber-500'
-                          : strength === 'strong'
-                            ? 'bg-green-500'
-                            : 'bg-zinc-200 dark:bg-zinc-700'
-                      )}
-                    />
-                    <div
-                      className={cn(
-                        'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
-                        strength === 'strong' ? 'bg-green-500' : 'bg-zinc-200 dark:bg-zinc-700'
-                      )}
-                    />
-                  </div>
-                  <span
-                    className={cn(
-                      'text-xs font-medium',
-                      strength === 'weak' && 'text-red-500',
-                      strength === 'medium' && 'text-amber-600',
-                      strength === 'strong' && 'text-green-600'
-                    )}
-                  >
-                    {strength === 'weak' && t('onboarding.account.strengthWeak')}
-                    {strength === 'medium' && t('onboarding.account.strengthMedium')}
-                    {strength === 'strong' && t('onboarding.account.strengthStrong')}
-                  </span>
-                </div>
-              )}
-            </InputGroup>
-            <InputGroup label={t('onboarding.account.confirmPassword')} error={errors.confirmPassword}>
-              <div className={'relative'}>
-                <Input
-                  id={'setup-confirm-password'}
-                  type={showConfirm ? 'text' : 'password'}
-                  autoComplete={'new-password'}
-                  required
-                  value={accountData.confirmPassword}
-                  onChange={(e) => onChange({ ...accountData, confirmPassword: e.target.value })}
-                  onBlur={() => setTouched((prev) => ({ ...prev, confirmPassword: true }))}
-                  placeholder={t('onboarding.account.confirmPasswordPlaceholder')}
-                  className={'pr-10'}
-                  error={!!errors.confirmPassword}
-                />
-                <Button
-                  variant={'ghost'}
-                  size={'icon-sm'}
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className={
-                    'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
-                  }
-                  tabIndex={-1}
-                >
-                  {showConfirm ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
-                </Button>
-              </div>
-            </InputGroup>
-            <div className={'border-t border-black/10 pt-4 dark:border-white/10'}>
-              <p className={'mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.language.title')}</p>
-              <div className={'grid grid-cols-2 gap-3'}>
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    type={'button'}
-                    onClick={() => handleLanguageChange(lang.code)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-(--duration-fast)',
-                      lang.code === selectedLang
-                        ? 'border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-800'
-                        : 'border-black/10 hover:border-black/12 hover:bg-zinc-50/50 dark:border-white/10 dark:hover:border-white/12 dark:hover:bg-zinc-800/50'
-                    )}
-                  >
-                    <span className={'text-xl'}>{lang.flag}</span>
-                    <span
-                      className={cn(
-                        'text-sm font-medium',
-                        lang.code === selectedLang ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'
-                      )}
-                    >
-                      {lang.name}
-                    </span>
-                    {lang.code === selectedLang && (
-                      <div
-                        className={'ml-auto flex size-4.5 items-center justify-center rounded-full bg-zinc-900 dark:bg-zinc-100'}
+              <FormField
+                control={form.control}
+                name={'password'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('onboarding.account.password')}</FormLabel>
+                    <div className={'relative'}>
+                      <FormControl>
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          autoComplete={'new-password'}
+                          placeholder={t('onboarding.account.passwordPlaceholder')}
+                          className={'pr-10'}
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type={'button'}
+                        variant={'ghost'}
+                        size={'icon-sm'}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={
+                          'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
+                        }
+                        tabIndex={-1}
                       >
-                        <Check className={'size-2.5 text-white dark:text-zinc-900'} strokeWidth={3} />
+                        {showPassword ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
+                      </Button>
+                    </div>
+                    <FormMessage />
+                    {watchedPassword.length > 0 && strength && (
+                      <div className={'flex items-center gap-2'}>
+                        <div className={'flex flex-1 gap-1'}>
+                          <div
+                            className={cn(
+                              'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
+                              strength === 'weak' && 'bg-red-500',
+                              strength === 'medium' && 'bg-amber-500',
+                              strength === 'strong' && 'bg-green-500'
+                            )}
+                          />
+                          <div
+                            className={cn(
+                              'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
+                              strength === 'medium'
+                                ? 'bg-amber-500'
+                                : strength === 'strong'
+                                  ? 'bg-green-500'
+                                  : 'bg-zinc-200 dark:bg-zinc-700'
+                            )}
+                          />
+                          <div
+                            className={cn(
+                              'h-1 flex-1 rounded-full transition-colors duration-(--duration-normal)',
+                              strength === 'strong' ? 'bg-green-500' : 'bg-zinc-200 dark:bg-zinc-700'
+                            )}
+                          />
+                        </div>
+                        <span
+                          className={cn(
+                            'text-xs font-medium',
+                            strength === 'weak' && 'text-red-500',
+                            strength === 'medium' && 'text-amber-600',
+                            strength === 'strong' && 'text-green-600'
+                          )}
+                        >
+                          {strength === 'weak' && t('onboarding.account.strengthWeak')}
+                          {strength === 'medium' && t('onboarding.account.strengthMedium')}
+                          {strength === 'strong' && t('onboarding.account.strengthStrong')}
+                        </span>
                       </div>
                     )}
-                  </button>
-                ))}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={'confirmPassword'}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('onboarding.account.confirmPassword')}</FormLabel>
+                    <div className={'relative'}>
+                      <FormControl>
+                        <Input
+                          type={showConfirm ? 'text' : 'password'}
+                          autoComplete={'new-password'}
+                          placeholder={t('onboarding.account.confirmPasswordPlaceholder')}
+                          className={'pr-10'}
+                          {...field}
+                        />
+                      </FormControl>
+                      <Button
+                        type={'button'}
+                        variant={'ghost'}
+                        size={'icon-sm'}
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className={
+                          'absolute top-1/2 right-1.5 size-7 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
+                        }
+                        tabIndex={-1}
+                      >
+                        {showConfirm ? <EyeOff className={'size-4'} /> : <Eye className={'size-4'} />}
+                      </Button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className={'border-t border-black/10 pt-4 dark:border-white/10'}>
+                <p className={'mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100'}>{t('onboarding.language.title')}</p>
+                <div className={'grid grid-cols-2 gap-3'}>
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      type={'button'}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg border px-4 py-3 transition-all duration-(--duration-fast)',
+                        lang.code === selectedLang
+                          ? 'border-zinc-900 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-800'
+                          : 'border-black/10 hover:border-black/12 hover:bg-zinc-50/50 dark:border-white/10 dark:hover:border-white/12 dark:hover:bg-zinc-800/50'
+                      )}
+                    >
+                      <span className={'text-xl'}>{lang.flag}</span>
+                      <span
+                        className={cn(
+                          'text-sm font-medium',
+                          lang.code === selectedLang ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'
+                        )}
+                      >
+                        {lang.name}
+                      </span>
+                      {lang.code === selectedLang && (
+                        <div
+                          className={
+                            'ml-auto flex size-4.5 items-center justify-center rounded-full bg-zinc-900 dark:bg-zinc-100'
+                          }
+                        >
+                          <Check className={'size-2.5 text-white dark:text-zinc-900'} strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            {setupError && (
-              <div
-                className={'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600 dark:bg-red-950'}
+              {setupError && (
+                <div
+                  className={'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600 dark:bg-red-950'}
+                >
+                  <CircleX className={'size-4 shrink-0'} />
+                  <span>{setupError}</span>
+                </div>
+              )}
+              <Button
+                type={'submit'}
+                size={'default'}
+                disabled={!form.formState.isValid}
+                loading={setup.isPending}
+                className={'w-full'}
               >
-                <CircleX className={'size-4 shrink-0'} />
-                <span>{setupError}</span>
-              </div>
-            )}
-            <Button type={'submit'} size={'md'} disabled={!isValid} loading={setup.isPending} className={'w-full'}>
-              {setup.isPending ? t('common.loading') : t('onboarding.finish')}
-            </Button>
-          </form>
+                {setup.isPending ? t('common.loading') : t('onboarding.finish')}
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
@@ -405,7 +438,7 @@ function CompleteStep({ username }: CompleteStepProps) {
             <p className={'mt-1.5 text-sm text-zinc-500 dark:text-zinc-400'}>
               {t('onboarding.complete.loggedInAs', { username })}
             </p>
-            <Button size={'md'} className={'mt-6 w-full'} onClick={() => navigate({ to: '/app' }).then()}>
+            <Button size={'default'} className={'mt-6 w-full'} onClick={() => navigate({ to: '/app' }).then()}>
               {t('onboarding.goToPanel')}
               <ArrowRight className={'size-4'} />
             </Button>

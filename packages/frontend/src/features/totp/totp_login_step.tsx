@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, AlertCircle, ShieldCheck, KeyRound } from 'lucide-react';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Input, InputGroup } from '@remnant/frontend/features/ui/input';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { InputGroup } from '@remnant/frontend/features/ui/input_group';
 import { OtpInput } from '@remnant/frontend/features/ui/otp_input';
 
 type TotpLoginStepProps = {
@@ -78,7 +79,7 @@ export function TotpLoginStep({ onVerify, onBack, error, loading }: TotpLoginSte
               />
             )}
           </InputGroup>
-          <Button size={'md'} onClick={handleSubmit} disabled={!canSubmit} className={'w-full'} {...{ loading }}>
+          <Button size={'default'} onClick={handleSubmit} disabled={!canSubmit} className={'w-full'} {...{ loading }}>
             {loading ? t('common.loading') : t('auth.totp.verify')}
           </Button>
           <div className={'flex justify-center'}>

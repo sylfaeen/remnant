@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Copy, Globe, Lock, Coffee, Trash2, Loader2 } from 'lucide-react';
-import { Alert } from '@remnant/frontend/features/ui/alert';
+import { CheckCircle2, Copy, Globe, Info, Lock, Coffee, Trash2, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
 import { cn } from '@remnant/frontend/lib/cn';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useInstalledJava } from '@remnant/frontend/hooks/use_java';
@@ -12,10 +12,10 @@ import {
   useEnablePanelSsl,
   useServerIp,
 } from '@remnant/frontend/hooks/use_domains';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge } from '@remnant/frontend/features/ui/badge';
-import { Input } from '@remnant/frontend/features/ui/input';
-import { Label } from '@remnant/frontend/features/ui/label';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 
 export function SettingsGeneralPage() {
@@ -103,11 +103,11 @@ function PanelDomainSection() {
                       {panelDomain.domain}
                     </span>
                     {panelDomain.ssl_enabled ? (
-                      <Badge variant={isExpiringSoon ? 'warning' : 'success'} size={'xs'} className={'font-semibold'}>
+                      <Badge variant={isExpiringSoon ? 'outline' : 'default'} className={'font-semibold'}>
                         {isExpiringSoon ? t('settings.domains.sslExpiringSoon') : 'SSL'}
                       </Badge>
                     ) : (
-                      <Badge variant={'muted'} size={'xs'} className={'font-semibold'}>
+                      <Badge variant={'secondary'} className={'font-semibold'}>
                         {t('settings.domains.noSsl')}
                       </Badge>
                     )}
@@ -124,7 +124,7 @@ function PanelDomainSection() {
                   <div className={'flex items-center gap-1.5'}>
                     <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
                     <Button
-                      variant={'danger'}
+                      variant={'destructive'}
                       size={'xs'}
                       onClick={handleRemove}
                       disabled={removePanelDomain.isPending}
@@ -150,7 +150,7 @@ function PanelDomainSection() {
                         {t('settings.domains.enableSsl')}
                       </Button>
                     )}
-                    <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+                    <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
                       <Trash2 className={'size-4'} />
                     </Button>
                   </>
@@ -172,8 +172,9 @@ function PanelDomainSection() {
                   </Button>
                 </div>
               </div>
-              <Alert className={'mt-3'}>
-                <Alert.Text>{t('appSettings.panelDomain.restartWarning')}</Alert.Text>
+              <Alert variant={'default'} className={'mt-3'}>
+                <Info className={'size-4'} />
+                <AlertDescription>{t('appSettings.panelDomain.restartWarning')}</AlertDescription>
               </Alert>
               {panelDomain.ssl_enabled && (
                 <div className={'mt-3 rounded-lg border border-green-500/20 bg-green-50/50 p-3 dark:bg-green-950/20'}>
@@ -345,11 +346,7 @@ function JavaSection() {
                 <div className={'flex items-center gap-2'}>
                   <Coffee className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
                   <span>{java.name}</span>
-                  {java.isDefault && (
-                    <Badge variant={'warning'} size={'xs'}>
-                      {t('appSettings.java.default')}
-                    </Badge>
-                  )}
+                  {java.isDefault && <Badge variant={'outline'}>{t('appSettings.java.default')}</Badge>}
                 </div>
               </FeatureCard.RowLabel>
               <FeatureCard.RowControl>
@@ -362,4 +359,3 @@ function JavaSection() {
     </FeatureCard>
   );
 }
-

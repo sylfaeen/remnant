@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { cn } from '@remnant/frontend/lib/cn';
 import { Box } from 'lucide-react';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
 type ServerStatus = 'stopped' | 'starting' | 'running' | 'stopping';
 
@@ -37,17 +37,17 @@ export function ServerStatusIcon({ status }: ServerStatusBadgeProps) {
   const config = statusConfig[status];
 
   return (
-    <Tooltip.Provider delayDuration={200}>
+    <TooltipProvider delayDuration={200}>
       <Tooltip>
-        <Tooltip.Trigger>
+        <TooltipTrigger>
           <div className={cn('flex size-8 items-center justify-center rounded transition-colors', config.className)}>
             <Box className={cn('size-4', config.iconClass)} strokeWidth={2} />
           </div>
-        </Tooltip.Trigger>
-        <Tooltip.Content>
+        </TooltipTrigger>
+        <TooltipContent>
           <p>{t(config.labelKey)}</p>
-        </Tooltip.Content>
+        </TooltipContent>
       </Tooltip>
-    </Tooltip.Provider>
+    </TooltipProvider>
   );
 }

@@ -9,13 +9,13 @@ import { useBackups, useDeleteBackup } from '@remnant/frontend/hooks/use_backups
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { CreateBackupDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_backup_dialog';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
 export function ServerBackupsPage() {
   const { t } = useTranslation();
@@ -203,13 +203,9 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{backup.name}</span>
-            {isNewest && (
-              <Badge size={'xs'} className={'font-semibold'}>
-                latest
-              </Badge>
-            )}
+            {isNewest && <Badge className={'font-semibold'}>latest</Badge>}
             {source && (
-              <Badge variant={source === 'auto' ? 'cyan' : 'muted'} size={'xs'} className={'font-semibold'}>
+              <Badge variant={'secondary'} className={'font-semibold'}>
                 {t(`backups.source${source === 'auto' ? 'Auto' : 'Manual'}`)}
               </Badge>
             )}
@@ -226,7 +222,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
-              variant={'danger'}
+              variant={'destructive'}
               size={'xs'}
               onClick={() => onDelete(backup.name)}
               disabled={deletePending}
@@ -240,9 +236,9 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
           </div>
         ) : (
           <>
-            <Tooltip.Provider delayDuration={300}>
+            <TooltipProvider delayDuration={300}>
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <Button
                     variant={'ghost'}
                     size={'icon-sm'}
@@ -251,18 +247,18 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
                   >
                     <Download className={'size-4'} />
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('backups.tooltipDownload')}</Tooltip.Content>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('backups.tooltipDownload')}</TooltipContent>
               </Tooltip>
               <Tooltip>
-                <Tooltip.Trigger asChild>
-                  <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => onDeleteConfirm(backup.name)}>
+                <TooltipTrigger asChild>
+                  <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => onDeleteConfirm(backup.name)}>
                     <Trash2 className={'size-4'} />
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('backups.tooltipDelete')}</Tooltip.Content>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('backups.tooltipDelete')}</TooltipContent>
               </Tooltip>
-            </Tooltip.Provider>
+            </TooltipProvider>
           </>
         )}
       </div>

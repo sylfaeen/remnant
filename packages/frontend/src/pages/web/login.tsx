@@ -1,6 +1,9 @@
-import { useState, useEffect, type SubmitEvent } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { AlertCircle } from 'lucide-react';
 import { TRPCClientError } from '@trpc/client';
 import { ErrorCodes } from '@remnant/shared';
@@ -8,8 +11,16 @@ import { useLogin, useVerifyTotpLogin, getAuthErrorMessage } from '@remnant/fron
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { BrandPanel } from '@remnant/frontend/pages/web/features/brand_panel';
 import { TotpLoginStep } from '@remnant/frontend/features/totp/totp_login_step';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Input, InputGroup } from '@remnant/frontend/features/ui/input';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
+
+const loginSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 type LoginStep = 'credentials' | 'totp';
 
@@ -18,8 +29,6 @@ export function LoginPage() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState<LoginStep>('credentials');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [totpToken, setTotpToken] = useState<string | null>(null);
   const [totpError, setTotpError] = useState<string | null>(null);
 
@@ -34,15 +43,22 @@ export function LoginPage() {
   const verifyTotp = useVerifyTotpLogin();
   const errorMessage = getAuthErrorMessage(login.error as Error | null, t);
 
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+  });
+
   useEffect(() => {
     if (isAuthenticated && isInitialized) {
       navigate({ to: '/' }).then();
     }
   }, [isAuthenticated, isInitialized, navigate]);
 
-  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    login.mutate({ username, password });
+  const onFormSubmit = (data: LoginFormValues) => {
+    login.mutate(data);
   };
 
   const handleTotpVerify = (code: string) => {
@@ -99,43 +115,54 @@ export function LoginPage() {
                 <p className={'mt-1 mb-8 text-sm text-zinc-500 dark:text-zinc-400'}>{t('auth.subtitle')}</p>
               </div>
               <div className={'shadow-card rounded-xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-800'}>
-                <form onSubmit={handleSubmit} className={'space-y-4'}>
-                  {errorMessage && (
-                    <div
-                      className={
-                        'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600 dark:bg-red-950'
-                      }
-                    >
-                      <AlertCircle className={'size-4 shrink-0'} />
-                      <span>{errorMessage}</span>
-                    </div>
-                  )}
-                  <InputGroup label={t('auth.username')}>
-                    <Input
-                      id={'username'}
-                      type={'text'}
-                      autoComplete={'username'}
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder={t('auth.username')}
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onFormSubmit)} className={'space-y-4'}>
+                    {errorMessage && (
+                      <div
+                        className={
+                          'flex items-center gap-2.5 rounded-lg bg-red-50 px-3.5 py-2.5 text-sm text-red-600 dark:bg-red-950'
+                        }
+                      >
+                        <AlertCircle className={'size-4 shrink-0'} />
+                        <span>{errorMessage}</span>
+                      </div>
+                    )}
+                    <FormField
+                      control={form.control}
+                      name={'username'}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('auth.username')}</FormLabel>
+                          <FormControl>
+                            <Input type={'text'} autoComplete={'username'} placeholder={t('auth.username')} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </InputGroup>
-                  <InputGroup label={t('auth.password')}>
-                    <Input
-                      id={'password'}
-                      type={'password'}
-                      autoComplete={'current-password'}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t('auth.password')}
+                    <FormField
+                      control={form.control}
+                      name={'password'}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t('auth.password')}</FormLabel>
+                          <FormControl>
+                            <Input
+                              type={'password'}
+                              autoComplete={'current-password'}
+                              placeholder={t('auth.password')}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </InputGroup>
-                  <Button type={'submit'} size={'md'} loading={login.isPending} className={'w-full'}>
-                    {login.isPending ? t('auth.loggingIn') : t('auth.loginButton')}
-                  </Button>
-                </form>
+                    <Button type={'submit'} size={'default'} loading={login.isPending} className={'w-full'}>
+                      {login.isPending ? t('auth.loggingIn') : t('auth.loginButton')}
+                    </Button>
+                  </form>
+                </Form>
               </div>
             </>
           )}

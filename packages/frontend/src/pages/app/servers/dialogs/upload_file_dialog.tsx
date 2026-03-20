@@ -2,11 +2,20 @@ import { useState, useEffect, useRef, type DragEvent, type ChangeEvent } from 'r
 import { useTranslation } from 'react-i18next';
 import { File, Upload, X } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Input } from '@remnant/frontend/features/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogIcon,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+} from '@remnant/frontend/features/ui/shadcn/dialog';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Input } from '@remnant/frontend/features/ui/shadcn/input';
 import { formatFileSize } from '@remnant/frontend/hooks/use_files';
-import { Label } from '@remnant/frontend/features/ui/label';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
 
 type UploadFileDialogProps = {
   open: boolean;
@@ -58,17 +67,17 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
 
   return (
     <Dialog onOpenChange={handleOpenChange} {...{ open }}>
-      <Dialog.Content className={'max-w-md'}>
-        <Dialog.Header>
-          <Dialog.Icon className={'bg-zinc-100 dark:bg-zinc-800'}>
+      <DialogContent className={'max-w-md'}>
+        <DialogHeader>
+          <DialogIcon className={'bg-zinc-100 dark:bg-zinc-800'}>
             <Upload className={'size-5 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
-          </Dialog.Icon>
+          </DialogIcon>
           <div>
-            <Dialog.Title>{t('files.upload')}</Dialog.Title>
-            <Dialog.Description>{t('files.uploadDescription')}</Dialog.Description>
+            <DialogTitle>{t('files.upload')}</DialogTitle>
+            <DialogDescription>{t('files.uploadDescription')}</DialogDescription>
           </div>
-        </Dialog.Header>
-        <Dialog.Body>
+        </DialogHeader>
+        <DialogBody>
           <div>
             <Label htmlFor={'target-path'}>{t('files.uploadDestination')}</Label>
             <Input
@@ -130,8 +139,8 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
               ))}
             </div>
           )}
-        </Dialog.Body>
-        <Dialog.Footer>
+        </DialogBody>
+        <DialogFooter>
           <Button type={'button'} variant={'secondary'} onClick={onClose}>
             {t('common.cancel')}
           </Button>
@@ -143,8 +152,8 @@ export function UploadFileDialog({ open, currentPath, isPending, onUpload, onClo
             <Upload className={'size-4'} />
             {t('files.uploadCount', { count: selectedFiles.length })}
           </Button>
-        </Dialog.Footer>
-      </Dialog.Content>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

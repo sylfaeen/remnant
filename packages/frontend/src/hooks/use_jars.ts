@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@remnant/frontend/features/ui/toast';
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
-import { useToast } from '@remnant/frontend/features/ui/toast';
 
 export type JarSource = 'papermc' | 'spigot' | 'purpur' | 'fabric' | 'forge' | 'vanilla' | 'custom';
 
@@ -42,7 +42,6 @@ export function useServerJars(serverId: number | null) {
 export function useDownloadJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.jars.download.useMutation({
@@ -76,7 +75,6 @@ export function useDownloadProgress(serverId: number | null, isDownloading: bool
 export function useSetActiveJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.jars.setActive.useMutation({
@@ -100,7 +98,6 @@ export function useSetActiveJar(serverId: number) {
 export function useDeleteJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const mutation = trpc.jars.delete.useMutation({
@@ -122,7 +119,6 @@ export function useDeleteJar(serverId: number) {
 export function useUploadJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const utils = trpc.useUtils();
 
   const accessToken = useAuthStore((state) => state.accessToken);

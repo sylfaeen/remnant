@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Copy, Loader2 } from 'lucide-react';
+import { CheckCircle2, Copy, Info, Loader2 } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Alert } from '@remnant/frontend/features/ui/alert';
+import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { useSftpInfo } from '@remnant/frontend/hooks/use_sftp';
@@ -35,9 +35,10 @@ export function SettingsFtpPage() {
               </div>
             )}
           </FeatureCard.Body>
-          <FeatureCard.Footer>
-            <Alert>
-              <Alert.Text>{t('appSettings.ftp.changePasswordHint')}</Alert.Text>
+          <FeatureCard.Footer alert>
+            <Alert variant={'warning'}>
+              <Info className={'size-4'} />
+              <AlertDescription>{t('appSettings.ftp.changePasswordHint')}</AlertDescription>
             </Alert>
           </FeatureCard.Footer>
         </FeatureCard>
@@ -77,13 +78,16 @@ function ConnectionInfoCell({ label, value, copyable }: ConnectionInfoCellProps)
       <span className={'text-xs font-medium text-zinc-400 dark:text-zinc-500'}>{label}</span>
       <span className={'flex items-center gap-2'}>
         <span className={'font-jetbrains text-sm font-semibold text-zinc-800 dark:text-zinc-200'}>{value}</span>
-        {copyable && (
-          copied ? (
+        {copyable &&
+          (copied ? (
             <CheckCircle2 className={'size-3 text-green-500'} strokeWidth={3} />
           ) : (
-            <Copy className={'size-3 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400'} />
-          )
-        )}
+            <Copy
+              className={
+                'size-3 text-zinc-300 transition-colors group-hover:text-zinc-500 dark:text-zinc-600 dark:group-hover:text-zinc-400'
+              }
+            />
+          ))}
       </span>
     </Tag>
   );

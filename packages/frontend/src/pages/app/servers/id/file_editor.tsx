@@ -14,7 +14,7 @@ import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import { useFileContent, useWriteFile, getFileExtension } from '@remnant/frontend/hooks/use_files';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { ApiError } from '@remnant/frontend/lib/api';

@@ -14,13 +14,13 @@ import {
   formatPluginSize,
   type PluginInfo,
 } from '@remnant/frontend/hooks/use_plugins';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
-import { Badge } from '@remnant/frontend/features/ui/badge';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
-import { Label } from '@remnant/frontend/features/ui/label';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
+import { Label } from '@remnant/frontend/features/ui/shadcn/label';
 
 export function ServerPluginsPage() {
   const { t } = useTranslation();
@@ -267,7 +267,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{plugin.name}</span>
             {!plugin.enabled && (
-              <Badge variant={'muted'} size={'xs'} className={'font-semibold'}>
+              <Badge variant={'secondary'} className={'font-semibold'}>
                 {t('plugins.disabled')}
               </Badge>
             )}
@@ -300,7 +300,7 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
-              variant={'danger'}
+              variant={'destructive'}
               size={'xs'}
               onClick={handleDelete}
               disabled={deletePlugin.isPending}
@@ -314,9 +314,9 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
           </div>
         ) : (
           <>
-            <Tooltip.Provider delayDuration={300}>
+            <TooltipProvider delayDuration={300}>
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <Button
                     variant={plugin.enabled ? 'ghost' : 'success'}
                     size={plugin.enabled ? 'icon-sm' : 'xs'}
@@ -334,20 +334,20 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
                       </>
                     )}
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {plugin.enabled ? t('plugins.tooltipDisable') : t('plugins.tooltipEnable')}
-                </Tooltip.Content>
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
-                <Tooltip.Trigger asChild>
-                  <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+                <TooltipTrigger asChild>
+                  <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
                     <Trash2 className={'size-4'} />
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('plugins.tooltipDelete')}</Tooltip.Content>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('plugins.tooltipDelete')}</TooltipContent>
               </Tooltip>
-            </Tooltip.Provider>
+            </TooltipProvider>
           </>
         )}
       </FeatureCard.RowControl>

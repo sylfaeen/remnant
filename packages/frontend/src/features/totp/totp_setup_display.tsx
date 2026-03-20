@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Copy, Check, Download, AlertTriangle, Shield, ShieldCheck, ShieldOff, Loader2 } from 'lucide-react';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { InputGroup } from '@remnant/frontend/features/ui/input';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { InputGroup } from '@remnant/frontend/features/ui/input_group';
 import { OtpInput } from '@remnant/frontend/features/ui/otp_input';
-import { Dialog } from '@remnant/frontend/features/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@remnant/frontend/features/ui/shadcn/dialog';
 import { cn } from '@remnant/frontend/lib/cn';
 import { copyToClipboard } from '@remnant/frontend/lib/copy';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 
 type TotpQrDisplayProps = {
   qrCodeUri: string;
@@ -92,7 +92,7 @@ export function TotpCodeInput({ code, onChange, onSubmit, error, loading }: Totp
       <InputGroup label={t('settings.twoFactor.enterCode')} error={error ?? undefined}>
         <OtpInput value={code} length={6} onComplete={onSubmit} error={!!error} disabled={loading} {...{ onChange }} />
       </InputGroup>
-      <Button size={'md'} onClick={() => onSubmit(code)} disabled={code.length !== 6} className={'w-full'} {...{ loading }}>
+      <Button size={'default'} onClick={() => onSubmit(code)} disabled={code.length !== 6} className={'w-full'} {...{ loading }}>
         {loading ? t('common.loading') : t('settings.twoFactor.verify')}
       </Button>
     </div>
@@ -175,7 +175,7 @@ export function RecoveryCodesDisplay({ codes, onDone }: RecoveryCodesDisplayProp
           {t('settings.twoFactor.recoveryCodes.download')}
         </Button>
       </div>
-      <Button size={'md'} onClick={onDone} className={'w-full'}>
+      <Button size={'default'} onClick={onDone} className={'w-full'}>
         {t('settings.twoFactor.recoveryCodes.saved')}
       </Button>
     </div>
@@ -215,7 +215,7 @@ export function TotpSettingsSection({ enabled, onSetupStart, onDisable, loading 
             </p>
           </div>
           {enabled && (
-            <Badge variant={'success'} size={'md'} className={'text-xs'}>
+            <Badge variant={'default'} className={'text-xs'}>
               {t('settings.twoFactor.activeBadge')}
             </Badge>
           )}
@@ -275,15 +275,15 @@ export function TotpSetupDialog({
 
   return (
     <Dialog {...{ open, onOpenChange }}>
-      <Dialog.Content className={'max-w-xl'}>
-        <Dialog.Header>
-          <Dialog.Title>
+      <DialogContent className={'max-w-xl'}>
+        <DialogHeader>
+          <DialogTitle>
             {showRecovery ? t('settings.twoFactor.recoveryCodes.title') : t('settings.twoFactor.setupTitle')}
-          </Dialog.Title>
-          <Dialog.Description>
+          </DialogTitle>
+          <DialogDescription>
             {showRecovery ? t('settings.twoFactor.recoveryCodes.subtitle') : t('settings.twoFactor.setupDescription')}
-          </Dialog.Description>
-        </Dialog.Header>
+          </DialogDescription>
+        </DialogHeader>
         <div className={'mt-5'}>
           {showSetup && (
             <div className={'space-y-5'}>
@@ -308,7 +308,7 @@ export function TotpSetupDialog({
             </div>
           )}
         </div>
-      </Dialog.Content>
+      </DialogContent>
     </Dialog>
   );
 }
@@ -327,15 +327,15 @@ export function TotpDisableDialog({ open, onOpenChange, onConfirm, error, loadin
 
   return (
     <Dialog {...{ open, onOpenChange }}>
-      <Dialog.Content>
-        <Dialog.Header>
-          <Dialog.Title>{t('settings.twoFactor.disableTitle')}</Dialog.Title>
-          <Dialog.Description>{t('settings.twoFactor.disableConfirm')}</Dialog.Description>
-        </Dialog.Header>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('settings.twoFactor.disableTitle')}</DialogTitle>
+          <DialogDescription>{t('settings.twoFactor.disableConfirm')}</DialogDescription>
+        </DialogHeader>
         <div className={'mt-5'}>
           <TotpCodeInput onChange={setCode} onSubmit={onConfirm} {...{ code, error, loading }} />
         </div>
-      </Dialog.Content>
+      </DialogContent>
     </Dialog>
   );
 }

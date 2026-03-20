@@ -1,7 +1,7 @@
 import type { ComponentProps, PropsWithChildren, ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 
 type FeatureCardProps = ComponentProps<'div'>;
 
@@ -29,7 +29,7 @@ FeatureCard.Title = function FeatureCardTitle({ count, className, children, ...r
   return (
     <h3 className={cn('text-strong flex items-center gap-2 font-medium', className)} {...rest}>
       {children}
-      {count ? <Badge size={'md'}>{count}</Badge> : null}
+      {count ? <Badge variant={'secondary'}>{count}</Badge> : null}
     </h3>
   );
 };
@@ -103,10 +103,12 @@ FeatureCard.RowControl = function FeatureCardRowControl({ className, ...rest }: 
   );
 };
 
-type FeatureCardFooterProps = ComponentProps<'div'>;
+type FeatureCardFooterProps = ComponentProps<'div'> & {
+  alert?: boolean;
+};
 
-FeatureCard.Footer = function FeatureCardFooter({ className, ...rest }: FeatureCardFooterProps) {
-  return <div className={cn('p-4', className)} {...rest} />;
+FeatureCard.Footer = function FeatureCardFooter({ className, alert = false, ...rest }: FeatureCardFooterProps) {
+  return <div className={cn(alert ? 'px-0.5 pt-1 pb-0.5' : 'p-4', className)} {...rest} />;
 };
 
 type FeatureCardStackProps = PropsWithChildren<ComponentProps<'div'>>;

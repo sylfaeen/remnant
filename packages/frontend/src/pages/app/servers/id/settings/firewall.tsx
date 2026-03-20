@@ -5,8 +5,8 @@ import { Clock, Info, Plus, Power, PowerOff, Shield, Trash2 } from 'lucide-react
 import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
-import { Button } from '@remnant/frontend/features/ui/button';
-import { Badge, type BadgeProps } from '@remnant/frontend/features/ui/badge';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -20,12 +20,12 @@ import { FirewallGuidelinesDialog } from '@remnant/frontend/pages/app/servers/di
 import { ServerPageHeader } from '@remnant/frontend/pages/app/servers/features/server_page_header';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import type { Protocol } from '@remnant/frontend/pages/app/servers/features/firewall_card';
-import { Tooltip } from '@remnant/frontend/features/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
-const PROTOCOL_BADGE_VARIANT: Record<Protocol, BadgeProps['variant']> = {
-  tcp: 'success',
-  udp: 'blue',
-  both: 'violet',
+const PROTOCOL_BADGE_VARIANT: Record<Protocol, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  tcp: 'default',
+  udp: 'secondary',
+  both: 'secondary',
 };
 
 const PROTOCOL_LABELS: Record<Protocol, string> = {
@@ -186,11 +186,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
               {PROTOCOL_LABELS[rule.protocol]}
             </Badge>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{rule.label}</span>
-            {!rule.enabled && (
-              <Badge variant={'muted'} size={'xs'}>
-                {t('settings.firewall.disabled')}
-              </Badge>
-            )}
+            {!rule.enabled && <Badge variant={'secondary'}>{t('settings.firewall.disabled')}</Badge>}
           </div>
         </div>
       </div>
@@ -215,7 +211,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
         ) : deleteConfirm ? (
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
-            <Button variant={'danger'} size={'xs'} onClick={() => onDelete(rule.id)}>
+            <Button variant={'destructive'} size={'xs'} onClick={() => onDelete(rule.id)}>
               {t('common.yes')}
             </Button>
             <Button variant={'ghost'} size={'xs'} onClick={() => setDeleteConfirm(false)}>
@@ -224,9 +220,9 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
           </div>
         ) : (
           <>
-            <Tooltip.Provider delayDuration={300}>
+            <TooltipProvider delayDuration={300}>
               <Tooltip>
-                <Tooltip.Trigger asChild>
+                <TooltipTrigger asChild>
                   <Button
                     variant={rule.enabled ? 'ghost' : 'success'}
                     size={rule.enabled ? 'icon-sm' : 'sm'}
@@ -244,20 +240,20 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
                       </>
                     )}
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {rule.enabled ? t('rules.tooltipDisable') : t('rules.tooltipEnable')}
-                </Tooltip.Content>
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
-                <Tooltip.Trigger asChild>
-                  <Button variant={'ghost-danger'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
+                <TooltipTrigger asChild>
+                  <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => setDeleteConfirm(true)}>
                     <Trash2 className={'size-4'} />
                   </Button>
-                </Tooltip.Trigger>
-                <Tooltip.Content className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('rules.tooltipDelete')}</Tooltip.Content>
+                </TooltipTrigger>
+                <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>{t('rules.tooltipDelete')}</TooltipContent>
               </Tooltip>
-            </Tooltip.Provider>
+            </TooltipProvider>
           </>
         )}
       </FeatureCard.RowControl>

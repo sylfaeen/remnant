@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
-import { Badge } from '@remnant/frontend/features/ui/badge';
+import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 
 export function ServerSection({ children }: { children: ReactNode }) {
   return <div className={'rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900'}>{children}</div>;
@@ -40,7 +40,7 @@ ServerSection.Description = function ServerSectionDescription({ children }: { ch
 };
 
 ServerSection.Count = function ServerSectionCount({ children }: { children: ReactNode }) {
-  return <Badge size={'md'}>{children}</Badge>;
+  return <Badge>{children}</Badge>;
 };
 
 ServerSection.HeaderAction = function ServerSectionHeaderAction({ children }: { children: ReactNode }) {

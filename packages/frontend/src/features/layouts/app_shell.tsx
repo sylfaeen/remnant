@@ -3,7 +3,7 @@ import { SidebarProvider, useSidebar } from '@remnant/frontend/pages/app/feature
 import { trpc } from '@remnant/frontend/lib/trpc';
 import { cn } from '@remnant/frontend/lib/cn';
 import { ArrowRight, Download, Menu } from 'lucide-react';
-import { Button } from '@remnant/frontend/features/ui/button';
+import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 
