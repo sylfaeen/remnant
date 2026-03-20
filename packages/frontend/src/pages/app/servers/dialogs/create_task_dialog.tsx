@@ -21,13 +21,7 @@ import {
   DialogFooter,
 } from '@remnant/frontend/features/ui/shadcn/dialog';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
-import {
-  CRON_PRESETS,
-  getTaskTypes,
-  type CreateTaskInput,
-  type TaskConfig,
-  type TaskType,
-} from '@remnant/frontend/hooks/use_tasks';
+import { CRON_PRESETS, getTaskTypes, type CreateTaskInput, type TaskType } from '@remnant/frontend/hooks/use_tasks';
 
 const createTaskSchema = z.object({
   name: z.string().min(1),
@@ -135,25 +129,19 @@ function CreateTaskForm({ serverId, onSubmit }: CreateTaskFormProps) {
       return;
     }
 
-    const config: TaskConfig = {};
+    let command = '';
     if (taskType === 'command') {
-      config.command = data.command;
+      command = data.command ?? '';
     } else if (taskType === 'backup') {
-      config.backup_paths = Array.from(backupPaths);
+      command = `backup ${Array.from(backupPaths).join(' ')}`;
     } else if (taskType === 'restart') {
-      if (data.warnPlayers) {
-        config.warn_players = true;
-        config.warn_message = data.warnMessage;
-        config.warn_seconds = data.warnSeconds;
-      }
+      command = 'restart';
     }
 
     onSubmit({
       name: data.name,
-      type: taskType,
-      cron_expression: cronExpression,
-      enabled: true,
-      config,
+      command,
+      schedule: cronExpression,
     }).then();
   };
 

@@ -65,7 +65,7 @@ done
 
 ### Files to Create
 - `packages/frontend/src/pages/app/servers/id/backups.tsx` — Page Backups complète avec dialog arborescence
-- `packages/frontend/src/hooks/use_backups.ts` — Hooks tRPC pour list/delete backups
+- `packages/frontend/src/hooks/use_backups.ts` — Hooks ts-rest pour list/delete backups
 
 ### Files to Modify
 - `packages/frontend/src/hooks/use_servers.ts` — `useBackupServer()` accepte `paths?: Array<string>`
@@ -140,7 +140,7 @@ done
 - [x] Créer le hook `use_backups.ts` (useBackups, useDeleteBackup)
 - [x] Créer la page `backups.tsx` avec liste, download, delete
 - [x] Ajouter la dialog de sélection de fichiers avec arborescence
-- [x] Lazy-load des sous-dossiers via `trpcUtils.files.list.fetch()`
+- [x] Lazy-load des sous-dossiers via `tsRestUtils.files.list.fetch()`
 - [x] Sélection/désélection récursive des dossiers
 - [x] Optimisation des paths (envoyer le dossier parent si tous les enfants sont sélectionnés)
 - [x] Modifier `useBackupServer()` pour accepter `paths`

@@ -17,7 +17,7 @@ backlog
 - Fichiers clés:
   - Créer: `packages/backend/src/db/schema/sftp_accounts.ts` — table sftp_accounts
   - Créer: `packages/shared/src/schemas/sftp.ts` — schemas Zod
-  - Modifier: `packages/backend/src/trpc/routers/sftp.ts` — ajout procédures CRUD
+  - Modifier: `packages/backend/src/routes/handlers/sftp.ts` — ajout procédures CRUD
   - Modifier: `packages/shared/src/schemas/index.ts` — export des schemas
 - Pattern existant : voir `packages/backend/src/db/schema/servers.ts` et `packages/shared/src/schemas/server.ts`
 
@@ -34,7 +34,7 @@ backlog
 **Then** `sftpAccountSchema`, `createSftpAccountSchema`, `updateSftpAccountSchema` sont exportés
 **And** les validations incluent : username unique par serveur, password requis à la création
 
-### AC3: Router tRPC
+### AC3: Router ts-rest
 **Given** le backend
 **When** le router sftp est étendu
 **Then** les procédures `sftp.list(serverId)`, `sftp.create(...)`, `sftp.update(...)`, `sftp.delete(id)` sont disponibles
@@ -45,7 +45,7 @@ backlog
 - [ ] Créer la table `sftp_accounts` avec Drizzle schema
 - [ ] Créer la migration DB
 - [ ] Créer les schemas Zod dans shared
-- [ ] Ajouter les procédures CRUD au router tRPC sftp
+- [ ] Ajouter les procédures CRUD au router ts-rest sftp
 - [ ] Implémenter le hashing des mots de passe
 - [ ] Valider l'unicité username par serveur
 - [ ] S'assurer que les mots de passe ne sont jamais exposés dans les réponses API

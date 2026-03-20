@@ -10,6 +10,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@25.4.0)(zod@3.25.76)
     devDependencies:
       '@eslint-react/eslint-plugin':
         specifier: ^2.13.0
@@ -74,9 +78,12 @@ importers:
       '@remnant/shared':
         specifier: workspace:*
         version: link:../shared
-      '@trpc/server':
-        specifier: ^11.12.0
-        version: 11.12.0(typescript@5.9.3)
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@22.19.15)(zod@3.25.76)
+      '@ts-rest/fastify':
+        specifier: ^3.52.1
+        version: 3.52.1(@ts-rest/core@3.52.1(@types/node@22.19.15)(zod@3.25.76))(fastify@5.8.2)(zod@3.25.76)
       archiver:
         specifier: ^7.0.1
         version: 7.0.1
@@ -107,9 +114,6 @@ importers:
       socket.io:
         specifier: ^4
         version: 4.8.3
-      superjson:
-        specifier: ^2.2.6
-        version: 2.2.6
       zod:
         specifier: ^3
         version: 3.25.76
@@ -156,9 +160,6 @@ importers:
       '@monaco-editor/react':
         specifier: ^4
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@remnant/backend':
-        specifier: workspace:*
-        version: link:../backend
       '@remnant/shared':
         specifier: workspace:*
         version: link:../shared
@@ -168,12 +169,9 @@ importers:
       '@tanstack/react-router':
         specifier: ^1.166.7
         version: 1.166.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@trpc/client':
-        specifier: ^11.12.0
-        version: 11.12.0(@trpc/server@11.12.0(typescript@5.9.3))(typescript@5.9.3)
-      '@trpc/react-query':
-        specifier: ^11.12.0
-        version: 11.12.0(@tanstack/react-query@5.90.21(react@19.2.4))(@trpc/client@11.12.0(@trpc/server@11.12.0(typescript@5.9.3))(typescript@5.9.3))(@trpc/server@11.12.0(typescript@5.9.3))(react@19.2.4)(typescript@5.9.3)
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@25.4.0)(zod@3.25.76)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -249,9 +247,6 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      superjson:
-        specifier: ^2.2.6
-        version: 2.2.6
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0
@@ -295,6 +290,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@ts-rest/core':
+        specifier: ^3.52.1
+        version: 3.52.1(@types/node@25.4.0)(zod@3.25.76)
       zod:
         specifier: ^3
         version: 3.25.76
@@ -2410,25 +2408,26 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@trpc/client@11.12.0':
-    resolution: {integrity: sha512-zTwFKQdE99pvNm7kXFdHo5xIQpGqpQJHtqVkT9o+i8h/0fbDOUBEEbFVICiMsNA+GiXskoaDRX2l+z6ir+Ug3w==}
+  '@ts-rest/core@3.52.1':
+    resolution: {integrity: sha512-tAjz7Kxq/grJodcTA1Anop4AVRDlD40fkksEV5Mmal88VoZeRKAG8oMHsDwdwPZz+B/zgnz0q2sF+cm5M7Bc7g==}
     peerDependencies:
-      '@trpc/server': 11.12.0
-      typescript: '>=5.7.2'
+      '@types/node': ^18.18.7 || >=20.8.4
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      zod:
+        optional: true
 
-  '@trpc/react-query@11.12.0':
-    resolution: {integrity: sha512-SLJLlQw0XVc+oVD5RITLl0G7cAFJ4oSJXUcblTS8CKUET+J4r/Ot2hKfX+qhENcFM1ChllbwMrCbUHNOH7qU1A==}
+  '@ts-rest/fastify@3.52.1':
+    resolution: {integrity: sha512-y+w3ENayNI77T0l2gcr9mobF3Nfc4yIb4487mvNMsMUkGLMHmaWzhLy3Mo/mswuoA+tVdOkrD8tJD38bLY7iYQ==}
     peerDependencies:
-      '@tanstack/react-query': ^5.80.3
-      '@trpc/client': 11.12.0
-      '@trpc/server': 11.12.0
-      react: '>=18.2.0'
-      typescript: '>=5.7.2'
-
-  '@trpc/server@11.12.0':
-    resolution: {integrity: sha512-rpZnf5FUjNndE/AjGIy+FvEHR52iBd0u0wySqWCwXj67wraj3qCuBr5Opcf0Te/g67C/YztqceFkLoG0r4mp4Q==}
-    peerDependencies:
-      typescript: '>=5.7.2'
+      '@ts-rest/core': ~3.52.0
+      fastify: ^4.0.0
+      zod: ^3.22.3
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   '@types/archiver@7.0.0':
     resolution: {integrity: sha512-/3vwGwx9n+mCQdYZ2IKGGHEFL30I96UgBlk8EtRDDFQ9uxM1l4O5Ci6r00EMAkiDaTqD9DQ6nVrWRICnBPtzzg==}
@@ -2975,10 +2974,6 @@ packages:
 
   cookie@1.1.1:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
-    engines: {node: '>=18'}
-
-  copy-anything@4.0.5:
-    resolution: {integrity: sha512-7Vv6asjS4gMOuILabD3l739tsaxFQmC+a7pLZm02zyvs8p977bL3zEgq3yDk5rn9B0PbYgIv++jmHcuUab4RhA==}
     engines: {node: '>=18'}
 
   core-util-is@1.0.3:
@@ -3735,10 +3730,6 @@ packages:
   is-stream@2.0.1:
     resolution: {integrity: sha512-hFoiJiTl63nn+kstHGBtewWSKnQLpyb155KHheA1l39uvtO9nWIop1p3udqPcUd/xbF1VLMO4n7OI6p7RbngDg==}
     engines: {node: '>=8'}
-
-  is-what@5.5.0:
-    resolution: {integrity: sha512-oG7cgbmg5kLYae2N5IVd3jm2s+vldjxJzK1pcu9LfpGuQ93MQSzo0okvRna+7y5ifrD+20FE8FvjusyGaz14fw==}
-    engines: {node: '>=18'}
 
   isarray@1.0.0:
     resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
@@ -4881,10 +4872,6 @@ packages:
     resolution: {integrity: sha512-DhuTmvZWux4H1UOnWMB3sk0sbaCVOoQZjv8u1rDoTV0HTdGem9hkAZtl4JZy8P2z4Bg0nT+YMeOFyVr4zcG5Tw==}
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
-
-  superjson@2.2.6:
-    resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
-    engines: {node: '>=16'}
 
   tabbable@6.4.0:
     resolution: {integrity: sha512-05PUHKSNE8ou2dwIxTngl4EzcnsCDZGJ/iCLtDflR/SHB/ny14rXc+qU5P4mG9JkusiV7EivzY9Mhm55AzAvCg==}
@@ -7223,22 +7210,22 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@trpc/client@11.12.0(@trpc/server@11.12.0(typescript@5.9.3))(typescript@5.9.3)':
-    dependencies:
-      '@trpc/server': 11.12.0(typescript@5.9.3)
-      typescript: 5.9.3
+  '@ts-rest/core@3.52.1(@types/node@22.19.15)(zod@3.25.76)':
+    optionalDependencies:
+      '@types/node': 22.19.15
+      zod: 3.25.76
 
-  '@trpc/react-query@11.12.0(@tanstack/react-query@5.90.21(react@19.2.4))(@trpc/client@11.12.0(@trpc/server@11.12.0(typescript@5.9.3))(typescript@5.9.3))(@trpc/server@11.12.0(typescript@5.9.3))(react@19.2.4)(typescript@5.9.3)':
-    dependencies:
-      '@tanstack/react-query': 5.90.21(react@19.2.4)
-      '@trpc/client': 11.12.0(@trpc/server@11.12.0(typescript@5.9.3))(typescript@5.9.3)
-      '@trpc/server': 11.12.0(typescript@5.9.3)
-      react: 19.2.4
-      typescript: 5.9.3
+  '@ts-rest/core@3.52.1(@types/node@25.4.0)(zod@3.25.76)':
+    optionalDependencies:
+      '@types/node': 25.4.0
+      zod: 3.25.76
 
-  '@trpc/server@11.12.0(typescript@5.9.3)':
+  '@ts-rest/fastify@3.52.1(@ts-rest/core@3.52.1(@types/node@22.19.15)(zod@3.25.76))(fastify@5.8.2)(zod@3.25.76)':
     dependencies:
-      typescript: 5.9.3
+      '@ts-rest/core': 3.52.1(@types/node@22.19.15)(zod@3.25.76)
+      fastify: 5.8.2
+    optionalDependencies:
+      zod: 3.25.76
 
   '@types/archiver@7.0.0':
     dependencies:
@@ -7833,10 +7820,6 @@ snapshots:
   cookie@0.7.2: {}
 
   cookie@1.1.1: {}
-
-  copy-anything@4.0.5:
-    dependencies:
-      is-what: 5.5.0
 
   core-util-is@1.0.3: {}
 
@@ -8772,8 +8755,6 @@ snapshots:
   is-plain-obj@4.1.0: {}
 
   is-stream@2.0.1: {}
-
-  is-what@5.5.0: {}
 
   isarray@1.0.0: {}
 
@@ -10139,10 +10120,6 @@ snapshots:
       pirates: 4.0.7
       tinyglobby: 0.2.15
       ts-interface-checker: 0.1.13
-
-  superjson@2.2.6:
-    dependencies:
-      copy-anything: 4.0.5
 
   tabbable@6.4.0: {}
 

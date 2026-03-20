@@ -80,8 +80,10 @@ function AddJarSection({ serverId }: AddJarSectionProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const { data: versions, isLoading: versionsLoading } = usePaperVersions();
-  const { data: builds, isLoading: buildsLoading } = usePaperBuilds(selectedVersion);
+  const { data: versionsData, isLoading: versionsLoading } = usePaperVersions();
+  const { data: buildsData, isLoading: buildsLoading } = usePaperBuilds(selectedVersion);
+  const versions = versionsData?.versions;
+  const builds = buildsData?.builds;
   const downloadJar = useDownloadJar(serverId);
   const uploadJar = useUploadJar(serverId);
 

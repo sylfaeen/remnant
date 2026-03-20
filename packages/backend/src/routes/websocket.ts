@@ -5,7 +5,11 @@ import { metricsService } from '@remnant/backend/services/metrics_service';
 import { playersService } from '@remnant/backend/services/players_service';
 import type { PlayersUpdate } from '@remnant/shared';
 import { eq } from 'drizzle-orm';
-import { hasPermission } from '@remnant/backend/trpc/middlewares/auth';
+import type { Permission } from '@remnant/shared';
+
+function hasPermission(userPermissions: Array<string>, required: Permission): boolean {
+  return userPermissions.includes('*') || userPermissions.includes(required);
+}
 import { db } from '@remnant/backend/db';
 import { users } from '@remnant/backend/db/schema';
 

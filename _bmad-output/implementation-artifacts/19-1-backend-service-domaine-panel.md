@@ -16,7 +16,7 @@ done
 - Dependencies: Epic 17 (script shell + service domaines)
 - Fichiers clés:
   - `packages/backend/src/services/domain_service.ts` — `DomainService` class avec `setPanelDomain`, `removePanelDomain`, `getPanelDomain`, `enableSsl`, `dnsCheck`, `getIpAccessStatus`, `setIpAccess`, `renewAll`, `refreshSslExpiry`, `ensureCertbotTimer`
-  - `packages/backend/src/trpc/routers/domains.ts` — endpoints panel: `panelDomain`, `setPanelDomain`, `removePanelDomain`, `enableSsl`, `dnsCheck`, `ipAccess`, `setIpAccess`, `renew`, `refreshExpiry`, `ensureTimer`
+  - `packages/backend/src/routes/handlers/domains.ts` — endpoints panel: `panelDomain`, `setPanelDomain`, `removePanelDomain`, `enableSsl`, `dnsCheck`, `ipAccess`, `setIpAccess`, `renew`, `refreshExpiry`, `ensureTimer`
   - `packages/backend/src/services/env_service.ts` — mise à jour `CORS_ORIGIN` et `SECURE_COOKIES`
   - `packages/backend/src/services/audit_service.ts` — audit logging de toutes les mutations
   - `scripts/remnant-domain.sh` — actions shell: `update-panel`, `reset-panel`, `enable-ssl`, `dns-check`, `enable-fallback`, `disable-fallback`, `fallback-status`, `renew`, `check-expiry`, `ensure-timer`
@@ -90,7 +90,7 @@ Implémentation complète. Tous les endpoints fonctionnels avec audit logging, r
 ## File List
 
 - `packages/backend/src/services/domain_service.ts`
-- `packages/backend/src/trpc/routers/domains.ts`
+- `packages/backend/src/routes/handlers/domains.ts`
 - `packages/backend/src/services/env_service.ts`
 - `packages/backend/src/services/audit_service.ts`
 - `scripts/remnant-domain.sh`

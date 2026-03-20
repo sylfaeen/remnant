@@ -162,10 +162,10 @@ function PlayerDomainSection({ serverId }: PlayerDomainSectionProps) {
 type TcpDomainData = {
   id: number;
   domain: string;
-  port: number;
+  port: number | null;
   type: string;
-  ssl_enabled: boolean;
-  ssl_expires_at: string | null;
+  sslEnabled: boolean;
+  sslExpiresAt: string | null;
 };
 
 type TcpDomainRowProps = {
@@ -257,7 +257,7 @@ function TcpDomainRow({ domain, serverIp, onRemove }: TcpDomainRowProps) {
                 </Button>
               </div>
             </div>
-            <SrvRegistrarTable domain={domain.domain} port={domain.port} />
+            <SrvRegistrarTable domain={domain.domain} port={domain.port ?? 25565} />
           </div>
           <div className={'mt-3 rounded-lg border border-blue-500/20 bg-blue-50/50 p-3 dark:bg-blue-950/20'}>
             <p className={'text-sm font-medium text-blue-800 dark:text-blue-200'}>
@@ -516,7 +516,7 @@ function HttpDomainListSection({ serverId }: HttpDomainListSectionProps) {
   const renewSsl = useRenewSsl(serverId);
 
   const httpDomains = domainsData?.domains?.filter((d) => d.type !== 'tcp') ?? [];
-  const sslCount = httpDomains.filter((d) => d.ssl_enabled).length;
+  const sslCount = httpDomains.filter((d) => d.sslEnabled).length;
   const hasSsl = sslCount > 0;
 
   const handleAdd = async (input: { domain: string; port: number; type: DomainType }) => {
@@ -577,10 +577,10 @@ function HttpDomainListSection({ serverId }: HttpDomainListSectionProps) {
 type DomainData = {
   id: number;
   domain: string;
-  port: number;
+  port: number | null;
   type: string;
-  ssl_enabled: boolean;
-  ssl_expires_at: string | null;
+  sslEnabled: boolean;
+  sslExpiresAt: string | null;
 };
 
 type DomainRowProps = {
@@ -595,8 +595,7 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [showDns, setShowDns] = useState(false);
 
-  const isExpiringSoon =
-    domain.ssl_expires_at && new Date(domain.ssl_expires_at).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
+  const isExpiringSoon = domain.sslExpiresAt && new Date(domain.sslExpiresAt).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
 
   const handleDelete = async () => {
     try {
@@ -612,10 +611,10 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
           <div
             className={cn(
               'flex size-8 shrink-0 items-center justify-center rounded-lg',
-              domain.ssl_enabled ? 'bg-green-600 text-white' : 'bg-zinc-200 dark:bg-zinc-700'
+              domain.sslEnabled ? 'bg-green-600 text-white' : 'bg-zinc-200 dark:bg-zinc-700'
             )}
           >
-            {domain.ssl_enabled ? <Lock className={'size-4'} strokeWidth={2} /> : <Globe className={'size-4'} strokeWidth={2} />}
+            {domain.sslEnabled ? <Lock className={'size-4'} strokeWidth={2} /> : <Globe className={'size-4'} strokeWidth={2} />}
           </div>
           <div className={'min-w-0'}>
             <div className={'flex items-center gap-2'}>
@@ -623,7 +622,7 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
               <Badge variant={TYPE_BADGE_VARIANT[domain.type]} className={'font-semibold uppercase'}>
                 {domain.type}
               </Badge>
-              {domain.ssl_enabled ? (
+              {domain.sslEnabled ? (
                 <Badge variant={isExpiringSoon ? 'outline' : 'default'} className={'font-semibold'}>
                   {isExpiringSoon ? t('settings.domains.sslExpiringSoon') : 'SSL'}
                 </Badge>
@@ -635,10 +634,10 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
             </div>
             <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
               <span className={'font-jetbrains tabular-nums'}>:{domain.port}</span>
-              {domain.ssl_expires_at && (
+              {domain.sslExpiresAt && (
                 <>
                   <span className={'text-zinc-200 dark:text-zinc-700'}>&middot;</span>
-                  <span>{t('settings.domains.expiresAt', { date: new Date(domain.ssl_expires_at).toLocaleDateString() })}</span>
+                  <span>{t('settings.domains.expiresAt', { date: new Date(domain.sslExpiresAt).toLocaleDateString() })}</span>
                 </>
               )}
             </div>
@@ -664,7 +663,7 @@ function DomainRow({ domain, serverIp, onRemove, onEnableSsl }: DomainRowProps) 
           ) : (
             <>
               <TooltipProvider delayDuration={300}>
-                {!domain.ssl_enabled && (
+                {!domain.sslEnabled && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant={'success'} size={'xs'} onClick={() => onEnableSsl.mutateAsync(domain.id)}>

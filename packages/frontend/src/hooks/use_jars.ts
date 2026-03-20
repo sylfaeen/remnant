@@ -1,7 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 
 export type JarSource = 'papermc' | 'spigot' | 'purpur' | 'fabric' | 'forge' | 'vanilla' | 'custom';
@@ -15,40 +15,57 @@ export interface JarInfo {
 }
 
 export function usePaperVersions() {
-  return trpc.jars.getVersions.useQuery(undefined, {
+  return useQuery({
+    queryKey: ['jars', 'versions'],
+    queryFn: async () => {
+      const result = await apiClient.jars.getVersions();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     staleTime: 5 * 60 * 1000,
   });
 }
 
 export function usePaperBuilds(version: string | null) {
-  return trpc.jars.getBuilds.useQuery(
-    { version: version! },
-    {
-      enabled: !!version,
-      staleTime: 5 * 60 * 1000,
-    }
-  );
+  return useQuery({
+    queryKey: ['jars', 'builds', version],
+    queryFn: async () => {
+      const result = await apiClient.jars.getBuilds({ query: { version: version! } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!version,
+    staleTime: 5 * 60 * 1000,
+  });
 }
 
 export function useServerJars(serverId: number | null) {
-  return trpc.jars.list.useQuery(
-    { serverId: serverId! },
-    {
-      enabled: !!serverId,
-    }
-  );
+  return useQuery({
+    queryKey: ['jars', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.jars.list({ params: { serverId: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useDownloadJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.jars.download.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: { version: string; build?: number }) => {
+      const result = await apiClient.jars.download({ params: { serverId: String(serverId) }, body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.jars.list.invalidate({ serverId }).then();
-      utils.servers.byId.invalidate({ id: serverId }).then();
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['jars', 'list', serverId] }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'byId', serverId] }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.jarDownloaded') });
     },
     onError: () => {
@@ -58,30 +75,38 @@ export function useDownloadJar(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: { version: string; build?: number }) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: { version: string; build?: number }) => mutation.mutateAsync(input),
   };
 }
 
 export function useDownloadProgress(serverId: number | null, isDownloading: boolean) {
-  return trpc.jars.progress.useQuery(
-    { serverId: serverId! },
-    {
-      enabled: !!serverId && isDownloading,
-      refetchInterval: isDownloading ? 500 : false,
-    }
-  );
+  return useQuery({
+    queryKey: ['jars', 'progress', serverId],
+    queryFn: async () => {
+      const result = await apiClient.jars.progress({ params: { serverId: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId && isDownloading,
+    refetchInterval: isDownloading ? 500 : false,
+  });
 }
 
 export function useSetActiveJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.jars.setActive.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ jarFile }: { jarFile: string }) => {
+      const result = await apiClient.jars.setActive({ params: { serverId: String(serverId) }, body: { jarFile } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.jars.list.invalidate({ serverId }).then();
-      utils.servers.byId.invalidate({ id: serverId }).then();
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['jars', 'list', serverId] }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'byId', serverId] }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.jarActivated') });
     },
     onError: () => {
@@ -91,18 +116,23 @@ export function useSetActiveJar(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (jarFile: string) => mutation.mutateAsync({ serverId, jarFile }),
+    mutateAsync: (jarFile: string) => mutation.mutateAsync({ jarFile }),
   };
 }
 
 export function useDeleteJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.jars.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ jarFile }: { jarFile: string }) => {
+      const result = await apiClient.jars.delete({ params: { serverId: String(serverId), jarFile } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.jars.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['jars', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.jarDeleted') });
     },
     onError: () => {
@@ -112,15 +142,14 @@ export function useDeleteJar(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (jarFile: string) => mutation.mutateAsync({ serverId, jarFile }),
+    mutateAsync: (jarFile: string) => mutation.mutateAsync({ jarFile }),
   };
 }
 
 export function useUploadJar(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
-
+  const queryClient = useQueryClient();
   const accessToken = useAuthStore((state) => state.accessToken);
 
   return useMutation({
@@ -144,19 +173,22 @@ export function useUploadJar(serverId: number) {
 
       const result = await response.json();
 
-      // Optionally set as active JAR
       if (setAsActive && result.data?.path) {
         const filename = result.data.path.split('/').pop();
         if (filename) {
-          await utils.client.jars.setActive.mutate({ serverId, jarFile: filename });
+          const setActiveResult = await apiClient.jars.setActive({
+            params: { serverId: String(serverId) },
+            body: { jarFile: filename },
+          });
+          if (setActiveResult.status !== 200) raise(setActiveResult.body, setActiveResult.status);
         }
       }
 
       return result;
     },
     onSuccess: () => {
-      utils.jars.list.invalidate({ serverId }).then();
-      utils.servers.byId.invalidate({ id: serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['jars', 'list', serverId] }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'byId', serverId] }).then();
       addToast({ type: 'success', title: t('toast.jarUploaded') });
     },
     onError: () => {

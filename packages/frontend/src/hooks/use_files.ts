@@ -1,47 +1,57 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 
-export interface FileInfo {
+export type FileInfo = {
   name: string;
   path: string;
   type: 'file' | 'directory';
   size: number;
   modified: string;
-  permissions: string;
-}
+};
 
-export function useFiles(serverId: number | null, path: string) {
-  return trpc.files.list.useQuery(
-    { serverId: serverId!, path },
-    {
-      enabled: !!serverId,
-    }
-  );
+export function useFiles(serverId: number | null, currentPath: string) {
+  return useQuery({
+    queryKey: ['files', 'list', serverId, currentPath],
+    queryFn: async () => {
+      const result = await apiClient.files.list({ params: { serverId: String(serverId!) }, query: { path: currentPath } });
+      if (result.status !== 200) raise(result.body, result.status);
+      const basePath = currentPath === '/' ? '' : currentPath;
+      return result.body.map((f): FileInfo => ({ ...f, path: `${basePath}/${f.name}` }));
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useFileContent(serverId: number | null, path: string | null) {
-  return trpc.files.read.useQuery(
-    { serverId: serverId!, path: path! },
-    {
-      enabled: !!serverId && !!path,
-    }
-  );
+  return useQuery({
+    queryKey: ['files', 'read', serverId, path],
+    queryFn: async () => {
+      const result = await apiClient.files.read({ params: { serverId: String(serverId!) }, query: { path: path! } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId && !!path,
+  });
 }
 
 export function useWriteFile(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.files.write.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: { path: string; content: string }) => {
+      const result = await apiClient.files.write({ params: { serverId: String(serverId) }, body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: (_, variables) => {
-      utils.files.read.invalidate({ serverId, path: variables.path }).then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'read', serverId, variables.path] }).then();
       const dirPath = variables.path.substring(0, variables.path.lastIndexOf('/')) || '/';
-      utils.files.list.invalidate({ serverId, path: dirPath }).then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, dirPath] }).then();
       addToast({ type: 'success', title: t('toast.fileSaved') });
     },
     onError: () => {
@@ -51,20 +61,24 @@ export function useWriteFile(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: { path: string; content: string }) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: { path: string; content: string }) => mutation.mutateAsync(input),
   };
 }
 
 export function useDeleteFile(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.files.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ path }: { path: string }) => {
+      const result = await apiClient.files.delete({ params: { serverId: String(serverId) }, query: { path } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: (_, variables) => {
       const dirPath = variables.path.substring(0, variables.path.lastIndexOf('/')) || '/';
-      utils.files.list.invalidate({ serverId, path: dirPath }).then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, dirPath] }).then();
       addToast({ type: 'success', title: t('toast.fileDeleted') });
     },
     onError: () => {
@@ -74,20 +88,24 @@ export function useDeleteFile(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (path: string) => mutation.mutateAsync({ serverId, path }),
+    mutateAsync: (path: string) => mutation.mutateAsync({ path }),
   };
 }
 
 export function useCreateDirectory(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.files.mkdir.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ path }: { path: string }) => {
+      const result = await apiClient.files.mkdir({ params: { serverId: String(serverId) }, body: { path } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: (_, variables) => {
       const parentPath = variables.path.substring(0, variables.path.lastIndexOf('/')) || '/';
-      utils.files.list.invalidate({ serverId, path: parentPath }).then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, parentPath] }).then();
       addToast({ type: 'success', title: t('toast.directoryCreated') });
     },
     onError: () => {
@@ -97,14 +115,13 @@ export function useCreateDirectory(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (path: string) => mutation.mutateAsync({ serverId, path }),
+    mutateAsync: (path: string) => mutation.mutateAsync({ path }),
   };
 }
 
 export function useUploadFile(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-
   const queryClient = useQueryClient();
   const accessToken = useAuthStore((state) => state.accessToken);
 
@@ -130,11 +147,7 @@ export function useUploadFile(serverId: number) {
       return response.json();
     },
     onSuccess: (_, variables) => {
-      queryClient
-        .invalidateQueries({
-          queryKey: [['files', 'list'], { input: { serverId, path: variables.targetPath } }],
-        })
-        .then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, variables.targetPath] }).then();
       addToast({ type: 'success', title: t('toast.fileUploaded') });
     },
     onError: () => {
@@ -146,16 +159,20 @@ export function useUploadFile(serverId: number) {
 export function useRenameFile(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.files.rename.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: { oldPath: string; newPath: string }) => {
+      const result = await apiClient.files.rename({ params: { serverId: String(serverId) }, body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: (_, variables) => {
       const oldDirPath = variables.oldPath.substring(0, variables.oldPath.lastIndexOf('/')) || '/';
       const newDirPath = variables.newPath.substring(0, variables.newPath.lastIndexOf('/')) || '/';
-      utils.files.list.invalidate({ serverId, path: oldDirPath }).then();
+      queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, oldDirPath] }).then();
       if (oldDirPath !== newDirPath) {
-        utils.files.list.invalidate({ serverId, path: newDirPath }).then();
+        queryClient.invalidateQueries({ queryKey: ['files', 'list', serverId, newDirPath] }).then();
       }
       addToast({ type: 'success', title: t('toast.fileRenamed') });
     },
@@ -166,7 +183,7 @@ export function useRenameFile(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: { oldPath: string; newPath: string }) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: { oldPath: string; newPath: string }) => mutation.mutateAsync(input),
   };
 }
 

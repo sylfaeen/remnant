@@ -1,70 +1,81 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Archive, RotateCcw, Terminal } from 'lucide-react';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 
 export type TaskExecution = {
   id: number;
-  task_id: number;
-  status: 'success' | 'error';
-  duration_ms: number;
-  error: string | null;
-  created_at: string;
+  taskId: number;
+  status: 'success' | 'failure' | 'skipped';
+  output: string | null;
+  executedAt: string;
+  duration: number;
 };
-
-export interface TaskConfig {
-  command?: string;
-  backup_paths?: Array<string>;
-  warn_players?: boolean;
-  warn_message?: string;
-  warn_seconds?: number;
-}
 
 export type TaskType = 'restart' | 'backup' | 'command';
 
-export interface ScheduledTask {
+export type ScheduledTask = {
   id: number;
-  server_id: number;
+  serverId: number;
   name: string;
   type: TaskType;
-  cron_expression: string;
+  command: string;
+  schedule: string;
   enabled: boolean;
-  config: TaskConfig | null;
-  last_run: string | null;
-  next_run: string | null;
-  created_at: string;
-  updated_at: string;
-}
+  lastRun: string | null;
+  nextRun: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export function useTasks(serverId: number | null) {
-  return trpc.tasks.list.useQuery(
-    { serverId: serverId! },
-    {
-      enabled: !!serverId,
-    }
-  );
+  return useQuery({
+    queryKey: ['tasks', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.tasks.list({ params: { serverId: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useTaskHistory(serverId: number, taskId: number | null, enabled: boolean) {
-  return trpc.tasks.history.useQuery({ serverId, taskId: taskId! }, { enabled: !!taskId && enabled, refetchInterval: 1000 });
+  return useQuery({
+    queryKey: ['tasks', 'history', serverId, taskId],
+    queryFn: async () => {
+      const result = await apiClient.tasks.history({ params: { serverId: String(serverId), taskId: String(taskId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!taskId && enabled,
+    refetchInterval: 1000,
+  });
 }
 
-export interface CreateTaskInput {
+export type CreateTaskInput = {
   name: string;
-  type: TaskType;
-  cron_expression: string;
-  enabled?: boolean;
-  config?: TaskConfig;
-}
+  command: string;
+  schedule: string;
+};
 
 export function useCreateTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.tasks.create.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: CreateTaskInput) => {
+      const result = await apiClient.tasks.create({
+        params: { serverId: String(serverId) },
+        body: { serverId, name: input.name, command: input.command, schedule: input.schedule },
+      });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.tasks.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.taskCreated') });
     },
     onError: () => {
@@ -74,24 +85,38 @@ export function useCreateTask(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: CreateTaskInput) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: CreateTaskInput) => mutation.mutateAsync(input),
   };
 }
 
-export interface UpdateTaskInput {
+export type UpdateTaskInput = {
   name?: string;
-  cron_expression?: string;
+  command?: string;
+  schedule?: string;
   enabled?: boolean;
-  config?: TaskConfig;
-}
+};
 
 export function useUpdateTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
-  const mutation = trpc.tasks.update.useMutation({
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async ({ taskId, input }: { taskId: number; input: UpdateTaskInput }) => {
+      const result = await apiClient.tasks.update({
+        params: { serverId: String(serverId), taskId: String(taskId) },
+        body: {
+          name: input.name,
+          command: input.command,
+          schedule: input.schedule,
+          enabled: input.enabled,
+        },
+      });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.tasks.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.taskUpdated') });
     },
     onError: () => {
@@ -101,19 +126,23 @@ export function useUpdateTask(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: ({ taskId, input }: { taskId: number; input: UpdateTaskInput }) =>
-      mutation.mutateAsync({ serverId, taskId, ...input }),
+    mutateAsync: ({ taskId, input }: { taskId: number; input: UpdateTaskInput }) => mutation.mutateAsync({ taskId, input }),
   };
 }
 
 export function useDeleteTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.tasks.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ taskId }: { taskId: number }) => {
+      const result = await apiClient.tasks.delete({ params: { serverId: String(serverId), taskId: String(taskId) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.tasks.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.taskDeleted') });
     },
     onError: () => {
@@ -123,18 +152,23 @@ export function useDeleteTask(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (taskId: number) => mutation.mutateAsync({ serverId, taskId }),
+    mutateAsync: (taskId: number) => mutation.mutateAsync({ taskId }),
   };
 }
 
 export function useToggleTask(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.tasks.toggle.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ taskId }: { taskId: number }) => {
+      const result = await apiClient.tasks.toggle({ params: { serverId: String(serverId), taskId: String(taskId) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.tasks.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.taskToggled') });
     },
     onError: () => {
@@ -144,7 +178,7 @@ export function useToggleTask(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (taskId: number) => mutation.mutateAsync({ serverId, taskId }),
+    mutateAsync: (taskId: number) => mutation.mutateAsync({ taskId }),
   };
 }
 
@@ -169,7 +203,6 @@ export function formatCronExpression(cron: string): string {
 
   const isStandardDate = day === '*' && month === '*' && weekday === '*';
 
-  // 6-field: second-level patterns
   if (parts.length === 6 && isStandardDate) {
     if (second === '*' && minute === '*' && hour === '*') {
       return 'Every second';
@@ -191,7 +224,6 @@ export function formatCronExpression(cron: string): string {
     }
   }
 
-  // 6-field: daily/weekly patterns
   if (parts.length === 6 && second === '0') {
     if (minute === '0' && hour === '0' && day === '*' && month === '*' && weekday === '*') {
       return 'Daily at midnight';
@@ -204,7 +236,6 @@ export function formatCronExpression(cron: string): string {
     }
   }
 
-  // 5-field standard patterns
   if (minute === '*' && hour === '*' && isStandardDate) {
     return 'Every minute';
   }

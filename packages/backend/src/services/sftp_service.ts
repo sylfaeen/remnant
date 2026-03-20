@@ -93,16 +93,11 @@ export class SftpService {
   }
 
   async createAccount(data: CreateSftpAccountRequest): Promise<SftpAccountResponse> {
-    // Get the server to find its path
     const [server] = await db.select().from(servers).where(eq(servers.id, data.serverId)).limit(1);
-    if (!server) {
-      throw new Error('Server not found');
-    }
+    if (!server) throw new Error('Server not found');
 
-    // Hash the password for DB storage
     const passwordHash = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
 
-    // Insert into DB
     const [account] = await db
       .insert(sftpAccounts)
       .values({
@@ -114,21 +109,17 @@ export class SftpService {
       })
       .returning();
 
-    // Execute system script to create the user (pass plain password for chpasswd)
     const result = await runSftpScript(['create-user', data.username, data.password, server.path]);
 
     if (!result.success) {
-      // Rollback DB insertion
       await db.delete(sftpAccounts).where(eq(sftpAccounts.id, account.id));
       throw new Error(result.error || 'Failed to create SFTP user on the system');
     }
 
-    // Set permissions if not default read-write
     if (data.permissions === 'read-only') {
       const permResult = await runSftpScript(['update-permissions', data.username, server.path, data.permissions]);
       if (!permResult.success) {
-        // Non-critical: user is created but permissions may not be set correctly
-        // Log but don't rollback
+        // the user is created but permissions may not be set correctly
       }
     }
 
@@ -138,35 +129,25 @@ export class SftpService {
   async updateAccount(data: UpdateSftpAccountRequest): Promise<SftpAccountResponse> {
     const [existing] = await db.select().from(sftpAccounts).where(eq(sftpAccounts.id, data.id)).limit(1);
 
-    if (!existing) {
-      throw new Error('SFTP account not found');
-    }
+    if (!existing) throw new Error('SFTP account not found');
 
     const [server] = await db.select().from(servers).where(eq(servers.id, existing.server_id)).limit(1);
-    if (!server) {
-      throw new Error('Server not found');
-    }
+    if (!server) throw new Error('Server not found');
 
     const updateData: Record<string, string> = {
       updated_at: new Date().toISOString(),
     };
 
-    // Update password on the system if changed
     if (data.password) {
       updateData.password = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
       const result = await runSftpScript(['update-password', existing.username, data.password]);
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update SFTP password on the system');
-      }
+      if (!result.success) throw new Error(result.error || 'Failed to update SFTP password on the system');
     }
 
-    // Update permissions on the system if changed
     if (data.permissions && data.permissions !== existing.permissions) {
       updateData.permissions = data.permissions;
       const result = await runSftpScript(['update-permissions', existing.username, server.path, data.permissions]);
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update SFTP permissions on the system');
-      }
+      if (!result.success) throw new Error(result.error || 'Failed to update SFTP permissions on the system');
     }
 
     if (data.username) {
@@ -185,17 +166,11 @@ export class SftpService {
   async deleteAccount(id: number): Promise<CommandResult> {
     const [account] = await db.select().from(sftpAccounts).where(eq(sftpAccounts.id, id)).limit(1);
 
-    if (!account) {
-      throw new Error('SFTP account not found');
-    }
+    if (!account) throw new Error('SFTP account not found');
 
-    // Delete system user first
     const result = await runSftpScript(['delete-user', account.username]);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to delete SFTP user from the system');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to delete SFTP user from the system');
 
-    // Remove from DB
     await db.delete(sftpAccounts).where(eq(sftpAccounts.id, id));
 
     return { success: true };

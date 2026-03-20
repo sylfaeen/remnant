@@ -1,7 +1,6 @@
 import fp from 'fastify-plugin';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ErrorCodes, type Permission } from '@remnant/shared';
-import { hasPermission } from '@remnant/backend/trpc/middlewares/auth';
 
 interface JWTUser {
   sub: number;
@@ -22,7 +21,7 @@ export default fp(async (fastify: FastifyInstance) => {
       return false;
     }
 
-    if (!hasPermission(user.permissions, permission)) {
+    if (!user.permissions.includes('*') && !user.permissions.includes(permission)) {
       reply.status(403).send({
         success: false,
         error: { code: ErrorCodes.AUTH_FORBIDDEN, message: 'Insufficient permissions' },

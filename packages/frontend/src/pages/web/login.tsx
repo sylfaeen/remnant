@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AlertCircle } from 'lucide-react';
-import { TRPCClientError } from '@trpc/client';
 import { ErrorCodes } from '@remnant/shared';
+import { ApiError } from '@remnant/frontend/lib/api';
 import { useLogin, useVerifyTotpLogin, getAuthErrorMessage } from '@remnant/frontend/hooks/use_auth';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { BrandPanel } from '@remnant/frontend/pages/web/features/brand_panel';
@@ -68,7 +68,7 @@ export function LoginPage() {
       { totp_token: totpToken, code },
       {
         onError: (error) => {
-          if (error instanceof TRPCClientError) {
+          if (error instanceof ApiError) {
             if (error.message === ErrorCodes.TOTP_INVALID_CODE) {
               setTotpError(t('auth.totp.invalidCode'));
             } else if (error.message === ErrorCodes.AUTH_TOKEN_EXPIRED) {

@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Check, CircleX, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
-import { TRPCClientError } from '@trpc/client';
 import { ErrorCodes } from '@remnant/shared';
+import { ApiError } from '@remnant/frontend/lib/api';
 import { useNeedsSetup, useSetup } from '@remnant/frontend/hooks/use_onboarding';
 import { useTotpSetup, useTotpVerify } from '@remnant/frontend/hooks/use_totp';
 import { BrandPanel } from '@remnant/frontend/pages/web/features/brand_panel';
@@ -103,7 +103,7 @@ export function SetupPage() {
           setRecoveryCodes(totpSetup.data?.recovery_codes ?? null);
         },
         onError: (error) => {
-          if (error instanceof TRPCClientError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
+          if (error instanceof ApiError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
             setVerifyError(t('settings.twoFactor.invalidCode'));
           } else {
             setVerifyError(t('authErrors.generic'));

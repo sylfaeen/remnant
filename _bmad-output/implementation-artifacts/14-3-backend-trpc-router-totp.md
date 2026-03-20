@@ -1,9 +1,9 @@
-# Story 14.3: Backend — Router tRPC 2FA
+# Story 14.3: Backend — Router ts-rest 2FA
 
 ## Story
 
 **As a** développeur backend,
-**I want** les endpoints tRPC pour le setup, la vérification et la désactivation du 2FA,
+**I want** les endpoints ts-rest pour le setup, la vérification et la désactivation du 2FA,
 **So that** le frontend puisse piloter le flux 2FA complet.
 
 ## Status
@@ -15,8 +15,8 @@ ready-for-dev
 - Epic: 14 - Authentification à Deux Facteurs (TOTP)
 - Dependencies: Story 14.2 complétée
 - Fichiers clés:
-  - Créer: `packages/backend/src/trpc/routers/totp.ts`
-  - Modifier: `packages/backend/src/trpc/router.ts` — enregistrer le sous-router totp
+  - Créer: `packages/backend/src/routes/handlers/totp.ts`
+  - Modifier: `packages/backend/src/routes/index.ts` — enregistrer le sous-router totp
 
 ## Acceptance Criteria
 
@@ -56,35 +56,35 @@ ready-for-dev
 ### Router Structure
 
 ```typescript
-import { protectedProcedure, router } from '../index';
+import { protectedRoute, router } from '../index';
 import { totpVerifyRequestSchema, totpDisableRequestSchema } from '@remnant/shared';
 import { totpService } from '../../services/totp_service';
-import { TRPCError } from '@trpc/server';
+import { TsRestError } from '@ts-rest/core';
 import { ErrorCodes } from '@remnant/shared';
 
 export const totpRouter = router({
-  setup: protectedProcedure.mutation(async ({ ctx }) => {
+  setup: protectedRoute.mutation(async ({ ctx }) => {
     const userId = ctx.user.sub;
     const isEnabled = await totpService.isTotpEnabled(userId);
     if (isEnabled) {
-      throw new TRPCError({ code: 'BAD_REQUEST', message: ErrorCodes.TOTP_ALREADY_ENABLED });
+      throw new TsRestError({ code: 'BAD_REQUEST', message: ErrorCodes.TOTP_ALREADY_ENABLED });
     }
     return totpService.generateTotpSetup(userId);
   }),
 
-  verify: protectedProcedure
+  verify: protectedRoute
     .input(totpVerifyRequestSchema)
     .mutation(async ({ ctx, input }) => {
       // Vérifie le code et active le TOTP
     }),
 
-  disable: protectedProcedure
+  disable: protectedRoute
     .input(totpDisableRequestSchema)
     .mutation(async ({ ctx, input }) => {
       // Vérifie le code puis désactive
     }),
 
-  status: protectedProcedure.query(async ({ ctx }) => {
+  status: protectedRoute.query(async ({ ctx }) => {
     const enabled = await totpService.isTotpEnabled(ctx.user.sub);
     return { enabled };
   }),
@@ -105,7 +105,7 @@ export const appRouter = router({
 
 ## Tasks
 
-- [ ] Task 1: Créer `packages/backend/src/trpc/routers/totp.ts` (AC: #1, #2, #3, #4, #5)
+- [ ] Task 1: Créer `packages/backend/src/routes/handlers/totp.ts` (AC: #1, #2, #3, #4, #5)
   - [ ] `totp.setup` — mutation protégée, appelle `totpService.generateTotpSetup`
   - [ ] `totp.verify` — mutation protégée, input validé par `totpVerifyRequestSchema`
   - [ ] `totp.disable` — mutation protégée, input validé par `totpDisableRequestSchema`
@@ -113,4 +113,4 @@ export const appRouter = router({
   - [ ] Gestion d'erreurs avec les codes `TOTP_*` appropriés
 
 - [ ] Task 2: Enregistrer le router (AC: #5)
-  - [ ] Ajouter `totp: totpRouter` dans `packages/backend/src/trpc/router.ts`
+  - [ ] Ajouter `totp: totpRouter` dans `packages/backend/src/routes/index.ts`

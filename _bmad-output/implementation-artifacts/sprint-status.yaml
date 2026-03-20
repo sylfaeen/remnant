@@ -130,7 +130,7 @@ development_status:
   epic-12: done
   12-1-firewall-shell-script: done
   12-2-firewall-backend-service: done
-  12-3-firewall-trpc-router: done
+  12-3-firewall-ts-rest-router: done
   12-4-firewall-ui-server-settings: done
   12-5-firewall-installation-sudoers: done
 
@@ -151,7 +151,7 @@ development_status:
   epic-14: done
   14-1-shared-schemas-2fa: done
   14-2-backend-db-service-totp: done
-  14-3-backend-trpc-router-totp: done
+  14-3-backend-ts-rest-router-totp: done
   14-4-backend-login-flow-2fa: done
   14-5-frontend-settings-2fa: done
   14-6-frontend-login-totp-screen: done
@@ -200,7 +200,7 @@ development_status:
   epic-17: done
   17-1-script-shell-domaines-securise: done
   17-2-backend-table-service-domaines: done
-  17-3-backend-router-trpc-domaines: done
+  17-3-backend-router-ts-rest-domaines: done
   17-4-frontend-page-domaines-serveur: done
   17-5-installation-sudoers-domaines: done
 

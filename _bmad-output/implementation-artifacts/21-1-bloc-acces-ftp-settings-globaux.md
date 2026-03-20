@@ -16,8 +16,8 @@ backlog
 - Dependencies: Epic 9 (page settings globale existante)
 - Fichiers clés:
   - Modifier: `packages/frontend/src/pages/app/settings/general.tsx` — ajout du FeatureCard "Accès FTP"
-  - Créer: `packages/backend/src/trpc/routers/sftp.ts` — endpoint `sftp.changeRemnantPassword`
-  - Modifier: `packages/backend/src/trpc/routers/index.ts` — enregistrement du router sftp
+  - Créer: `packages/backend/src/routes/handlers/sftp.ts` — endpoint `sftp.changeRemnantPassword`
+  - Modifier: `packages/backend/src/routes/handlers/index.ts` — enregistrement du router sftp
   - Modifier: `packages/frontend/src/i18n/locales/en.json` et `fr.json` — namespace `appSettings.ftp.*`
 - Le mot de passe remnant est défini à l'installation et n'est pas stocké en DB
 - Le changement de mot de passe utilise `chpasswd` via sudo en root
@@ -57,7 +57,7 @@ backlog
 ## Tasks
 
 - [ ] Créer le service backend `sftp_service.ts` avec méthode `changeRemnantPassword`
-- [ ] Créer le router tRPC `sftp.ts` avec endpoint `changeRemnantPassword`
+- [ ] Créer le router ts-rest `sftp.ts` avec endpoint `changeRemnantPassword`
 - [ ] Enregistrer le router dans `index.ts`
 - [ ] Ajouter le FeatureCard "Accès FTP" dans `general.tsx`
 - [ ] Créer le dialog de changement de mot de passe

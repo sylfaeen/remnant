@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as monaco from 'monaco-editor';
 import { Eye, Info, Save } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@remnant/frontend/features/ui/shadcn/alert';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
@@ -49,10 +50,18 @@ function EnvironmentSection() {
 
   const isDark = useThemeStore((s) => s.isDark);
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  const { data: initialContent, isLoading } = trpc.env.getContent.useQuery();
+  const { data: envData, isLoading } = useQuery({
+    queryKey: ['env', 'content'],
+    queryFn: async () => {
+      const result = await apiClient.env.getContent();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
+  const initialContent = envData?.content;
 
   const [content, setContent] = useState<string>('');
   const [hasChanges, setHasChanges] = useState<boolean>(false);
@@ -77,9 +86,14 @@ function EnvironmentSection() {
     [initialContent]
   );
 
-  const saveMutation = trpc.env.saveContent.useMutation({
+  const saveMutation = useMutation({
+    mutationFn: async (input: { content: string }) => {
+      const result = await apiClient.env.saveContent({ body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.env.getContent.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['env', 'content'] }).then();
       addToast({ type: 'success', title: t('toast.envUpdated') });
       setSaveStatus('saved');
       setHasChanges(false);

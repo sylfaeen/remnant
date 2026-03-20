@@ -1,25 +1,34 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 import type { FirewallProtocol } from '@remnant/shared';
 
 export function useFirewallRules(serverId: number | null) {
-  return trpc.firewall.list.useQuery(
-    { serverId: serverId! },
-    {
-      enabled: !!serverId,
-    }
-  );
+  return useQuery({
+    queryKey: ['firewall', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.firewall.list({ params: { serverId: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useAddFirewallRule(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.firewall.add.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: { port: number; protocol: FirewallProtocol; label: string }) => {
+      const result = await apiClient.firewall.add({ params: { serverId: String(serverId) }, body: { serverId, ...input } });
+      if (result.status !== 201) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.firewall.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['firewall', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.firewallRuleAdded') });
     },
     onError: (error) => {
@@ -29,19 +38,23 @@ export function useAddFirewallRule(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: { port: number; protocol: FirewallProtocol; label: string }) =>
-      mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: { port: number; protocol: FirewallProtocol; label: string }) => mutation.mutateAsync(input),
   };
 }
 
 export function useRemoveFirewallRule(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.firewall.remove.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ ruleId }: { ruleId: number }) => {
+      const result = await apiClient.firewall.remove({ params: { ruleId: String(ruleId) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.firewall.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['firewall', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.firewallRuleRemoved') });
     },
     onError: () => {
@@ -58,11 +71,16 @@ export function useRemoveFirewallRule(serverId: number) {
 export function useToggleFirewallRule(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.firewall.toggle.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ ruleId }: { ruleId: number }) => {
+      const result = await apiClient.firewall.toggle({ params: { ruleId: String(ruleId) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.firewall.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['firewall', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.firewallRuleToggled') });
     },
     onError: () => {

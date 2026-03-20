@@ -1,5 +1,6 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useToast } from '@remnant/frontend/features/ui/toast';
 
 function useErrorDescription() {
@@ -13,31 +14,51 @@ function useErrorDescription() {
 }
 
 export function useServers() {
-  return trpc.servers.list.useQuery(undefined, {
+  return useQuery({
+    queryKey: ['servers', 'list'],
+    queryFn: async () => {
+      const result = await apiClient.servers.list();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     refetchInterval: 5000,
   });
 }
 
 export function useServer(id: number) {
-  return trpc.servers.byId.useQuery(
-    { id },
-    {
-      enabled: !!id,
-      refetchInterval: 3000,
-    }
-  );
+  return useQuery({
+    queryKey: ['servers', 'byId', id],
+    queryFn: async () => {
+      const result = await apiClient.servers.byId({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!id,
+    refetchInterval: 3000,
+  });
 }
 
 export function useCreateServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  return trpc.servers.create.useMutation({
+  return useMutation({
+    mutationFn: async (input: {
+      name: string;
+      min_ram: string;
+      max_ram: string;
+      jvm_flags: string;
+      java_port: number;
+      auto_start: boolean;
+    }) => {
+      const result = await apiClient.servers.create({ body: input });
+      if (result.status !== 201) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverCreated') });
     },
     onError: (error) => {
@@ -50,12 +71,26 @@ export function useUpdateServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  return trpc.servers.update.useMutation({
+  return useMutation({
+    mutationFn: async (input: {
+      id: number;
+      name?: string;
+      min_ram?: string;
+      max_ram?: string;
+      jvm_flags?: string;
+      java_port?: number;
+      java_path?: string | null;
+      auto_start?: boolean;
+    }) => {
+      const { id, ...body } = input;
+      const result = await apiClient.servers.update({ params: { id: String(id) }, body });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverUpdated') });
     },
     onError: (error) => {
@@ -68,12 +103,16 @@ export function useDeleteServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.servers.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id, createBackup }: { id: number; createBackup: boolean }) => {
+      const result = await apiClient.servers.delete({ params: { id: String(id) }, query: { createBackup } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverDeleted') });
     },
     onError: (error) => {
@@ -92,7 +131,12 @@ export function useBackupServer() {
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
 
-  const mutation = trpc.servers.backup.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id, paths }: { id: number; paths?: Array<string> }) => {
+      const result = await apiClient.servers.backup({ params: { id: String(id) }, body: { paths } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
       addToast({ type: 'success', title: t('toast.backupCreated') });
     },
@@ -111,12 +155,16 @@ export function useStartServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.servers.start.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.servers.start({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverStarted') });
     },
     onError: (error) => {
@@ -134,12 +182,16 @@ export function useStopServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.servers.stop.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.servers.stop({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverStopped') });
     },
     onError: (error) => {
@@ -157,12 +209,16 @@ export function useRestartServer() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const getDescription = useErrorDescription();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-
-  const mutation = trpc.servers.restart.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.servers.restart({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.serverRestarted') });
     },
     onError: (error) => {

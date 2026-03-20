@@ -15,8 +15,8 @@ done
 - Epic: 16 - Gestion de l'Environnement (.env)
 - Dependencies: Aucune — story initiale de l'epic
 - Fichiers clés:
-  - Créer: `packages/backend/src/trpc/routers/env.ts` — nouveau router tRPC
-  - Modifier: `packages/backend/src/trpc/router.ts` — enregistrer le router
+  - Créer: `packages/backend/src/routes/handlers/env.ts` — nouveau router ts-rest
+  - Modifier: `packages/backend/src/routes/index.ts` — enregistrer le router
   - Réutiliser: logique de parsing de `packages/backend/src/env.ts`
 - Les secrets (`JWT_SECRET`, `COOKIE_SECRET`, `TOTP_ENCRYPTION_KEY`) doivent être masqués en lecture
 - Le fichier .env est lu à froid à chaque appel (pas de cache), pour refléter l'état réel du fichier
@@ -58,7 +58,7 @@ done
 
 ## Tasks
 
-- [x] Task 1: Créer le router tRPC `env.ts` (AC: #1, #2)
+- [x] Task 1: Créer le router ts-rest `env.ts` (AC: #1, #2)
   - [x] Procédure `getAll` protégée (admin uniquement)
   - [x] Parser le .env : extraire paires clé/valeur, ignorer commentaires et lignes vides
   - [x] Masquer les secrets : 3 premiers + `...` + 3 derniers caractères
@@ -71,7 +71,7 @@ done
   - [x] Écrire le fichier modifié
 
 - [x] Task 3: Enregistrer le router et audit log (AC: #6)
-  - [x] Ajouter `env: envRouter` dans `trpc/router.ts`
+  - [x] Ajouter `env: envRouter` dans `routes/index.ts`
   - [x] Audit log sur mutation : action `update`, resourceType `env`, details `{ key }` (sans valeur)
 
 - [x] Task 4: Tests
@@ -89,12 +89,12 @@ done
 
 ### Completion Notes
 - ✅ 15/15 tests unitaires passent (parseEnvFile, maskValue, updateEnvFile, SENSITIVE_KEYS)
-- ✅ Router enregistré dans `trpc/router.ts`
+- ✅ Router enregistré dans `routes/index.ts`
 - ✅ Audit log intégré sur mutation `update`
 - ✅ Vitest config créé pour le package backend
 
 ## File List
 
 - `packages/backend/src/services/env_service.ts` — nouveau : logique pure de parsing/masquage/écriture .env
-- `packages/backend/src/trpc/routers/env.ts` — nouveau : router tRPC env (getAll, update)
-- `packages/backend/src/trpc/router.ts` — modifié : ajout `env: envRouter`
+- `packages/backend/src/routes/handlers/env.ts` — nouveau : router ts-rest env (getAll, update)
+- `packages/backend/src/routes/index.ts` — modifié : ajout `env: envRouter`

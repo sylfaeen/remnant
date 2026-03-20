@@ -76,14 +76,10 @@ export class DomainService {
   async addDomain(serverId: number, domain: string, port: number, type: DomainType) {
     const [existing] = await db.select().from(customDomains).where(eq(customDomains.domain, domain)).limit(1);
 
-    if (existing) {
-      throw new Error(`Domain ${domain} is already configured`);
-    }
+    if (existing) throw new Error(`Domain ${domain} is already configured`);
 
     const result = await runDomainScript(['add', domain, String(port), type]);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to add domain');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to add domain');
 
     const [created] = await db.insert(customDomains).values({ server_id: serverId, domain, port, type }).returning();
 
@@ -92,14 +88,10 @@ export class DomainService {
 
   async removeDomain(id: number) {
     const [domain] = await db.select().from(customDomains).where(eq(customDomains.id, id)).limit(1);
-    if (!domain) {
-      throw new Error('Domain not found');
-    }
+    if (!domain) throw new Error('Domain not found');
 
     const result = await runDomainScript(['remove', domain.domain]);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to remove domain');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to remove domain');
 
     await db.delete(customDomains).where(eq(customDomains.id, id));
     return { success: true };
@@ -107,18 +99,12 @@ export class DomainService {
 
   async enableSsl(id: number) {
     const [domain] = await db.select().from(customDomains).where(eq(customDomains.id, id)).limit(1);
-    if (!domain) {
-      throw new Error('Domain not found');
-    }
+    if (!domain) throw new Error('Domain not found');
 
-    if (domain.ssl_enabled) {
-      return domain;
-    }
+    if (domain.ssl_enabled) return domain;
 
     const result = await runDomainScript(['enable-ssl', domain.domain]);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to enable SSL');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to enable SSL');
 
     const [updated] = await db
       .update(customDomains)
@@ -168,9 +154,7 @@ export class DomainService {
     }
 
     const result = await runDomainScript(['update-panel', domain]);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to update panel domain');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to update panel domain');
 
     const [created] = await db.insert(customDomains).values({ server_id: null, domain, port, type: 'panel' }).returning();
 
@@ -182,14 +166,9 @@ export class DomainService {
 
   async removePanelDomain() {
     const panelDomain = await this.getPanelDomain();
-    if (!panelDomain) {
-      throw new Error('No panel domain configured');
-    }
-
+    if (!panelDomain) throw new Error('No panel domain configured');
     const result = await runDomainScript(['reset-panel']);
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to reset panel domain');
-    }
+    if (!result.success) throw new Error(result.error || 'Failed to reset panel domain');
 
     await db.delete(customDomains).where(eq(customDomains.id, panelDomain.id));
 

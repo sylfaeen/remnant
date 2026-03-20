@@ -7,25 +7,29 @@ import { Skeleton } from '@remnant/frontend/features/ui/shadcn/skeleton';
 import { useServers, useCreateServer } from '@remnant/frontend/hooks/use_servers';
 import { CreateServerDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_server_dialog';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
-import { ApiError } from '@remnant/frontend/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { ApiError, apiClient, raise } from '@remnant/frontend/lib/api';
 import { DocsLink } from '@remnant/frontend/pages/app/features/docs_link';
 import { ServerStatusIcon } from '@remnant/frontend/pages/app/servers/features/server_status_badge';
 import { formatUptime } from '@remnant/frontend/lib/uptime';
-import { trpc } from '@remnant/frontend/lib/trpc';
 import type { ServerResponse } from '@remnant/shared';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 
-type ServerListItem = ServerResponse & {
-  cpu: number | null;
-  player_count: number;
-};
+type ServerListItem = ServerResponse;
 
 export function ServersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { data: servers, isLoading, error } = useServers();
-  const { data: versionInfo } = trpc.settings.getVersionInfo.useQuery();
+  const { data: versionInfo } = useQuery({
+    queryKey: ['settings', 'versionInfo'],
+    queryFn: async () => {
+      const result = await apiClient.settings.getVersionInfo();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
 
   const createServer = useCreateServer();
 
@@ -130,14 +134,14 @@ function ServerCard({ server, ipAddress }: ServerCardProps) {
                   <span>
                     {t('dashboard.players')}: {server.player_count}
                   </span>
-                </>
-              )}
-              {server.uptime && (
-                <>
-                  <span>·</span>
-                  <span>
-                    {t('dashboard.uptime')}: {formatUptime(server.uptime)}
-                  </span>
+                  {server.uptime && (
+                    <>
+                      <span>·</span>
+                      <span>
+                        {t('dashboard.uptime')}: {formatUptime(server.uptime)}
+                      </span>
+                    </>
+                  )}
                 </>
               )}
             </div>

@@ -243,6 +243,6 @@ i18n.t('common.save') // "Enregistrer" ou "Save"
 ## Post-Implementation Updates
 
 - **v0.12.0-v0.12.1 :** La persistance de la langue a ete migree de localStorage vers la base de donnees (colonne `users.locale`)
-- Nouvel endpoint tRPC `users.updateLocale` pour sauvegarder la preference linguistique
+- Nouvel endpoint ts-rest `users.updateLocale` pour sauvegarder la preference linguistique
 - La langue est automatiquement restauree a la connexion depuis le profil utilisateur
 - Les messages toast supportent desormais des descriptions par defaut localisees

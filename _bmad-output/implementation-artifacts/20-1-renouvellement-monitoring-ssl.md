@@ -17,7 +17,7 @@ done
 - Fichiers clés:
   - Modifier: `scripts/remnant-domain.sh` — action `renew` et `check-expiry`
   - Modifier: `packages/backend/src/services/domain_service.ts` — méthodes renouvellement + vérification expiration
-  - Modifier: `packages/backend/src/trpc/routers/domains.ts` — endpoints renew + expiry check
+  - Modifier: `packages/backend/src/routes/handlers/domains.ts` — endpoints renew + expiry check
   - Modifier: `packages/frontend/src/pages/app/servers/id/settings/domains.tsx` — affichage expiration + badge warning
 - Certbot installe déjà un timer systemd (`certbot.timer`) pour le renouvellement automatique
 - Les certificats Let's Encrypt expirent après 90 jours
@@ -63,7 +63,7 @@ done
 
 - `scripts/remnant-domain.sh` — modifié (check-expiry, ensure-timer)
 - `packages/backend/src/services/domain_service.ts` — modifié (refreshSslExpiry, refreshAllSslExpiry, ensureCertbotTimer)
-- `packages/backend/src/trpc/routers/domains.ts` — modifié (refreshExpiry, ensureTimer)
+- `packages/backend/src/routes/handlers/domains.ts` — modifié (refreshExpiry, ensureTimer)
 - `packages/frontend/src/hooks/use_domains.ts` — modifié (useRenewSsl)
 - `packages/frontend/src/pages/app/servers/id/settings/domains.tsx` — modifié (bouton renew)
 - `packages/frontend/src/i18n/locales/en.json` — modifié

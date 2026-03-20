@@ -1,25 +1,34 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 
 export function useBackups(serverId: number | null) {
-  return trpc.servers.listBackups.useQuery(
-    { id: serverId! },
-    {
-      enabled: !!serverId,
-      refetchInterval: 10000,
-    }
-  );
+  return useQuery({
+    queryKey: ['servers', 'listBackups', serverId],
+    queryFn: async () => {
+      const result = await apiClient.servers.listBackups({ params: { id: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+    refetchInterval: 10000,
+  });
 }
 
 export function useDeleteBackup(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  return trpc.servers.deleteBackup.useMutation({
+  return useMutation({
+    mutationFn: async ({ filename }: { filename: string }) => {
+      const result = await apiClient.servers.deleteBackup({ params: { filename } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.servers.listBackups.invalidate({ id: serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'listBackups', serverId] }).then();
       addToast({ type: 'success', title: t('toast.backupDeleted') });
     },
     onError: () => {

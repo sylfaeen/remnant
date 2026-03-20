@@ -1,9 +1,9 @@
-# Story 17.3: Backend — Router tRPC Domaines
+# Story 17.3: Backend — Router ts-rest Domaines
 
 ## Story
 
 **As a** administrateur,
-**I want** des endpoints tRPC pour gérer les domaines,
+**I want** des endpoints ts-rest pour gérer les domaines,
 **So that** le frontend puisse interagir avec le service domaines.
 
 ## Status
@@ -15,10 +15,10 @@ backlog
 - Epic: 17 - Domaines Personnalisés par Serveur
 - Dependencies: Story 17.2 (service domaines)
 - Fichiers clés:
-  - Créer: `packages/backend/src/trpc/routers/domains.ts` — router tRPC
-  - Modifier: `packages/backend/src/trpc/router.ts` — enregistrer le router
+  - Créer: `packages/backend/src/routes/handlers/domains.ts` — router ts-rest
+  - Modifier: `packages/backend/src/routes/index.ts` — enregistrer le router
 - Toutes les mutations nécessitent la permission `servers:manage`
-- Pattern identique aux autres routers tRPC (env, firewall, etc.)
+- Pattern identique aux autres routers ts-rest (env, firewall, etc.)
 
 ## Acceptance Criteria
 

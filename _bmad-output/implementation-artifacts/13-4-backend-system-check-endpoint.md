@@ -15,7 +15,7 @@ ready-for-dev
 - Epic: 13 - Onboarding Administrateur
 - Dependencies: Stories 13-2 et 13-3 completed
 - Fichiers clés:
-  - Modifier: `packages/backend/src/trpc/routers/onboarding.ts` — ajout endpoint `systemCheck`
+  - Modifier: `packages/backend/src/routes/handlers/onboarding.ts` — ajout endpoint `systemCheck`
 
 ## Acceptance Criteria
 
@@ -44,7 +44,7 @@ Le guard `needsSetup` sera réutilisé par `systemCheck` et `setup`. Extraire en
 async function assertNeedsSetup() {
   const [result] = await db.select({ count: count() }).from(users);
   if (result.count > 0) {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'Setup already completed' });
+    throw new HttpError(403, 'Setup already completed');
   }
 }
 ```
@@ -53,5 +53,5 @@ async function assertNeedsSetup() {
 
 - [ ] Task 1: Ajouter `systemCheck` au router onboarding (AC: #1, #2, #3)
   - [ ] Définir comme `publicProcedure.query`
-  - [ ] Guard: vérifier `COUNT(users) > 0` → throw `TRPCError({ code: 'FORBIDDEN' })`
+  - [ ] Guard: vérifier `COUNT(users) > 0` → throw `HttpError(403)`
   - [ ] Appeler `systemCheckService.check()` et retourner le résultat

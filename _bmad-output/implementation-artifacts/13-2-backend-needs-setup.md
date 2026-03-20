@@ -15,15 +15,15 @@ ready-for-dev
 - Epic: 13 - Onboarding Administrateur
 - Dependencies: Story 13-1 completed
 - Fichiers clés:
-  - Créer: `packages/backend/src/trpc/routers/onboarding.ts`
-  - Modifier: `packages/backend/src/trpc/router.ts` — ajout `onboarding: onboardingRouter`
+  - Créer: `packages/backend/src/routes/handlers/onboarding.ts`
+  - Modifier: `packages/backend/src/routes/index.ts` — ajout `onboarding: onboardingRouter`
 
 ## Acceptance Criteria
 
 ### AC1: Endpoint public
 **Given** l'endpoint `onboarding.needsSetup` existe
 **When** un utilisateur non authentifié l'appelle
-**Then** il reçoit une réponse sans erreur 401 (c'est un `publicProcedure`)
+**Then** il reçoit une réponse sans erreur 401 (c'est un `publicRoute`)
 
 ### AC2: Aucun utilisateur
 **Given** la table `users` est vide
@@ -45,13 +45,13 @@ ready-for-dev
 ### Architecture
 
 ```typescript
-import { publicProcedure, router } from '../index';
+import { publicRoute, router } from '../index';
 import { db } from '../../db';
 import { users } from '../../db/schema';
 import { count } from 'drizzle-orm';
 
 export const onboardingRouter = router({
-  needsSetup: publicProcedure.query(async () => {
+  needsSetup: publicRoute.query(async () => {
     const [result] = await db.select({ count: count() }).from(users);
     return { needsSetup: result.count === 0 };
   }),
@@ -60,15 +60,15 @@ export const onboardingRouter = router({
 
 ### Notes
 
-- `publicProcedure` existe déjà dans le projet (utilisé par `auth.login` et `auth.refresh`)
+- `publicRoute` existe déjà dans le projet (utilisé par `auth.login` et `auth.refresh`)
 - La query est simple et rapide — pas besoin de cache
 
 ## Tasks
 
 - [ ] Task 1: Créer le router onboarding (AC: #1, #2, #3)
-  - [ ] Créer `packages/backend/src/trpc/routers/onboarding.ts`
-  - [ ] Définir `needsSetup` comme `publicProcedure.query`
+  - [ ] Créer `packages/backend/src/routes/handlers/onboarding.ts`
+  - [ ] Définir `needsSetup` comme `publicRoute.query`
   - [ ] Query: `SELECT COUNT(*) FROM users` → renvoie `{ needsSetup: count === 0 }`
 
 - [ ] Task 2: Enregistrer le router (AC: #4)
-  - [ ] Ajouter `onboarding: onboardingRouter` dans `packages/backend/src/trpc/router.ts`
+  - [ ] Ajouter `onboarding: onboardingRouter` dans `packages/backend/src/routes/index.ts`

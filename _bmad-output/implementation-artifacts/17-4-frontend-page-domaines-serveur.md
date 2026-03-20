@@ -13,13 +13,13 @@ backlog
 ## Context
 
 - Epic: 17 - Domaines Personnalisés par Serveur
-- Dependencies: Story 17.3 (router tRPC)
+- Dependencies: Story 17.3 (router ts-rest)
 - Fichiers clés:
   - Créer: `packages/frontend/src/pages/app/servers/id/settings/domains.tsx` — page domaines
-  - Créer: `packages/frontend/src/hooks/use_domains.ts` — hooks tRPC domaines
+  - Créer: `packages/frontend/src/hooks/use_domains.ts` — hooks ts-rest domaines
   - Créer: `packages/frontend/src/pages/app/servers/dialogs/add_domain_dialog.tsx` — dialog ajout
   - Modifier: route serveur pour ajouter la navigation
-- Pattern identique aux pages existantes : FeatureCard, hooks tRPC, state dans les sections
+- Pattern identique aux pages existantes : FeatureCard, hooks ts-rest, state dans les sections
 - Respecter toutes les règles `.claude/rules/` (curly braces, cn(), function declarations, etc.)
 
 ## Acceptance Criteria

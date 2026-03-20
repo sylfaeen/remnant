@@ -1,23 +1,44 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 
 export function useUsers() {
-  return trpc.users.list.useQuery();
+  return useQuery({
+    queryKey: ['users', 'list'],
+    queryFn: async () => {
+      const result = await apiClient.users.list();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
 }
 
 export function useUser(id: number) {
-  return trpc.users.byId.useQuery({ id }, { enabled: !!id });
+  return useQuery({
+    queryKey: ['users', 'byId', id],
+    queryFn: async () => {
+      const result = await apiClient.users.byId({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!id,
+  });
 }
 
 export function useCreateUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  return trpc.users.create.useMutation({
+  return useMutation({
+    mutationFn: async (input: { username: string; password: string; permissions: Array<string> }) => {
+      const result = await apiClient.users.create({ body: input });
+      if (result.status !== 201) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.users.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['users', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.userCreated') });
     },
     onError: () => {
@@ -29,11 +50,17 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  return trpc.users.update.useMutation({
+  return useMutation({
+    mutationFn: async (input: { id: number; username?: string; password?: string; permissions?: Array<string> }) => {
+      const { id, ...body } = input;
+      const result = await apiClient.users.update({ params: { id: String(id) }, body });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.users.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['users', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.userUpdated') });
     },
     onError: () => {
@@ -45,11 +72,16 @@ export function useUpdateUser() {
 export function useDeleteUser() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.users.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.users.delete({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.users.list.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['users', 'list'] }).then();
       addToast({ type: 'success', title: t('toast.userDeleted') });
     },
     onError: () => {

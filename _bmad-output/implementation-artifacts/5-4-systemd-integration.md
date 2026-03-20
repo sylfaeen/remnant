@@ -45,7 +45,7 @@ Cette story s'appelait initialement "Systemd Integration" et incluait une foncti
 
 ### Files Removed (2026-03-11)
 - `packages/backend/src/services/systemd_service.ts` - Supprime (fonctionnalite retiree)
-- Endpoint tRPC `generateSystemd` - Supprime
+- Endpoint ts-rest `generateSystemd` - Supprime
 
 ## Tasks
 

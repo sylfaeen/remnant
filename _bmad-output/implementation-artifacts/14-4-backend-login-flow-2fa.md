@@ -15,7 +15,7 @@ ready-for-dev
 - Epic: 14 - Authentification à Deux Facteurs (TOTP)
 - Dependencies: Story 14.3 complétée
 - Fichiers clés:
-  - Modifier: `packages/backend/src/trpc/routers/auth.ts` — adapter login, ajouter verifyTotp
+  - Modifier: `packages/backend/src/routes/handlers/auth.ts` — adapter login, ajouter verifyTotp
   - Modifier: `packages/backend/src/services/auth_service.ts` — token temporaire
   - Modifier: `packages/shared/src/schemas/auth.ts` — étendre loginResponseSchema
 

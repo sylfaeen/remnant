@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import {
-  Archive,
   CheckCircle2,
   ChevronDown,
   Clock,
@@ -11,7 +10,6 @@ import {
   Plus,
   Power,
   PowerOff,
-  RotateCcw,
   Terminal,
   Trash2,
   XCircle,
@@ -217,8 +215,6 @@ function TaskRow({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
-  const typeConfig = getTaskTypeConfig(task.type);
-
   return (
     <FeatureCard.Stack className={'gap-y-0'}>
       <FeatureCard.Row>
@@ -231,12 +227,12 @@ function TaskRow({
                 : 'bg-zinc-100 text-zinc-600 opacity-40 dark:bg-zinc-800 dark:text-zinc-400'
             )}
           >
-            <typeConfig.icon className={'size-4'} strokeWidth={2} />
+            <Terminal className={'size-4'} strokeWidth={2} />
           </div>
           <div className={cn('min-w-0', !task.enabled && 'opacity-50')}>
             <div className={'flex items-center gap-2'}>
               <span className={'font-medium text-zinc-800 dark:text-zinc-200'}>{task.name}</span>
-              <Badge variant={typeConfig.badgeVariant} className={'font-semibold'}>
+              <Badge variant={'outline'} className={'font-semibold'}>
                 {t(`tasks.types.${task.type}`)}
               </Badge>
               {!task.enabled && <Badge variant={'secondary'}>{t('tasks.disabled')}</Badge>}
@@ -245,25 +241,25 @@ function TaskRow({
               />
             </div>
             <div className={'flex items-center gap-2 text-sm'}>
-              <span className={'text-zinc-600 dark:text-zinc-400'}>{formatCronExpression(task.cron_expression)}</span>
-              <span className={'font-jetbrains text-sm text-zinc-600 dark:text-zinc-400'}>({task.cron_expression})</span>
+              <span className={'text-zinc-600 dark:text-zinc-400'}>{formatCronExpression(task.schedule)}</span>
+              <span className={'font-jetbrains text-sm text-zinc-600 dark:text-zinc-400'}>({task.schedule})</span>
             </div>
-            {task.last_run && (
+            {task.lastRun && (
               <div className={'flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400'}>
                 <Clock className={'size-3'} strokeWidth={2} />
                 <span>
-                  {t('tasks.lastRun')}: {new Date(task.last_run).toLocaleString()}
+                  {t('tasks.lastRun')}: {new Date(task.lastRun).toLocaleString()}
                 </span>
               </div>
             )}
-            {task.type === 'command' && task.config?.command && (
+            {task.command && (
               <div
                 className={
                   'font-jetbrains mt-2 inline-block rounded-md border border-black/10 bg-zinc-100/80 px-2.5 py-1 text-sm text-zinc-600 dark:border-white/10 dark:bg-zinc-800/80 dark:text-zinc-400'
                 }
               >
                 <span className={'mr-1.5 text-zinc-600 dark:text-zinc-400'}>$</span>
-                {task.config.command}
+                {task.command}
               </div>
             )}
           </div>
@@ -395,13 +391,15 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
                   <XCircle className={'size-3.5 shrink-0 text-red-500'} />
                 )}
                 <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums dark:text-zinc-400'}>
-                  {new Date(exec.created_at).toLocaleString()}
+                  {new Date(exec.executedAt).toLocaleString()}
                 </span>
               </div>
               <div className={'space-x-2'}>
-                {exec.error && <span className={'truncate text-[11px] text-red-400'}>{exec.error}</span>}
+                {exec.output && exec.status === 'failure' && (
+                  <span className={'truncate text-[11px] text-red-400'}>{exec.output}</span>
+                )}
                 <span className={'font-jetbrains text-[11px] text-zinc-600 tabular-nums dark:text-zinc-400'}>
-                  {t('tasks.duration', { ms: exec.duration_ms })}
+                  {t('tasks.duration', { ms: exec.duration })}
                 </span>
               </div>
             </div>
@@ -410,18 +408,4 @@ function TaskHistory({ serverId, taskId }: TaskHistoryProps) {
       )}
     </div>
   );
-}
-
-function getTaskTypeConfig(type: string) {
-  const neutral = { badgeVariant: 'secondary' as const };
-  switch (type) {
-    case 'restart':
-      return { icon: RotateCcw, ...neutral };
-    case 'backup':
-      return { icon: Archive, ...neutral };
-    case 'command':
-      return { icon: Terminal, ...neutral };
-    default:
-      return { icon: Clock, ...neutral };
-  }
 }

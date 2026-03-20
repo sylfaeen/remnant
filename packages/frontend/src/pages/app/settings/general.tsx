@@ -50,7 +50,7 @@ function PanelDomainSection() {
       domainInput
     );
   const isExpiringSoon =
-    panelDomain?.ssl_expires_at && new Date(panelDomain.ssl_expires_at).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
+    panelDomain?.sslExpiresAt && new Date(panelDomain.sslExpiresAt).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
 
   const handleSet = async () => {
     if (!isValidDomain) return;
@@ -88,10 +88,10 @@ function PanelDomainSection() {
                 <div
                   className={cn(
                     'flex size-8 shrink-0 items-center justify-center rounded-lg',
-                    panelDomain.ssl_enabled ? 'bg-green-600 text-white' : 'bg-zinc-200 dark:bg-zinc-700'
+                    panelDomain.sslEnabled ? 'bg-green-600 text-white' : 'bg-zinc-200 dark:bg-zinc-700'
                   )}
                 >
-                  {panelDomain.ssl_enabled ? (
+                  {panelDomain.sslEnabled ? (
                     <Lock className={'size-4'} strokeWidth={2} />
                   ) : (
                     <Globe className={'size-4'} strokeWidth={2} />
@@ -102,7 +102,7 @@ function PanelDomainSection() {
                     <span className={'font-jetbrains text-sm font-medium text-zinc-800 dark:text-zinc-200'}>
                       {panelDomain.domain}
                     </span>
-                    {panelDomain.ssl_enabled ? (
+                    {panelDomain.sslEnabled ? (
                       <Badge variant={isExpiringSoon ? 'outline' : 'default'} className={'font-semibold'}>
                         {isExpiringSoon ? t('settings.domains.sslExpiringSoon') : 'SSL'}
                       </Badge>
@@ -112,9 +112,9 @@ function PanelDomainSection() {
                       </Badge>
                     )}
                   </div>
-                  {panelDomain.ssl_expires_at && (
+                  {panelDomain.sslExpiresAt && (
                     <span className={'text-sm text-zinc-500 dark:text-zinc-400'}>
-                      {t('settings.domains.expiresAt', { date: new Date(panelDomain.ssl_expires_at).toLocaleDateString() })}
+                      {t('settings.domains.expiresAt', { date: new Date(panelDomain.sslExpiresAt).toLocaleDateString() })}
                     </span>
                   )}
                 </div>
@@ -138,7 +138,7 @@ function PanelDomainSection() {
                   </div>
                 ) : (
                   <>
-                    {!panelDomain.ssl_enabled && (
+                    {!panelDomain.sslEnabled && (
                       <Button
                         variant={'success'}
                         size={'xs'}
@@ -176,7 +176,7 @@ function PanelDomainSection() {
                 <Info className={'size-4'} />
                 <AlertDescription>{t('appSettings.panelDomain.restartWarning')}</AlertDescription>
               </Alert>
-              {panelDomain.ssl_enabled && (
+              {panelDomain.sslEnabled && (
                 <div className={'mt-3 rounded-lg border border-green-500/20 bg-green-50/50 p-3 dark:bg-green-950/20'}>
                   <div className={'flex items-center gap-2'}>
                     <CheckCircle2 className={'size-4 shrink-0 text-green-600'} strokeWidth={2} />
@@ -346,11 +346,11 @@ function JavaSection() {
                 <div className={'flex items-center gap-2'}>
                   <Coffee className={'size-4 text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
                   <span>{java.name}</span>
-                  {java.isDefault && <Badge variant={'outline'}>{t('appSettings.java.default')}</Badge>}
                 </div>
               </FeatureCard.RowLabel>
               <FeatureCard.RowControl>
                 <span className={'text-sm text-zinc-500 dark:text-zinc-400'}>Java {java.version}</span>
+                {java.isDefault && <Badge variant={'outline'}>{t('appSettings.java.default')}</Badge>}
               </FeatureCard.RowControl>
             </FeatureCard.Row>
           ))

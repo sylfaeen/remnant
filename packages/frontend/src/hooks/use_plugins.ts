@@ -1,31 +1,36 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 
 export type PluginInfo = {
   name: string;
   filename: string;
+  enabled: boolean;
   size: number;
   modified: string;
-  enabled: boolean;
+  version: string | null;
+  description: string | null;
+  authors: Array<string>;
 };
 
 export function usePlugins(serverId: number | null) {
-  return trpc.plugins.list.useQuery(
-    { serverId: serverId! },
-    {
-      enabled: !!serverId,
-    }
-  );
+  return useQuery({
+    queryKey: ['plugins', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.plugins.list({ params: { serverId: String(serverId!) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useUploadPlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const queryClient = useQueryClient();
-
   const accessToken = useAuthStore((state) => state.accessToken);
 
   return useMutation({
@@ -50,11 +55,7 @@ export function useUploadPlugin(serverId: number) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient
-        .invalidateQueries({
-          queryKey: [['plugins', 'list'], { input: { serverId } }],
-        })
-        .then();
+      queryClient.invalidateQueries({ queryKey: ['plugins', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.pluginUploaded') });
     },
     onError: () => {
@@ -66,11 +67,16 @@ export function useUploadPlugin(serverId: number) {
 export function useTogglePlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.plugins.toggle.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ filename }: { filename: string }) => {
+      const result = await apiClient.plugins.toggle({ params: { serverId: String(serverId) }, body: { filename } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.plugins.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['plugins', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.pluginToggled') });
     },
     onError: () => {
@@ -80,18 +86,23 @@ export function useTogglePlugin(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (filename: string) => mutation.mutateAsync({ serverId, filename }),
+    mutateAsync: (filename: string) => mutation.mutateAsync({ filename }),
   };
 }
 
 export function useDeletePlugin(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.plugins.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ filename }: { filename: string }) => {
+      const result = await apiClient.plugins.delete({ params: { serverId: String(serverId), filename } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.plugins.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['plugins', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.pluginDeleted') });
     },
     onError: () => {
@@ -101,7 +112,7 @@ export function useDeletePlugin(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (filename: string) => mutation.mutateAsync({ serverId, filename }),
+    mutateAsync: (filename: string) => mutation.mutateAsync({ filename }),
   };
 }
 

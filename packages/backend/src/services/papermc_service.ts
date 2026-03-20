@@ -41,15 +41,10 @@ async function graphql<T>(query: string, variables?: Record<string, unknown>): P
     body: JSON.stringify({ query, variables }),
   });
 
-  if (!response.ok) {
-    throw new Error(`PaperMC GraphQL request failed: ${response.statusText}`);
-  }
+  if (!response.ok) throw new Error(`PaperMC GraphQL request failed: ${response.statusText}`);
 
   const result = (await response.json()) as GraphQLResponse<T>;
-
-  if (result.errors?.length) {
-    throw new Error(`PaperMC GraphQL error: ${result.errors[0].message}`);
-  }
+  if (result.errors?.length) throw new Error(`PaperMC GraphQL error: ${result.errors[0].message}`);
 
   return result.data;
 }
@@ -127,9 +122,7 @@ export class PaperMCService {
     );
 
     const edges = data.project.version.builds.edges;
-    if (edges.length === 0) {
-      throw new Error(`No builds available for version ${version}`);
-    }
+    if (edges.length === 0) throw new Error(`No builds available for version ${version}`);
 
     const build = edges[0].node;
     const download = build.downloads[0];
@@ -168,9 +161,7 @@ export class PaperMCService {
     );
 
     const edge = data.project.version.builds.edges.find((e) => e.node.number === build);
-    if (!edge) {
-      throw new Error(`Build #${build} not found for version ${version}`);
-    }
+    if (!edge) throw new Error(`Build #${build} not found for version ${version}`);
 
     const download = edge.node.downloads[0];
     return { downloadUrl: download.url, filename: download.name };
@@ -192,16 +183,12 @@ export class PaperMCService {
 
     const response = await fetch(downloadUrl);
 
-    if (!response.ok) {
-      throw new Error(`Failed to download JAR: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`Failed to download JAR: ${response.statusText}`);
 
     const contentLength = response.headers.get('content-length');
     const total = contentLength ? parseInt(contentLength, 10) : 0;
 
-    if (!response.body) {
-      throw new Error('Response body is null');
-    }
+    if (!response.body) throw new Error('Response body is null');
 
     const fileStream = createWriteStream(targetPath);
 

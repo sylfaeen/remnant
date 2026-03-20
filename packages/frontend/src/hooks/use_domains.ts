@@ -1,20 +1,34 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import type { DomainType } from '@remnant/shared';
 
 export function useDomains(serverId: number | null) {
-  return trpc.domains.list.useQuery({ serverId: serverId! }, { enabled: !!serverId });
+  return useQuery({
+    queryKey: ['domains', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.domains.list({ query: { serverId: serverId! } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useAddDomain(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.add.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: { domain: string; port: number; type: DomainType }) => {
+      const result = await apiClient.domains.add({ body: { serverId, ...input } });
+      if (result.status !== 201) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.domainAdded') });
     },
     onError: (error) => {
@@ -24,18 +38,23 @@ export function useAddDomain(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: { domain: string; port: number; type: DomainType }) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: { domain: string; port: number; type: DomainType }) => mutation.mutateAsync(input),
   };
 }
 
 export function useRemoveDomain(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.remove.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.domains.remove({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.domainRemoved') });
     },
     onError: () => {
@@ -52,11 +71,16 @@ export function useRemoveDomain(serverId: number) {
 export function useEnableSsl(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.enableSsl.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.domains.enableSsl({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.sslEnabled') });
     },
     onError: (error) => {
@@ -71,18 +95,30 @@ export function useEnableSsl(serverId: number) {
 }
 
 export function useServerIp(): string {
-  const { data } = trpc.settings.getVersionInfo.useQuery();
+  const { data } = useQuery({
+    queryKey: ['settings', 'versionInfo'],
+    queryFn: async () => {
+      const result = await apiClient.settings.getVersionInfo();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
   return data?.ipAddress ?? '';
 }
 
 export function useRenewSsl(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.renew.useMutation({
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const result = await apiClient.domains.renew();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.sslRenewed') });
     },
     onError: (error) => {
@@ -94,17 +130,29 @@ export function useRenewSsl(serverId: number) {
 }
 
 export function usePanelDomain() {
-  return trpc.domains.panelDomain.useQuery();
+  return useQuery({
+    queryKey: ['domains', 'panelDomain'],
+    queryFn: async () => {
+      const result = await apiClient.domains.panelDomain();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
 }
 
 export function useSetPanelDomain() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.setPanelDomain.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ domain }: { domain: string }) => {
+      const result = await apiClient.domains.setPanelDomain({ body: { domain } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.panelDomain.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'panelDomain'] }).then();
       addToast({ type: 'success', title: t('toast.panelDomainSet') });
     },
     onError: (error) => {
@@ -121,11 +169,16 @@ export function useSetPanelDomain() {
 export function useRemovePanelDomain() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.removePanelDomain.useMutation({
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const result = await apiClient.domains.removePanelDomain();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.panelDomain.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'panelDomain'] }).then();
       addToast({ type: 'success', title: t('toast.panelDomainRemoved') });
     },
     onError: (error) => {
@@ -139,11 +192,16 @@ export function useRemovePanelDomain() {
 export function useEnablePanelSsl() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.domains.enableSsl.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.domains.enableSsl({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.domains.panelDomain.invalidate().then();
+      queryClient.invalidateQueries({ queryKey: ['domains', 'panelDomain'] }).then();
       addToast({ type: 'success', title: t('toast.sslEnabled') });
     },
     onError: (error) => {

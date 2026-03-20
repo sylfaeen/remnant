@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SidebarProvider, useSidebar } from '@remnant/frontend/pages/app/features/sidebar_context';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { cn } from '@remnant/frontend/lib/cn';
 import { ArrowRight, Download, Menu } from 'lucide-react';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
@@ -12,7 +13,13 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
-  const { data } = trpc.settings.getVersionInfo.useQuery(undefined, {
+  const { data } = useQuery({
+    queryKey: ['settings', 'versionInfo'],
+    queryFn: async () => {
+      const result = await apiClient.settings.getVersionInfo();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     staleTime: 60 * 60 * 1000,
     refetchOnWindowFocus: false,
   });

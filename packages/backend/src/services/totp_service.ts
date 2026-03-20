@@ -11,9 +11,7 @@ const RECOVERY_CODE_BYTES = 10;
 const TOTP_WINDOW = 1;
 
 function getEncryptionKey(): Buffer {
-  if (!process.env.TOTP_ENCRYPTION_KEY) {
-    throw new Error('TOTP_ENCRYPTION_KEY environment variable is required');
-  }
+  if (!process.env.TOTP_ENCRYPTION_KEY) throw new Error('TOTP_ENCRYPTION_KEY environment variable is required');
   return crypto.createHash('sha256').update(process.env.TOTP_ENCRYPTION_KEY).digest();
 }
 
@@ -49,14 +47,10 @@ export class TotpService {
     recovery_codes: Array<string>;
   }> {
     const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    if (!user) throw new Error('User not found');
 
     const [existing] = await db.select().from(userTotp).where(eq(userTotp.user_id, userId)).limit(1);
-    if (existing?.verified) {
-      throw new Error('TOTP_ALREADY_ENABLED');
-    }
+    if (existing?.verified) throw new Error('TOTP_ALREADY_ENABLED');
 
     if (existing) {
       await db.delete(userTotp).where(eq(userTotp.user_id, userId));

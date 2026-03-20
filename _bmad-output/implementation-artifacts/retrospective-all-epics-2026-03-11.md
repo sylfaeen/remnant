@@ -72,7 +72,7 @@ Le projet Remnant a ete developpe avec succes en 8 epics, livrant un panel de ge
 
 ### Lecons apprises
 - **Path traversal** - toujours valider les chemins cote serveur, jamais faire confiance au client
-- **Upload multipart** - garder en REST meme avec tRPC (tRPC ne supporte pas multipart)
+- **Upload multipart** - garder en REST meme avec ts-rest (ts-rest ne supporte pas multipart)
 - **Aikar Flags** en preset - les utilisateurs ne veulent pas configurer manuellement
 
 ### Decisions techniques cles
@@ -145,7 +145,7 @@ Le projet Remnant a ete developpe avec succes en 8 epics, livrant un panel de ge
 ## Patterns Transversaux
 
 ### Architecture
-- **tRPC** adopte en cours de projet - migration reussie de REST vers tRPC
+- **ts-rest** adopte en cours de projet - migration reussie de REST vers ts-rest
 - **Type safety end-to-end** - Zod schemas partages, TypeScript strict
 - **Monorepo** - facilite le partage de types et la coherence
 
@@ -241,7 +241,7 @@ Au démarrage de Remnant :
 
 **Fichiers supprimés :**
 - `packages/backend/src/services/systemd_service.ts` - Fonctionnalité retirée (créait confusion)
-- Endpoint tRPC `generateSystemd` - Retiré
+- Endpoint ts-rest `generateSystemd` - Retiré
 
 ---
 

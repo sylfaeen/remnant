@@ -18,7 +18,7 @@ export function getRefreshTokenCookieOptions(req: FastifyRequest) {
     httpOnly: true,
     secure: req.protocol === 'https',
     sameSite: 'lax' as const,
-    path: '/trpc',
+    path: '/api',
     maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
   };
 }

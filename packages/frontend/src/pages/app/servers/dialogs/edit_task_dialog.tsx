@@ -26,7 +26,6 @@ import {
   getTaskTypes,
   type CreateTaskInput,
   type ScheduledTask,
-  type TaskConfig,
   type TaskType,
 } from '@remnant/frontend/hooks/use_tasks';
 
@@ -96,21 +95,23 @@ type EditTaskFormProps = {
 function EditTaskForm({ serverId, task, onSubmit }: EditTaskFormProps) {
   const { t } = useTranslation();
 
-  const initialCronPreset = CRON_PRESETS.some((p) => p.value === task.cron_expression) ? task.cron_expression : '';
+  const initialCronPreset = CRON_PRESETS.some((p) => p.value === task.schedule) ? task.schedule : '';
 
-  const [taskType, setTaskType] = useState<TaskType>(task.type as TaskType);
-  const [backupPaths, setBackupPaths] = useState<Set<string>>(() => new Set(task.config?.backup_paths ?? []));
+  const inferredType: TaskType =
+    task.command === 'restart' ? 'restart' : task.command.startsWith('backup') ? 'backup' : 'command';
+  const [taskType, setTaskType] = useState<TaskType>(inferredType);
+  const [backupPaths, setBackupPaths] = useState<Set<string>>(() => new Set());
 
   const form = useForm<EditTaskFormValues>({
     resolver: zodResolver(editTaskSchema),
     defaultValues: {
       name: task.name,
       cronPreset: initialCronPreset,
-      customCron: initialCronPreset === '' ? task.cron_expression : '',
-      command: task.config?.command ?? '',
-      warnPlayers: task.config?.warn_players ?? true,
-      warnMessage: task.config?.warn_message ?? 'The server will restart in 30 seconds...',
-      warnSeconds: task.config?.warn_seconds ?? 30,
+      customCron: initialCronPreset === '' ? task.schedule : '',
+      command: task.command,
+      warnPlayers: true,
+      warnMessage: 'The server will restart in 30 seconds...',
+      warnSeconds: 30,
     },
   });
 
@@ -126,25 +127,19 @@ function EditTaskForm({ serverId, task, onSubmit }: EditTaskFormProps) {
       return;
     }
 
-    const config: TaskConfig = {};
+    let command = '';
     if (taskType === 'command') {
-      config.command = data.command;
+      command = data.command ?? '';
     } else if (taskType === 'backup') {
-      config.backup_paths = Array.from(backupPaths);
+      command = `backup ${Array.from(backupPaths).join(' ')}`;
     } else if (taskType === 'restart') {
-      if (data.warnPlayers) {
-        config.warn_players = true;
-        config.warn_message = data.warnMessage;
-        config.warn_seconds = data.warnSeconds;
-      }
+      command = 'restart';
     }
 
     onSubmit({
       name: data.name,
-      type: taskType,
-      cron_expression: cronExpression,
-      enabled: task.enabled,
-      config,
+      command,
+      schedule: cronExpression,
     }).then();
   };
 

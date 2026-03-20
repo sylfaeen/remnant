@@ -1,11 +1,23 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { TRPCClientError } from '@trpc/client';
 import type { TFunction } from 'i18next';
 import { ErrorCodes } from '@remnant/shared';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, ApiError } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
+
+type LoginSuccessData = {
+  success: true;
+  data: {
+    access_token: string;
+    user: { id: number; username: string; permissions: Array<string>; locale: string | null };
+  };
+};
+
+type LoginTotpData = {
+  requires_totp: true;
+  totp_token: string;
+};
 
 export function useLogin(onTotpRequired?: (totpToken: string) => void) {
   const navigate = useNavigate();
@@ -13,7 +25,15 @@ export function useLogin(onTotpRequired?: (totpToken: string) => void) {
   const setAuth = useAuthStore((state) => state.setAuth);
   const setLoading = useAuthStore((state) => state.setLoading);
 
-  return trpc.auth.login.useMutation({
+  return useMutation({
+    mutationFn: async (input: { username: string; password: string }) => {
+      const result = await apiClient.auth.login({ body: input });
+      if (result.status !== 200) {
+        const error = result.body as { message: string; code: string };
+        throw new ApiError(error.message, error.code, result.status);
+      }
+      return result.body as LoginSuccessData | LoginTotpData;
+    },
     onMutate: () => {
       setLoading(true);
     },
@@ -24,10 +44,10 @@ export function useLogin(onTotpRequired?: (totpToken: string) => void) {
         return;
       }
 
-      if ('access_token' in data) {
-        setAuth(data.user, data.access_token);
-        if (data.user.locale) {
-          i18n.changeLanguage(data.user.locale).then();
+      if ('success' in data && data.success) {
+        setAuth(data.data.user, data.data.access_token);
+        if (data.data.user.locale) {
+          i18n.changeLanguage(data.data.user.locale).then();
         }
         navigate({ to: '/app' }).then();
       }
@@ -43,16 +63,20 @@ export function useVerifyTotpLogin() {
   const { i18n } = useTranslation();
   const setAuth = useAuthStore((state) => state.setAuth);
 
-  return trpc.auth.verifyTotp.useMutation({
+  return useMutation({
+    mutationFn: async (input: { totp_token: string; code: string }) => {
+      const result = await apiClient.auth.verifyTotp({ body: input });
+      if (result.status !== 200) {
+        const error = result.body as { message: string; code: string };
+        throw new ApiError(error.message, error.code, result.status);
+      }
+      return result.body;
+    },
     onSuccess: (data) => {
-      if ('access_token' in data && 'user' in data) {
-        const result = data as {
-          access_token: string;
-          user: { id: number; username: string; permissions: Array<string>; locale: string | null };
-        };
-        setAuth(result.user, result.access_token);
-        if (result.user.locale) {
-          i18n.changeLanguage(result.user.locale).then();
+      if ('success' in data && data.success) {
+        setAuth(data.data.user, data.data.access_token);
+        if (data.data.user.locale) {
+          i18n.changeLanguage(data.data.user.locale).then();
         }
         navigate({ to: '/app' }).then();
       }
@@ -65,7 +89,12 @@ export function useLogout() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const queryClient = useQueryClient();
 
-  return trpc.auth.logout.useMutation({
+  return useMutation({
+    mutationFn: async () => {
+      const result = await apiClient.auth.logout();
+      if (result.status !== 200) throw new Error('Logout failed');
+      return result.body;
+    },
     onSuccess: () => {
       clearAuth();
       queryClient.clear();
@@ -85,11 +114,19 @@ export function useRefreshToken() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const setInitialized = useAuthStore((state) => state.setInitialized);
 
-  return trpc.auth.refresh.useMutation({
+  return useMutation({
+    mutationFn: async () => {
+      const result = await apiClient.auth.refresh();
+      if (result.status !== 200) {
+        const error = result.body as { message: string; code: string };
+        throw new ApiError(error.message, error.code, result.status);
+      }
+      return result.body;
+    },
     onSuccess: (data) => {
-      setAuth(data.user, data.access_token);
-      if (data.user.locale) {
-        i18n.changeLanguage(data.user.locale).then();
+      setAuth(data.data.user, data.data.access_token);
+      if (data.data.user.locale) {
+        i18n.changeLanguage(data.data.user.locale).then();
       }
       setInitialized(true);
     },
@@ -104,7 +141,13 @@ export function useUser() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const accessToken = useAuthStore((state) => state.accessToken);
 
-  return trpc.auth.me.useQuery(undefined, {
+  return useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: async () => {
+      const result = await apiClient.auth.me();
+      if (result.status !== 200) throw new Error('Failed to fetch user');
+      return result.body;
+    },
     enabled: isAuthenticated && !!accessToken,
     staleTime: 5 * 60 * 1000,
   });
@@ -113,7 +156,7 @@ export function useUser() {
 export function getAuthErrorMessage(error: Error | null, t: TFunction): string | null {
   if (!error) return null;
 
-  if (error instanceof TRPCClientError) {
+  if (error instanceof ApiError) {
     const message = error.message;
 
     switch (message) {
@@ -135,7 +178,7 @@ export function getAuthErrorMessage(error: Error | null, t: TFunction): string |
         break;
     }
 
-    const code = error.data?.code;
+    const code = error.code;
     switch (code) {
       case 'BAD_REQUEST':
         return t('authErrors.badRequest');

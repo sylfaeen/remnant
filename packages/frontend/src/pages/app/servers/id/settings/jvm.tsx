@@ -134,7 +134,7 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
         resolvedCustomJavaPath = server.java_path;
       }
     } else {
-      const defaultJava = javaVersions.find((j) => j.isDefault);
+      const defaultJava = javaVersions.find((j) => j.isDefault) ?? javaVersions[0];
       if (defaultJava) {
         resolvedJavaMode = 'bundled';
         resolvedJavaPath = defaultJava.path;
@@ -182,14 +182,12 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
     try {
       await updateServer.mutateAsync({
         id: serverId,
-        data: {
-          min_ram: minRam,
-          max_ram: maxRam,
-          jvm_flags: jvmFlags.trim(),
-          java_port: javaPort,
-          auto_start: autoStart,
-          java_path: javaMode === 'custom' ? customJavaPath || null : javaPath || null,
-        },
+        min_ram: minRam,
+        max_ram: maxRam,
+        jvm_flags: jvmFlags.trim(),
+        java_port: javaPort,
+        auto_start: autoStart,
+        java_path: javaMode === 'custom' ? customJavaPath || null : javaPath || null,
       });
       serverValuesRef.current = { minRam, maxRam, jvmFlags, javaPort, autoStart, javaMode, javaPath, customJavaPath };
       setSaveStatus('saved');

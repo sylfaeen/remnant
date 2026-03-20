@@ -5,7 +5,6 @@ import { AppShell } from '@remnant/frontend/features/layouts/app_shell';
 import { MainLayout } from '@remnant/frontend/pages/app/features/layouts/main_layout';
 import { ServerLayout } from '@remnant/frontend/pages/app/features/layouts/server_layout';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
-import { trpc, createTRPCClient } from '@remnant/frontend/lib/trpc';
 import { ToastProvider } from '@remnant/frontend/features/ui/toast';
 import { LoginPage } from '@remnant/frontend/pages/web/login';
 import { SetupPage } from '@remnant/frontend/pages/web/setup';
@@ -43,8 +42,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-const trpcClient = createTRPCClient(() => useAuthStore.getState().accessToken);
 
 // Auth guard: redirect to log in if not authenticated
 function requireAuth() {
@@ -90,15 +87,13 @@ function ProtectedShell() {
 
 function RootComponent() {
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <AuthInitializer>
-            <Outlet />
-          </AuthInitializer>
-        </ToastProvider>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <AuthInitializer>
+          <Outlet />
+        </AuthInitializer>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }
 

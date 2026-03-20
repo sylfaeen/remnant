@@ -88,7 +88,7 @@ const [useRecoveryCode, setUseRecoveryCode] = useState(false);
 
 // Nouveau hook useVerifyTotp :
 export function useVerifyTotp() {
-  return trpc.auth.verifyTotp.useMutation({
+  return tsRest.auth.verifyTotp.useMutation({
     onSuccess: (data) => {
       // Même logique que le login standard :
       // setAuth, updateLanguage, navigate('/app')

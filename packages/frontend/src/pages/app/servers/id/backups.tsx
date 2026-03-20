@@ -6,8 +6,8 @@ import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { useServer, useBackupServer } from '@remnant/frontend/hooks/use_servers';
 import { useBackups, useDeleteBackup } from '@remnant/frontend/hooks/use_backups';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
-import { trpc } from '@remnant/frontend/lib/trpc';
 import { cn } from '@remnant/frontend/lib/cn';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { CreateBackupDialog } from '@remnant/frontend/pages/app/servers/dialogs/create_backup_dialog';
@@ -70,7 +70,7 @@ function BackupsSection({ serverId }: BackupsSectionProps) {
   const { data: backups, isLoading: backupsLoading } = useBackups(serverId);
   const backupServer = useBackupServer();
   const deleteBackup = useDeleteBackup(serverId);
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   const totalSize = backups?.reduce((acc, b) => acc + b.size, 0) ?? 0;
 
@@ -78,7 +78,7 @@ function BackupsSection({ serverId }: BackupsSectionProps) {
     try {
       await backupServer.mutateAsync(serverId, paths);
       setDialogOpen(false);
-      utils.servers.listBackups.invalidate({ id: serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['servers', 'listBackups', serverId] }).then();
     } catch {}
   };
 
@@ -142,7 +142,7 @@ function BackupsSection({ serverId }: BackupsSectionProps) {
             <>
               {backups.map((backup, index) => (
                 <BackupRow
-                  key={backup.name}
+                  key={backup.filename}
                   deletePending={deleteBackup.isPending}
                   onDownload={handleDownload}
                   onDelete={handleDelete}
@@ -166,7 +166,7 @@ function BackupsSection({ serverId }: BackupsSectionProps) {
 }
 
 type BackupRowProps = {
-  backup: { name: string; size: number; date: string };
+  backup: { filename: string; size: number; created: string };
   index: number;
   deleteConfirm: string | null;
   deletePending: boolean;
@@ -184,7 +184,7 @@ function getBackupSource(filename: string): 'manual' | 'auto' | null {
 function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, onDelete, onDeleteConfirm }: BackupRowProps) {
   const { t } = useTranslation();
   const isNewest = index === 0;
-  const source = getBackupSource(backup.name);
+  const source = getBackupSource(backup.filename);
 
   return (
     <FeatureCard.Row interactive className={'items-center gap-8 py-3'}>
@@ -202,7 +202,9 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
         </div>
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
-            <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800 dark:text-zinc-200'}>{backup.name}</span>
+            <span className={'font-jetbrains truncate text-sm font-medium text-zinc-800 dark:text-zinc-200'}>
+              {backup.filename}
+            </span>
             {isNewest && <Badge className={'font-semibold'}>latest</Badge>}
             {source && (
               <Badge variant={'secondary'} className={'font-semibold'}>
@@ -213,18 +215,18 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
           <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span className={'font-jetbrains tabular-nums'}>{formatFileSize(backup.size)}</span>
             <span className={'text-zinc-200 dark:text-zinc-700'}>·</span>
-            <span>{formatRelativeDate(backup.date)}</span>
+            <span>{formatRelativeDate(backup.created)}</span>
           </div>
         </div>
       </div>
       <div className={'flex shrink-0 items-center gap-1.5'}>
-        {deleteConfirm === backup.name ? (
+        {deleteConfirm === backup.filename ? (
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
             <Button
               variant={'destructive'}
               size={'xs'}
-              onClick={() => onDelete(backup.name)}
+              onClick={() => onDelete(backup.filename)}
               disabled={deletePending}
               loading={deletePending}
             >
@@ -242,7 +244,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
                   <Button
                     variant={'ghost'}
                     size={'icon-sm'}
-                    onClick={() => onDownload(backup.name)}
+                    onClick={() => onDownload(backup.filename)}
                     className={'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'}
                   >
                     <Download className={'size-4'} />
@@ -252,7 +254,7 @@ function BackupRow({ backup, index, deleteConfirm, deletePending, onDownload, on
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => onDeleteConfirm(backup.name)}>
+                  <Button variant={'ghost-destructive'} size={'icon-sm'} onClick={() => onDeleteConfirm(backup.filename)}>
                     <Trash2 className={'size-4'} />
                   </Button>
                 </TooltipTrigger>

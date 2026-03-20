@@ -108,9 +108,7 @@ export class ServerService {
     let javaPort: number;
     if (data.java_port) {
       const available = await this.isPortAvailable(data.java_port);
-      if (!available) {
-        throw new Error(ErrorCodes.SERVER_PORT_ALREADY_IN_USE);
-      }
+      if (!available) throw new Error(ErrorCodes.SERVER_PORT_ALREADY_IN_USE);
       javaPort = data.java_port;
     } else {
       javaPort = await this.getNextAvailablePort();

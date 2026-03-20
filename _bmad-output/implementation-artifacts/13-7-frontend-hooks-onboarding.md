@@ -3,7 +3,7 @@
 ## Story
 
 **As a** composant frontend,
-**I want** des hooks tRPC pour l'onboarding,
+**I want** des hooks ts-rest pour l'onboarding,
 **So that** je puisse appeler les endpoints `needsSetup`, `systemCheck` et `setup`.
 
 ## Status
@@ -45,21 +45,21 @@ ready-for-dev
 Suivre exactement le pattern des hooks existants :
 
 ```typescript
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { tsRest } from '@remnant/frontend/lib/ts-rest';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 
 export function useNeedsSetup() {
-  return trpc.onboarding.needsSetup.useQuery();
+  return tsRest.onboarding.needsSetup.useQuery();
 }
 
 export function useSystemCheck(enabled: boolean) {
-  return trpc.onboarding.systemCheck.useQuery(undefined, { enabled });
+  return tsRest.onboarding.systemCheck.useQuery(undefined, { enabled });
 }
 
 export function useSetup() {
   const { setAuth } = useAuthStore();
 
-  return trpc.onboarding.setup.useMutation({
+  return tsRest.onboarding.setup.useMutation({
     onSuccess: (data) => {
       setAuth(data.user, data.access_token);
     },
@@ -76,6 +76,6 @@ export function useSetup() {
 ## Tasks
 
 - [ ] Task 1: Créer les hooks (AC: #1, #2, #3)
-  - [ ] `useNeedsSetup()` — `trpc.onboarding.needsSetup.useQuery()`
-  - [ ] `useSystemCheck(enabled: boolean)` — `trpc.onboarding.systemCheck.useQuery(undefined, { enabled })`
-  - [ ] `useSetup()` — `trpc.onboarding.setup.useMutation()` avec `onSuccess` qui met à jour le auth store
+  - [ ] `useNeedsSetup()` — `tsRest.onboarding.needsSetup.useQuery()`
+  - [ ] `useSystemCheck(enabled: boolean)` — `tsRest.onboarding.systemCheck.useQuery(undefined, { enabled })`
+  - [ ] `useSetup()` — `tsRest.onboarding.setup.useMutation()` avec `onSuccess` qui met à jour le auth store

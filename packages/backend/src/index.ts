@@ -11,7 +11,6 @@ import helmet from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
 import websocket from '@fastify/websocket';
 import multipart from '@fastify/multipart';
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { initializeDatabase } from '@remnant/backend/db/migrate';
 import authPlugin from '@remnant/backend/plugins/auth';
 import assertPermissionPlugin from '@remnant/backend/plugins/assert-permission';
@@ -19,9 +18,8 @@ import rateLimitPlugin from '@remnant/backend/plugins/rate_limit';
 import cookiePlugin from '@remnant/backend/plugins/cookie';
 import { registerRoutes } from '@remnant/backend/routes';
 import { registerWebSocketRoutes } from '@remnant/backend/routes/websocket';
+import { registerApiRoutes } from '@remnant/backend/api';
 import { taskScheduler } from '@remnant/backend/services/task_scheduler';
-import { appRouter } from '@remnant/backend/trpc/router';
-import { createContext } from '@remnant/backend/trpc';
 import { ServerService } from '@remnant/backend/services/server_service';
 import { firewallService } from '@remnant/backend/services/firewall_service';
 
@@ -121,18 +119,12 @@ const start = async () => {
       },
     });
 
-    // Register REST routes (will be deprecated after tRPC migration)
+    // Register REST routes (file/plugin/backup uploads)
     await registerRoutes(fastify);
     await registerWebSocketRoutes(fastify);
 
-    // Register tRPC
-    await fastify.register(fastifyTRPCPlugin, {
-      prefix: '/trpc',
-      trpcOptions: {
-        router: appRouter,
-        createContext,
-      },
-    });
+    // Register ts-rest API routes
+    await registerApiRoutes(fastify);
 
     // Serve frontend static files in production
     const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
@@ -145,7 +137,7 @@ const start = async () => {
     fastify.setNotFoundHandler(async (request, reply) => {
       if (
         request.url.startsWith('/api/') ||
-        request.url.startsWith('/trpc/') ||
+        request.url.startsWith('/api/') ||
         request.url.startsWith('/ws/') ||
         request.url.startsWith('/docs/')
       ) {

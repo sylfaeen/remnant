@@ -57,5 +57,5 @@ backlog
 - [ ] Implémenter le formulaire avec react-hook-form et validation Zod
 - [ ] Ajouter le select permissions (read-only / read-write)
 - [ ] Implémenter le multi-input pour les chemins autorisés
-- [ ] Connecter au hook tRPC (create / update)
+- [ ] Connecter au hook ts-rest (create / update)
 - [ ] Ajouter les traductions en.json et fr.json

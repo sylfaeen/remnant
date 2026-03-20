@@ -158,7 +158,7 @@
           .page-container {
             .content {
               @media (min-width: 960px) {
-                padding: 0 32px 16px;
+                padding: 0 32px 32px;
               }
             }
           }

@@ -3,9 +3,7 @@ import jwt from '@fastify/jwt';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ErrorCodes } from '@remnant/shared';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
-}
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET environment variable is required');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ACCESS_TOKEN_EXPIRES = '15m';

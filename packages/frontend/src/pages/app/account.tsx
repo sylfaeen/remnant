@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TRPCClientError } from '@trpc/client';
 import { ErrorCodes } from '@remnant/shared';
+import { ApiError } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 import { useTotpStatus, useTotpSetup, useTotpVerify, useTotpDisable } from '@remnant/frontend/hooks/use_totp';
 import { TotpSettingsSection, TotpSetupDialog, TotpDisableDialog } from '@remnant/frontend/features/totp/totp_setup_display';
@@ -56,7 +56,7 @@ function TwoFactorSection() {
           setRecoveryCodes(setup.data?.recovery_codes ?? null);
         },
         onError: (error) => {
-          if (error instanceof TRPCClientError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
+          if (error instanceof ApiError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
             setVerifyError(t('settings.twoFactor.invalidCode'));
           } else {
             setVerifyError(t('authErrors.generic'));
@@ -76,7 +76,7 @@ function TwoFactorSection() {
           refetchStatus().then();
         },
         onError: (error) => {
-          if (error instanceof TRPCClientError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
+          if (error instanceof ApiError && error.message === ErrorCodes.TOTP_INVALID_CODE) {
             setDisableError(t('settings.twoFactor.invalidCode'));
           } else {
             setDisableError(t('authErrors.generic'));

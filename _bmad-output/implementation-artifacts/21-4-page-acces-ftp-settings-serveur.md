@@ -18,7 +18,7 @@ backlog
   - Créer: `packages/frontend/src/pages/app/servers/id/settings/ftp.tsx` — page FTP
   - Modifier: `packages/frontend/src/routes.tsx` — ajout route `/app/servers/$id/settings/ftp`
   - Modifier: `packages/frontend/src/pages/app/features/layouts/server_layout.tsx` — ajout entrée sidebar
-  - Créer: `packages/frontend/src/hooks/use_sftp.ts` — hooks tRPC pour SFTP
+  - Créer: `packages/frontend/src/hooks/use_sftp.ts` — hooks ts-rest pour SFTP
   - Modifier: `packages/frontend/src/i18n/locales/en.json` et `fr.json` — namespace `serverSettings.ftp.*`
 - Pattern existant : voir `firewall.tsx` et `domains.tsx` pour la structure des pages settings serveur
 - Utiliser le compound pattern `FeatureCard` et `ServerPageHeader`

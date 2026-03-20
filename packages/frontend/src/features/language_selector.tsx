@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, Check } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
 import { cn } from '@remnant/frontend/lib/cn';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { useAuthStore } from '@remnant/frontend/stores/auth_store';
 
 const languages = [
@@ -103,7 +104,13 @@ export function LanguageSelectorCompact() {
 
 function useUpdateLocale() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const updateLocale = trpc.users.updateLocale.useMutation();
+  const updateLocale = useMutation({
+    mutationFn: async (input: { locale: string }) => {
+      const result = await apiClient.users.updateLocale({ body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
 
   return (code: string) => {
     if (isAuthenticated) {

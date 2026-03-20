@@ -15,7 +15,7 @@ ready-for-dev
 - Epic: 13 - Onboarding Administrateur
 - Dependencies: Stories 13-1 et 13-2 completed
 - Fichiers clés:
-  - Modifier: `packages/backend/src/trpc/routers/onboarding.ts` — ajout endpoint `setup`
+  - Modifier: `packages/backend/src/routes/handlers/onboarding.ts` — ajout endpoint `setup`
 - Services réutilisés:
   - `UserService.createUser()` ou logique équivalente (hash bcrypt, insertion DB)
   - `AuthService.login()` (génération JWT + refresh token)

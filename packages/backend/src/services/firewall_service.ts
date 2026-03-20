@@ -49,9 +49,7 @@ export class FirewallService {
       .where(and(eq(firewallRules.server_id, serverId), eq(firewallRules.port, port), eq(firewallRules.protocol, protocol)))
       .limit(1);
 
-    if (existing) {
-      throw new Error(`Port ${port}/${protocol} is already configured for this server`);
-    }
+    if (existing) throw new Error(`Port ${port}/${protocol} is already configured for this server`);
 
     const [rule] = await db
       .insert(firewallRules)
@@ -78,16 +76,12 @@ export class FirewallService {
   async removeRule(ruleId: number) {
     const [rule] = await db.select().from(firewallRules).where(eq(firewallRules.id, ruleId)).limit(1);
 
-    if (!rule) {
-      throw new Error('Rule not found');
-    }
+    if (!rule) throw new Error('Rule not found');
 
     // Close port on the firewall if the rule was enabled
     if (rule.enabled) {
       const result = await runFirewallScript(['deny', String(rule.port), rule.protocol]);
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to close port on firewall');
-      }
+      if (!result.success) throw new Error(result.error || 'Failed to close port on firewall');
     }
 
     await db.delete(firewallRules).where(eq(firewallRules.id, ruleId));
@@ -98,18 +92,14 @@ export class FirewallService {
   async toggleRule(ruleId: number) {
     const [rule] = await db.select().from(firewallRules).where(eq(firewallRules.id, ruleId)).limit(1);
 
-    if (!rule) {
-      throw new Error('Rule not found');
-    }
+    if (!rule) throw new Error('Rule not found');
 
     const newEnabled = !rule.enabled;
     const action = newEnabled ? 'allow' : 'deny';
 
     const result = await runFirewallScript([action, String(rule.port), rule.protocol]);
 
-    if (!result.success) {
-      throw new Error(result.error || `Failed to ${action} port on firewall`);
-    }
+    if (!result.success) throw new Error(result.error || `Failed to ${action} port on firewall`);
 
     const [updated] = await db
       .update(firewallRules)

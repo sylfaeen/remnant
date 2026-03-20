@@ -60,7 +60,7 @@ export function UsersPage() {
     if (!editingUser) return;
     setFormError(null);
     try {
-      await updateUser.mutateAsync({ id: editingUser.id, data });
+      await updateUser.mutateAsync({ id: editingUser.id, ...data });
       setEditingUser(null);
     } catch (err) {
       if (err instanceof ApiError) {

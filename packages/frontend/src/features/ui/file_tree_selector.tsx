@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronRight, File, Folder, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@remnant/frontend/lib/cn';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 
@@ -39,8 +40,15 @@ export function FileTreeSelector({
   const [tree, setTree] = useState<Array<TreeNode>>([]);
   const [loading, setLoading] = useState(true);
 
-  const trpcUtils = trpc.useUtils();
-  const filesQuery = trpc.files.list.useQuery({ serverId, path: '/' }, { enabled });
+  const filesQuery = useQuery({
+    queryKey: ['files', 'list', serverId, '/'],
+    queryFn: async () => {
+      const result = await apiClient.files.list({ params: { serverId: String(serverId) }, query: { path: '/' } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body.map((f) => ({ ...f, path: `/${f.name}` }));
+    },
+    enabled,
+  });
 
   useEffect(() => {
     if (filesQuery.data && enabled) {
@@ -68,7 +76,10 @@ export function FileTreeSelector({
   const loadChildren = useCallback(
     async (dirPath: string) => {
       try {
-        const children = await trpcUtils.files.list.fetch({ serverId, path: dirPath });
+        const result = await apiClient.files.list({ params: { serverId: String(serverId) }, query: { path: dirPath } });
+        if (result.status !== 200) raise(result.body, result.status);
+        const basePath = dirPath === '/' ? '' : dirPath;
+        const children = result.body.map((f) => ({ ...f, path: `${basePath}/${f.name}` }));
 
         const filtered = directoriesOnly ? children.filter((c) => c.type === 'directory') : children;
 
@@ -105,7 +116,7 @@ export function FileTreeSelector({
         );
       }
     },
-    [serverId, trpcUtils, selectedPaths, onSelectedPathsChange, directoriesOnly]
+    [serverId, selectedPaths, onSelectedPathsChange, directoriesOnly]
   );
 
   const handleExpand = useCallback(

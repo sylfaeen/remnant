@@ -13,7 +13,7 @@ done
 ## Context
 
 - Epic: 11 - Gestion des Backups
-- Dependencies: Aucune — le `BackupService` et la mutation tRPC `backup` existent déjà partiellement
+- Dependencies: Aucune — le `BackupService` et la mutation ts-rest `backup` existent déjà partiellement
 - Le service `backup_service.ts` supporte déjà `createFullBackup()`, `listBackups()`, `deleteServerDirectory()`
 - La mutation `servers.backup` a été ajoutée pour le backup à la volée
 - Il manque : list backups endpoint, delete backup endpoint, download backup route, taille formatée
@@ -50,21 +50,21 @@ done
 ### Files to Modify
 - `packages/backend/src/services/backup_service.ts` — `deleteBackup(filename)`, `createSelectiveBackup(serverPath, serverName, paths)`
 - `packages/backend/src/services/server_service.ts` — `backupServer(id, paths?)` accepte un paramètre optionnel
-- `packages/backend/src/trpc/routers/servers.ts` — Mutations `listBackups`, `deleteBackup`, `backup` (avec `paths` optionnel)
+- `packages/backend/src/routes/handlers/servers.ts` — Mutations `listBackups`, `deleteBackup`, `backup` (avec `paths` optionnel)
 - `packages/backend/src/routes/index.ts` — Route download `/api/servers/:id/backups/:filename`
 
 ### API Endpoints
-- `servers.backup` (tRPC mutation) — Créer un backup (full ou sélectif via `paths`)
-- `servers.listBackups` (tRPC query) — Lister les backups d'un serveur
-- `servers.deleteBackup` (tRPC mutation) — Supprimer un backup
+- `servers.backup` (ts-rest mutation) — Créer un backup (full ou sélectif via `paths`)
+- `servers.listBackups` (ts-rest query) — Lister les backups d'un serveur
+- `servers.deleteBackup` (ts-rest mutation) — Supprimer un backup
 - `GET /api/servers/:id/backups/:filename` (REST) — Télécharger un backup (stream fichier)
 
 ## Tasks
 
 - [x] Ajouter `deleteBackup(filename)` au `BackupService`
 - [x] Ajouter `createSelectiveBackup(serverPath, serverName, paths)` au `BackupService`
-- [x] Ajouter `listBackups` query tRPC
-- [x] Ajouter `deleteBackup` mutation tRPC
+- [x] Ajouter `listBackups` query ts-rest
+- [x] Ajouter `deleteBackup` mutation ts-rest
 - [x] Modifier `backup` mutation pour accepter `paths` optionnel
 - [x] Ajouter route REST pour le download de backup
 - [ ] Tester le flow complet : create (full) → create (sélectif) → list → download → delete

@@ -1,24 +1,45 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@remnant/frontend/features/ui/toast';
-import { trpc } from '@remnant/frontend/lib/trpc';
+import { apiClient, raise } from '@remnant/frontend/lib/api';
 import type { CreateSftpAccountRequest, UpdateSftpAccountRequest } from '@remnant/shared';
 
 export function useSftpInfo() {
-  return trpc.sftp.getInfo.useQuery();
+  return useQuery({
+    queryKey: ['sftp', 'info'],
+    queryFn: async () => {
+      const result = await apiClient.sftp.getInfo();
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+  });
 }
 
 export function useSftpAccounts(serverId: number) {
-  return trpc.sftp.list.useQuery({ serverId }, { enabled: !!serverId });
+  return useQuery({
+    queryKey: ['sftp', 'list', serverId],
+    queryFn: async () => {
+      const result = await apiClient.sftp.list({ query: { serverId } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
+    enabled: !!serverId,
+  });
 }
 
 export function useCreateSftpAccount(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.sftp.create.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: Omit<CreateSftpAccountRequest, 'serverId'>) => {
+      const result = await apiClient.sftp.create({ body: { serverId, ...input } });
+      if (result.status !== 201) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.sftp.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['sftp', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.sftpAccountCreated') });
     },
     onError: (error) => {
@@ -28,18 +49,23 @@ export function useCreateSftpAccount(serverId: number) {
 
   return {
     ...mutation,
-    mutateAsync: (input: Omit<CreateSftpAccountRequest, 'serverId'>) => mutation.mutateAsync({ serverId, ...input }),
+    mutateAsync: (input: Omit<CreateSftpAccountRequest, 'serverId'>) => mutation.mutateAsync(input),
   };
 }
 
 export function useUpdateSftpAccount(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.sftp.update.useMutation({
+  const mutation = useMutation({
+    mutationFn: async (input: UpdateSftpAccountRequest) => {
+      const result = await apiClient.sftp.update({ params: { id: String(input.id) }, body: input });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.sftp.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['sftp', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.sftpAccountUpdated') });
     },
     onError: (error) => {
@@ -56,11 +82,16 @@ export function useUpdateSftpAccount(serverId: number) {
 export function useDeleteSftpAccount(serverId: number) {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const utils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
-  const mutation = trpc.sftp.delete.useMutation({
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: number }) => {
+      const result = await apiClient.sftp.delete({ params: { id: String(id) } });
+      if (result.status !== 200) raise(result.body, result.status);
+      return result.body;
+    },
     onSuccess: () => {
-      utils.sftp.list.invalidate({ serverId }).then();
+      queryClient.invalidateQueries({ queryKey: ['sftp', 'list', serverId] }).then();
       addToast({ type: 'success', title: t('toast.sftpAccountDeleted') });
     },
     onError: (error) => {

@@ -16,6 +16,8 @@ export const serverResponseSchema = z.object({
   status: z.enum(['stopped', 'starting', 'running', 'stopping']),
   pid: z.number().nullable(),
   uptime: z.number().nullable(),
+  cpu: z.number().nullable(),
+  player_count: z.number(),
 });
 
 export type ServerResponse = z.infer<typeof serverResponseSchema>;

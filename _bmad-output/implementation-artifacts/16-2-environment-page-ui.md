@@ -68,7 +68,7 @@ done
   - [x] Clic sur une variable ouvre un mode édition (input + boutons sauvegarder/annuler)
   - [x] Appel mutation `env.update` à la sauvegarde
   - [x] Toast succès/erreur
-  - [x] Invalidation du cache tRPC après mutation
+  - [x] Invalidation du cache ts-rest après mutation
 
 - [x] Task 3: Route et navigation (AC: #1)
   - [x] Ajouter route `/app/environment` dans `routes.tsx` sous `mainLayoutRoute`
@@ -90,7 +90,7 @@ done
 
 ### Completion Notes
 - ✅ Page environment.tsx créée avec compound components
-- ✅ Édition inline avec mutation tRPC + toast + invalidation cache
+- ✅ Édition inline avec mutation ts-rest + toast + invalidation cache
 - ✅ Route /app/environment ajoutée dans routes.tsx
 - ✅ Nav item ajouté avec icône FileCode
 - ✅ Traductions EN/FR ajoutées (environment.*, toast.env*, nav.environment)

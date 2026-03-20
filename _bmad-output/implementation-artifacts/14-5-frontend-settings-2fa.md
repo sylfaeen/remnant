@@ -77,19 +77,19 @@ done
 ```typescript
 // packages/frontend/src/hooks/use_totp.ts
 export function useTotpStatus() {
-  return trpc.totp.status.useQuery();
+  return tsRest.totp.status.useQuery();
 }
 
 export function useTotpSetup() {
-  return trpc.totp.setup.useMutation();
+  return tsRest.totp.setup.useMutation();
 }
 
 export function useTotpVerify() {
-  return trpc.totp.verify.useMutation();
+  return tsRest.totp.verify.useMutation();
 }
 
 export function useTotpDisable() {
-  return trpc.totp.disable.useMutation();
+  return tsRest.totp.disable.useMutation();
 }
 ```
 

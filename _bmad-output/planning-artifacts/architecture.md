@@ -244,7 +244,7 @@ pnpm install
 - Database: SQLite avec Drizzle ORM
 - Auth: JWT via @fastify/jwt + token versioning
 - Real-time: WebSocket natif pour console
-- API: tRPC (type-safe) + REST pour uploads
+- API: ts-rest (type-safe REST) + WebSocket pour temps réel
 
 **Important Decisions (Shape Architecture):**
 - State management: Zustand
@@ -306,15 +306,14 @@ Request → Helmet → CORS → Rate Limit → JWT Verify → Permission Guard �
 
 | Décision | Choix | Rationale |
 |----------|-------|-----------|
-| **API Style** | tRPC + WebSocket | tRPC pour type-safety end-to-end, WS pour temps réel |
-| **tRPC Version** | v11 | Meilleure inférence TypeScript |
-| **Transformer** | superjson | Support Date, Map, Set |
-| **Validation** | Zod | Type-safe, intégré avec tRPC |
-| **File Uploads** | REST (hybride) | tRPC ne supporte pas multipart/form-data |
+| **API Style** | ts-rest + WebSocket | ts-rest pour type-safety end-to-end via contrat REST, WS pour temps réel |
+| **ts-rest Version** | latest | Contrat REST typé, compatible OpenAPI |
+| **Validation** | Zod | Type-safe, intégré avec ts-rest |
+| **File Uploads** | REST natif | ts-rest supporte nativement les uploads via endpoints REST |
 
-**tRPC Routers:**
+**ts-rest Contract Routes:**
 ```
-/trpc
+/api
   ├── auth       # login, logout, refresh, me
   ├── users      # list, byId, create, update, delete, updateLocale
   ├── servers    # list, byId, create, update, delete, start, stop, restart
@@ -368,7 +367,7 @@ src/
 │       └── settings/
 ├── hooks/              # use_auth, use_servers, use_files, etc.
 ├── components/ui/      # Button, Card, Dialog, Input, etc. (Radix UI)
-└── lib/                # Utils (cn), tRPC client, API client
+└── lib/                # Utils (cn), ts-rest client, API client
 ```
 
 **Frontend Routes:**
@@ -773,27 +772,26 @@ export const ErrorCodes = {
 
 ### Pattern Examples
 
-**Good Example — tRPC Router:**
+**Good Example — ts-rest Route Handler:**
 ```typescript
-// packages/backend/src/trpc/routers/servers.ts
-import { router } from '../index';
-import { protectedProcedure } from '../middlewares/auth';
+// packages/backend/src/routes/servers.ts
+import { contract } from '@remnant/shared';
 import { ServerService } from '../../services/server_service';
 
 const serverService = new ServerService();
 
-export const serversRouter = router({
-  list: protectedProcedure.query(async () => {
-    return serverService.getAllServers();
+export const serversHandler = {
+  list: async () => ({
+    status: 200 as const,
+    body: await serverService.getAllServers(),
   }),
 
-  byId: protectedProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      return serverService.getServerById(input.id);
-    }),
-});
-// Frontend: trpc.servers.list.useQuery() - Ctrl+Click navigates here!
+  byId: async ({ params: { id } }) => ({
+    status: 200 as const,
+    body: await serverService.getServerById(id),
+  }),
+};
+// Frontend: api.servers.list.useQuery() — contrat REST typé !
 ```
 
 **Anti-Patterns:**
@@ -881,25 +879,16 @@ remnant/
 │   │   │   │   │   └── tasks.ts      # Scheduled tasks table
 │   │   │   │   └── migrations/       # Drizzle migrations
 │   │   │   │
-│   │   │   ├── trpc/
-│   │   │   │   ├── index.ts          # Context, base procedures, superjson
-│   │   │   │   ├── router.ts         # Root router (AppRouter)
+│   │   │   ├── routes/
+│   │   │   │   ├── index.ts          # ts-rest Fastify plugin registration
 │   │   │   │   ├── middlewares/
-│   │   │   │   │   └── auth.ts       # protectedProcedure
-│   │   │   │   └── routers/
+│   │   │   │   │   └── auth.ts       # protectedRoute middleware
+│   │   │   │   └── handlers/
 │   │   │   │       ├── auth.ts       # login, logout, refresh, me
 │   │   │   │       ├── users.ts      # list, byId, create, update, delete
 │   │   │   │       ├── servers.ts    # list, byId, CRUD, start/stop/restart
 │   │   │   │       ├── files.ts      # list, read, write, delete, mkdir, rename
 │   │   │   │       ├── jars.ts       # getVersions, getBuilds, download, list
-│   │   │   │       ├── plugins.ts    # list, delete
-│   │   │   │       └── tasks.ts      # list, create, update, delete, toggle
-│   │   │   │
-│   │   │   ├── routes/               # REST uniquement pour uploads
-│   │   │   │   ├── index.ts          # Route registration
-│   │   │   │   ├── files.ts          # POST upload (multipart)
-│   │   │   │   ├── plugins.ts        # POST upload (multipart)
-│   │   │   │   └── websocket.ts      # WebSocket /ws/console
 │   │   │   │
 │   │   │   ├── services/
 │   │   │   │   ├── auth_service.ts   # JWT, password hashing, token versioning
@@ -1021,8 +1010,7 @@ remnant/
 │   │   │   │   └── use_metrics.ts         # Metrics subscription
 │   │   │   │
 │   │   │   ├── lib/
-│   │   │   │   ├── trpc.ts                # tRPC client + httpBatchLink
-│   │   │   │   ├── api.ts                 # ApiError class (pour uploads REST)
+│   │   │   │   ├── api.ts                 # ts-rest client typé
 │   │   │   │   ├── cn.ts                  # Tailwind class merge utility
 │   │   │   │   ├── socket_client.ts       # Socket.io client setup
 │   │   │   │   └── query_client.ts        # TanStack Query setup
@@ -1088,26 +1076,23 @@ remnant/
 
 | Boundary | Description | Authentication |
 |----------|-------------|----------------|
-| `/trpc/auth.*` | Authentication (tRPC) | Public (login), Protected (logout, refresh, me) |
-| `/trpc/users.*` | User management (tRPC) | Protected (protectedProcedure) |
-| `/trpc/servers.*` | Server CRUD + control (tRPC) | Protected |
-| `/trpc/files.*` | File operations (tRPC) | Protected |
-| `/trpc/jars.*` | JAR management (tRPC) | Protected |
-| `/trpc/plugins.*` | Plugin list/delete (tRPC) | Protected |
-| `/trpc/tasks.*` | Scheduled tasks (tRPC) | Protected |
-| `/api/servers/:id/files/upload` | File upload (REST) | JWT Bearer |
-| `/api/servers/:id/plugins` | Plugin upload (REST) | JWT Bearer |
+| `/api/auth/*` | Authentication (ts-rest) | Public (login), Protected (logout, refresh, me) |
+| `/api/users/*` | User management (ts-rest) | Protected (protectedRoute) |
+| `/api/servers/*` | Server CRUD + control (ts-rest) | Protected |
+| `/api/files/*` | File operations (ts-rest) | Protected |
+| `/api/jars/*` | JAR management (ts-rest) | Protected |
+| `/api/plugins/*` | Plugin list/delete/upload (ts-rest) | Protected |
+| `/api/tasks/*` | Scheduled tasks (ts-rest) | Protected |
 | `/ws/console` | Real-time console | JWT in query params |
 
 **Component Boundaries:**
 
 | Layer | Responsibility | Communication Pattern |
 |-------|----------------|----------------------|
-| **tRPC Routers** | API procedures, Zod validation | Calls Services |
-| **REST Routes** | File uploads (multipart) | Calls Services |
+| **ts-rest Handlers** | API route handlers, Zod validation | Calls Services |
 | **Services** | Business logic | Calls DB, external APIs |
 | **WebSocket Handlers** | Console streaming | Uses Services, emits to clients |
-| **Middlewares** | Auth (protectedProcedure) | tRPC middleware chain |
+| **Middlewares** | Auth (protectedRoute) | Fastify hooks chain |
 | **DB Schema** | Data structure | Used by Services via Drizzle |
 
 **Data Boundaries:**
@@ -1126,8 +1111,8 @@ remnant/
 ### Requirements to Structure Mapping
 
 **Epic: Authentication & Authorization**
-- tRPC: `backend/src/trpc/routers/auth.ts`, `backend/src/trpc/routers/users.ts`
-- Middleware: `backend/src/trpc/middlewares/auth.ts` (protectedProcedure)
+- Routes: `backend/src/routes/handlers/auth.ts`, `backend/src/routes/handlers/users.ts`
+- Middleware: `backend/src/routes/middlewares/auth.ts` (protectedRoute)
 - Services: `backend/src/services/auth_service.ts`, `backend/src/services/user_service.ts`
 - DB: `backend/src/db/schema/users.ts`, `backend/src/db/schema/sessions.ts`
 - Frontend: `frontend/src/pages/login.tsx`, `frontend/src/pages/users.tsx`
@@ -1135,7 +1120,7 @@ remnant/
 - Stores: `frontend/src/stores/auth_store.ts`
 
 **Epic: Server Management**
-- tRPC: `backend/src/trpc/routers/servers.ts`
+- Routes: `backend/src/routes/handlers/servers.ts`
 - Services: `backend/src/services/server_service.ts`
 - DB: `backend/src/db/schema/servers.ts`
 - Frontend: `frontend/src/pages/dashboard.tsx`, `frontend/src/pages/servers.tsx`
@@ -1148,26 +1133,24 @@ remnant/
 - Hooks: `frontend/src/hooks/use_console.ts`
 
 **Epic: File Management**
-- tRPC: `backend/src/trpc/routers/files.ts`
-- REST: `backend/src/routes/files.ts` (upload uniquement)
+- Routes: `backend/src/routes/handlers/files.ts`
 - Services: `backend/src/services/file_service.ts`
 - Frontend: `frontend/src/pages/files.tsx`, `frontend/src/pages/file_editor.tsx`
 - Hooks: `frontend/src/hooks/use_files.ts`
 
 **Epic: JAR Management**
-- tRPC: `backend/src/trpc/routers/jars.ts`
+- Routes: `backend/src/routes/handlers/jars.ts`
 - Services: `backend/src/services/jar_service.ts`
 - Frontend: `frontend/src/pages/server_settings.tsx`
 - Hooks: `frontend/src/hooks/use_jars.ts`
 
 **Epic: Plugin Management**
-- tRPC: `backend/src/trpc/routers/plugins.ts` (list, delete)
-- REST: `backend/src/routes/plugins.ts` (upload)
+- Routes: `backend/src/routes/handlers/plugins.ts`
 - Frontend: `frontend/src/pages/plugins.tsx`
 - Hooks: `frontend/src/hooks/use_plugins.ts`
 
 **Epic: Scheduled Tasks**
-- tRPC: `backend/src/trpc/routers/tasks.ts`
+- Routes: `backend/src/routes/handlers/tasks.ts`
 - Services: `backend/src/services/task_scheduler.ts`
 - DB: `backend/src/db/schema/scheduled_tasks.ts`
 - Frontend: `frontend/src/pages/tasks.tsx`
@@ -1204,10 +1187,9 @@ remnant/
 
 | From | To | Method |
 |------|----|--------|
-| Frontend pages | Backend API | tRPC hooks (type-safe, Ctrl+Click navigation) |
-| Frontend | Backend uploads | REST fetch (multipart/form-data) |
+| Frontend pages | Backend API | ts-rest hooks (type-safe, contrat REST) |
 | Frontend | Backend real-time | WebSocket /ws/console |
-| tRPC routers | Services | Direct function calls |
+| ts-rest handlers | Services | Direct function calls |
 | Services | Database | Drizzle ORM queries |
 | Services | Minecraft process | Child process spawn |
 
@@ -1221,12 +1203,9 @@ remnant/
 **Data Flow:**
 
 ```
-User Action → React Component → Zustand Store → tRPC hook
-    → tRPC Client → tRPC Router → Service → Drizzle → SQLite
+User Action → React Component → Zustand Store → ts-rest hook
+    → ts-rest Client → Route Handler → Service → Drizzle → SQLite
     → Response → TanStack Cache → Zustand → Component Re-render
-
-Uploads (REST):
-Form → fetch() → Fastify Route → Service → Filesystem
 
 Real-time Console:
 MC Process stdout → Server Service → WebSocket Handler
