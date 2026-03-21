@@ -217,7 +217,7 @@ restart_services() {
 
     # Update systemd service ReadWritePaths for domain/SSL management
     if grep -q "ReadWritePaths=" /etc/systemd/system/remnant.service 2>/dev/null; then
-        sed -i 's|ProtectSystem=strict|ProtectSystem=full|' /etc/systemd/system/remnant.service
+        sed -i 's|ProtectSystem=strict|ProtectSystem=true|; s|ProtectSystem=full|ProtectSystem=true|' /etc/systemd/system/remnant.service
         sed -i 's|ProtectHome=true|ProtectHome=false|' /etc/systemd/system/remnant.service
         sed -i 's|ReadWritePaths=.*|ReadWritePaths=/opt/remnant /var/lib/letsencrypt /var/lib/nginx /var/log/nginx /var/log/letsencrypt /run /home|' /etc/systemd/system/remnant.service
         print_ok "Service file updated"

@@ -509,7 +509,7 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=remnant
 PrivateTmp=true
-ProtectSystem=full
+ProtectSystem=true
 ProtectHome=false
 ReadWritePaths=${REMNANT_HOME} /var/lib/letsencrypt /var/lib/nginx /var/log/nginx /var/log/letsencrypt /run /home
 
