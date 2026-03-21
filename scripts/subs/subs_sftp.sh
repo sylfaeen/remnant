@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# remnant-sftp.sh — Secure SFTP user management for Remnant GSMP
+# subs_sftp.sh — Secure SFTP user management for Remnant GSMP
 # This script is the ONLY entry point for SFTP user operations.
 # Executed via sudo by the remnant system user.
-# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/scripts/subs/subs_sftp.sh
+# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/app/scripts/subs/subs_sftp.sh
 
 set -euo pipefail
 
@@ -26,7 +26,6 @@ validate_username() {
   if ! [[ "$username" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
     json_error "Invalid username: must be lowercase alphanumeric (max 32 chars)"
   fi
-  # Block dangerous usernames
   if [[ "$username" =~ ^(root|admin|nobody|daemon|bin|sys|www-data|remnant)$ ]]; then
     json_error "Username '${username}' is reserved"
   fi
@@ -37,7 +36,6 @@ validate_path() {
   if [ -z "$path" ]; then
     json_error "Path cannot be empty"
   fi
-  # Block path traversal
   if [[ "$path" == *".."* ]]; then
     json_error "Invalid path: path traversal detected"
   fi
@@ -58,104 +56,49 @@ ensure_sftp_group() {
     groupadd "$SFTP_GROUP"
   fi
 
-  # Configure sshd for chroot SFTP if not already done
+  # Configure sshd for SFTP-only access if not already done
   if ! grep -q "Match Group ${SFTP_GROUP}" /etc/ssh/sshd_config 2>/dev/null; then
     cat >> /etc/ssh/sshd_config << SSHD_EOF
 
-# Remnant SFTP chroot configuration
+# Remnant SFTP configuration
 Match Group ${SFTP_GROUP}
     ForceCommand internal-sftp
-    ChrootDirectory %h
     AllowTcpForwarding no
     X11Forwarding no
     PermitTunnel no
 SSHD_EOF
     systemctl restart sshd 2>/dev/null || systemctl restart ssh 2>/dev/null || true
   fi
-}
 
-# Sets up the chroot directory structure with symlinks to allowed paths.
-# If allowed_paths is empty or contains only "/", the entire server directory is linked.
-# Otherwise, individual subdirectories are symlinked.
-setup_allowed_paths() {
-  local username="$1" server_path="$2" allowed_paths="$3"
-  local chroot_dir="/home/${username}"
-
-  # Remove any existing server symlinks/dirs inside chroot
-  rm -rf "${chroot_dir}/server"
-
-  if [ -z "$allowed_paths" ] || [ "$allowed_paths" = '/' ] || [ "$allowed_paths" = '["/"]' ] || [ "$allowed_paths" = '[]' ]; then
-    # Full access: symlink entire server directory
-    ln -sfn "$server_path" "${chroot_dir}/server"
-  else
-    # Restricted access: create server dir and symlink only allowed subpaths
-    mkdir -p "${chroot_dir}/server"
-    chown root:root "${chroot_dir}/server"
-    chmod 755 "${chroot_dir}/server"
-
-    # Parse comma-separated paths (passed as "path1,path2,path3")
-    IFS=',' read -ra PATHS <<< "$allowed_paths"
-    for subpath in "${PATHS[@]}"; do
-      # Trim whitespace
-      subpath=$(echo "$subpath" | xargs)
-      # Strip leading slash
-      subpath="${subpath#/}"
-
-      if [ -z "$subpath" ]; then
-        # Root path means full access
-        rm -rf "${chroot_dir}/server"
-        ln -sfn "$server_path" "${chroot_dir}/server"
-        return
-      fi
-
-      # Block path traversal
-      if [[ "$subpath" == *".."* ]]; then
-        continue
-      fi
-
-      local target="${server_path}/${subpath}"
-      if [ -e "$target" ]; then
-        # Create parent directories if needed
-        local parent
-        parent=$(dirname "${chroot_dir}/server/${subpath}")
-        mkdir -p "$parent"
-        ln -sfn "$target" "${chroot_dir}/server/${subpath}"
-      fi
-    done
+  # Remove stale ChrootDirectory directive if present
+  if grep -q "ChrootDirectory" /etc/ssh/sshd_config 2>/dev/null; then
+    sed -i '/Match Group sftp-users/,/^Match\|^$/{/ChrootDirectory/d}' /etc/ssh/sshd_config
+    systemctl restart sshd 2>/dev/null || systemctl restart ssh 2>/dev/null || true
   fi
-
-  # Set permissions on the server path for the SFTP user
-  chown -R "${username}:${SFTP_GROUP}" "$server_path"
-  chmod -R 775 "$server_path"
 }
 
 action_create_user() {
-  local username="$1" password="$2" server_path="$3" allowed_paths="${4:-}"
+  local username="$1" password="$2" server_path="$3"
 
   validate_username "$username"
   validate_path "$server_path"
 
   ensure_sftp_group
 
-  # Check if user already exists
   if id "$username" &>/dev/null; then
     json_error "System user '${username}' already exists"
   fi
 
-  # Create the chroot base directory (must be owned by root for chroot)
-  local chroot_dir="/home/${username}"
-  mkdir -p "$chroot_dir"
-  chown root:root "$chroot_dir"
-  chmod 755 "$chroot_dir"
-
-  # Create system user with chroot home, no login shell
-  useradd -g "$SFTP_GROUP" -d "$chroot_dir" -s /usr/sbin/nologin "$username"
+  # Create system user with home set to server path, no login shell
+  useradd -g "$SFTP_GROUP" -d "$server_path" -s /usr/sbin/nologin -M "$username"
 
   # Set password
   echo "${username}:${password}" | chpasswd
 
-  # Set up allowed paths (symlinks into chroot)
-  setup_allowed_paths "$username" "$server_path" "$allowed_paths"
+  # Grant access to the server directory
+  usermod -aG "$SFTP_GROUP" "$username"
+  setfacl -R -m "u:${username}:rwX" "$server_path" 2>/dev/null || chown -R "${username}:${SFTP_GROUP}" "$server_path"
+  setfacl -R -d -m "u:${username}:rwX" "$server_path" 2>/dev/null || true
 
   json_success "create-user"
 }
@@ -186,18 +129,13 @@ action_update_permissions() {
   fi
 
   if [ "$permissions" = "read-only" ]; then
-    # Remove write permissions for the user on the server path
-    chmod -R o-w "$server_path"
-    # Set ACL for read-only access
     if command -v setfacl &>/dev/null; then
       setfacl -R -m "u:${username}:rX" "$server_path"
       setfacl -R -d -m "u:${username}:rX" "$server_path"
     else
-      chown -R "${username}:${SFTP_GROUP}" "$server_path"
-      chmod -R 555 "$server_path"
+      chmod -R o-w "$server_path"
     fi
   else
-    # read-write: full access
     if command -v setfacl &>/dev/null; then
       setfacl -R -m "u:${username}:rwX" "$server_path"
       setfacl -R -d -m "u:${username}:rwX" "$server_path"
@@ -211,7 +149,7 @@ action_update_permissions() {
 }
 
 action_update_paths() {
-  local username="$1" server_path="$2" allowed_paths="${3:-}"
+  local username="$1" server_path="$2"
 
   validate_username "$username"
   validate_path "$server_path"
@@ -220,7 +158,12 @@ action_update_paths() {
     json_error "System user '${username}' does not exist"
   fi
 
-  setup_allowed_paths "$username" "$server_path" "$allowed_paths"
+  # Update home directory to new server path
+  usermod -d "$server_path" "$username"
+
+  # Grant access
+  setfacl -R -m "u:${username}:rwX" "$server_path" 2>/dev/null || chown -R "${username}:${SFTP_GROUP}" "$server_path"
+  setfacl -R -d -m "u:${username}:rwX" "$server_path" 2>/dev/null || true
 
   json_success "update-paths"
 }
@@ -231,19 +174,14 @@ action_delete_user() {
   validate_username "$username"
 
   if ! id "$username" &>/dev/null; then
-    # User doesn't exist, nothing to do
     json_success "delete-user"
     exit 0
   fi
 
-  # Kill any active sessions for this user
+  # Kill any active sessions
   pkill -u "$username" 2>/dev/null || true
 
-  # Remove the chroot symlink and home directory
-  local chroot_dir="/home/${username}"
-  rm -rf "$chroot_dir"
-
-  # Delete the system user (without removing home, already handled)
+  # Delete the system user
   userdel "$username" 2>/dev/null || true
 
   json_success "delete-user"
@@ -259,9 +197,8 @@ case "$ACTION" in
     USERNAME="${2:-}"
     PASSWORD="${3:-}"
     SERVER_PATH="${4:-}"
-    ALLOWED_PATHS="${5:-}"
-    [ -n "$USERNAME" ] && [ -n "$PASSWORD" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 create-user <username> <password> <server_path> [allowed_paths]"
-    action_create_user "$USERNAME" "$PASSWORD" "$SERVER_PATH" "$ALLOWED_PATHS"
+    [ -n "$USERNAME" ] && [ -n "$PASSWORD" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 create-user <username> <password> <server_path>"
+    action_create_user "$USERNAME" "$PASSWORD" "$SERVER_PATH"
     ;;
   update-password)
     USERNAME="${2:-}"
@@ -279,9 +216,8 @@ case "$ACTION" in
   update-paths)
     USERNAME="${2:-}"
     SERVER_PATH="${3:-}"
-    ALLOWED_PATHS="${4:-}"
-    [ -n "$USERNAME" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 update-paths <username> <server_path> [allowed_paths]"
-    action_update_paths "$USERNAME" "$SERVER_PATH" "$ALLOWED_PATHS"
+    [ -n "$USERNAME" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 update-paths <username> <server_path>"
+    action_update_paths "$USERNAME" "$SERVER_PATH"
     ;;
   delete-user)
     USERNAME="${2:-}"

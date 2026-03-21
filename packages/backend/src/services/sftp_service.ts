@@ -116,8 +116,7 @@ export class SftpService {
       })
       .returning();
 
-    const allowedPathsArg = formatAllowedPathsArg(data.allowedPaths);
-    const result = await runSftpScript(['create-user', data.username, data.password, server.path, allowedPathsArg]);
+    const result = await runSftpScript(['create-user', data.username, data.password, server.path]);
 
     if (!result.success) {
       await db.delete(sftpAccounts).where(eq(sftpAccounts.id, account.id));
