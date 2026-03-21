@@ -13,6 +13,17 @@ fi
 
 REMNANT_HOME="${REMNANT_HOME:-/opt/remnant}"
 
+fail() {
+    echo ""
+    echo -e "  ${RED}✗ ERROR:${NC} $1"
+    echo ""
+    exit 1
+}
+
+if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" ]]; then
+    fail "This script must be run as root (not via sudo). Log in as root first: su -"
+fi
+
 # Confirmation
 
 echo ""

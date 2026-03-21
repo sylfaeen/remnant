@@ -2,7 +2,7 @@
 # remnant-firewall.sh — Secure firewall management for Remnant GSMP
 # This script is the ONLY entry point for firewall operations.
 # Executed via sudo by the remnant system user.
-# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/scripts/remnant-firewall.sh
+# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/scripts/subs/subs_firewall.sh
 
 set -euo pipefail
 

@@ -2,7 +2,7 @@
 # remnant-sftp.sh — Secure SFTP user management for Remnant GSMP
 # This script is the ONLY entry point for SFTP user operations.
 # Executed via sudo by the remnant system user.
-# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/scripts/remnant-sftp.sh
+# sudoers: remnant ALL=(ALL) NOPASSWD: /opt/remnant/scripts/subs/subs_sftp.sh
 
 set -euo pipefail
 

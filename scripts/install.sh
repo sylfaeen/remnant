@@ -681,7 +681,9 @@ main() {
     echo -e "${WHITE}Remnant${NC} — Game Server Management Panel"
     echo ""
 
-    [[ $EUID -eq 0 ]] || fail "This script must be run as root. Use: curl ... | sudo bash"
+    if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" ]]; then
+        fail "This script must be run as root (not via sudo). Log in as root first: su -"
+    fi
 
     resolve_version
     echo -e "Current version: ${CYAN}v${REMNANT_VERSION}${NC}"

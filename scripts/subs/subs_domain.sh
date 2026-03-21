@@ -2,7 +2,7 @@
 # remnant-domain.sh — Secure domain & SSL management for Remnant GSMP
 # This script is the ONLY entry point for domain/vhost/SSL operations.
 # Executed via sudo by the remnant system user.
-# sudoers: remnant ALL=(root) NOPASSWD: /opt/remnant/app/scripts/remnant-domain.sh
+# sudoers: remnant ALL=(root) NOPASSWD: /opt/remnant/app/scripts/subs/subs_domain.sh
 
 set -euo pipefail
 
