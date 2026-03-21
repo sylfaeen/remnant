@@ -172,7 +172,7 @@ function PanelDomainSection() {
                   </Button>
                 </div>
               </div>
-              <Alert variant={'default'} className={'mt-3'}>
+              <Alert variant={'warning'} className={'mt-3'}>
                 <Info className={'size-4'} />
                 <AlertDescription>{t('appSettings.panelDomain.restartWarning')}</AlertDescription>
               </Alert>

@@ -33,7 +33,7 @@ export function SettingsEnvironmentPage() {
   return (
     <PageContent>
       <div className={'space-y-4'}>
-        <Alert variant={'default'}>
+        <Alert variant={'warning'}>
           <Info className={'size-4'} />
           <AlertDescription dangerouslySetInnerHTML={{ __html: t('environment.restartWarning') }} />
         </Alert>
