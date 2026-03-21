@@ -12,9 +12,7 @@ export const apiClient = initClient(contract, {
     const headers: Record<string, string> = {};
     if (args.headers) {
       for (const [key, value] of Object.entries(args.headers)) {
-        if (typeof value === 'string') {
-          headers[key] = value;
-        }
+        headers[key] = value;
       }
     }
     if (token) {

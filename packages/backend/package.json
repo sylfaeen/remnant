@@ -34,7 +34,6 @@
     "fastify-plugin": "^5.1.0",
     "otpauth": "^9.5.0",
     "pidusage": "^4.0.1",
-    "pino": "^9",
     "socket.io": "^4",
     "zod": "^3"
   },

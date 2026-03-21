@@ -1,2 +1,2 @@
-ignores: ["prettier-plugin-tailwindcss"]
+ignores: ["prettier-plugin-tailwindcss","@ts-rest/core"]
 skip-missing: true
