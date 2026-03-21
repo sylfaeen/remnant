@@ -8,8 +8,6 @@ import {
   Loader2,
   Pencil,
   Plus,
-  Power,
-  PowerOff,
   Terminal,
   Trash2,
   XCircle,
@@ -38,6 +36,7 @@ import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
+import { Switch } from '@remnant/frontend/features/ui/shadcn/switch';
 
 export function ServerTasksPage() {
   const { t } = useTranslation();
@@ -303,23 +302,12 @@ function TaskRow({
               <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant={task.enabled ? 'ghost' : 'success'}
-                      size={task.enabled ? 'icon-sm' : 'sm'}
-                      onClick={() => onToggleConfirm(task.id)}
-                      className={cn(
-                        task.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
-                      )}
-                    >
-                      {task.enabled ? (
-                        <PowerOff className={'size-4'} />
-                      ) : (
-                        <>
-                          <Power className={'size-4'} />
-                          {t('tasks.enable')}
-                        </>
-                      )}
-                    </Button>
+                    <div className={'flex items-center'}>
+                      <Switch
+                        checked={task.enabled}
+                        onCheckedChange={() => onToggleConfirm(task.id)}
+                      />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                     {task.enabled ? t('tasks.tooltipDisable') : t('tasks.tooltipEnable')}

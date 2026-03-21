@@ -9,7 +9,7 @@ import { useServer, useUpdateServer } from '@remnant/frontend/hooks/use_servers'
 import { useInstalledJava } from '@remnant/frontend/hooks/use_java';
 import { Input } from '@remnant/frontend/features/ui/shadcn/input';
 import { Label } from '@remnant/frontend/features/ui/shadcn/label';
-import { Checkbox } from '@remnant/frontend/features/ui/shadcn/checkbox';
+import { Switch } from '@remnant/frontend/features/ui/shadcn/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@remnant/frontend/features/ui/shadcn/select';
 import { Textarea } from '@remnant/frontend/features/ui/shadcn/textarea';
 import { AIKAR_FLAGS_STRING, DEFAULT_JAVA_PORT } from '@remnant/shared';
@@ -221,10 +221,10 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
             </div>
             <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-4 dark:border-white/6 dark:bg-zinc-800/50'}>
               <Label className={'flex cursor-pointer items-center gap-3'}>
-                <Checkbox checked={hasAikarFlags} onCheckedChange={(checked) => handleToggleAikarFlags(checked === true)} />
+                <Switch checked={hasAikarFlags} onCheckedChange={(checked) => handleToggleAikarFlags(checked === true)} />
                 <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.useAikarFlags')}</span>
               </Label>
-              <p className={'pl-8 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.aikarDescription')}</p>
+              <p className={'pl-9 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.aikarDescription')}</p>
             </div>
             <div>
               <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>
@@ -300,7 +300,7 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
             <FeatureCard.RowLabel>{t('settings.autoStartSettings')}</FeatureCard.RowLabel>
             <div className={'w-full'}>
               <Label className={'flex cursor-pointer items-center gap-3'}>
-                <Checkbox checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
+                <Switch checked={autoStart} onCheckedChange={(checked) => setAutoStart(checked === true)} />
                 <div>
                   <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.enableAutoStart')}</span>
                   <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.autoStartDescription')}</p>

@@ -1,7 +1,7 @@
 import { useState, type DragEvent, type ChangeEvent } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Loader2, Package, Power, PowerOff, Puzzle, Trash2, UploadCloud } from 'lucide-react';
+import { AlertTriangle, Loader2, Package, Puzzle, Trash2, UploadCloud } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -21,6 +21,7 @@ import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 import { Label } from '@remnant/frontend/features/ui/shadcn/label';
+import { Switch } from '@remnant/frontend/features/ui/shadcn/switch';
 
 export function ServerPluginsPage() {
   const { t } = useTranslation();
@@ -317,23 +318,9 @@ function PluginRow({ plugin, togglePlugin, deletePlugin }: PluginRowProps) {
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant={plugin.enabled ? 'ghost' : 'success'}
-                    size={plugin.enabled ? 'icon-sm' : 'xs'}
-                    onClick={() => setToggleConfirm(true)}
-                    className={cn(
-                      plugin.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
-                    )}
-                  >
-                    {plugin.enabled ? (
-                      <PowerOff className={'size-4'} />
-                    ) : (
-                      <>
-                        <Power className={'size-4'} />
-                        {t('plugins.enable')}
-                      </>
-                    )}
-                  </Button>
+                  <div className={'flex items-center'}>
+                    <Switch checked={plugin.enabled} onCheckedChange={() => setToggleConfirm(true)} />
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {plugin.enabled ? t('plugins.tooltipDisable') : t('plugins.tooltipEnable')}
