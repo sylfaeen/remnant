@@ -10,6 +10,7 @@ import {
   FileText,
   FolderOpen,
   FolderPlus,
+  LoaderCircle,
   Pencil,
   TextCursorInput,
   Trash2,
@@ -278,10 +279,8 @@ function FilesSection({ serverId, currentPath, onNavigate }: FilesSectionProps) 
         </div>
         <div>
           {filesLoading ? (
-            <div className={'py-12 text-center'}>
-              <div
-                className={'mx-auto size-8 animate-spin rounded-full border-t-2 border-b-2 border-zinc-600 dark:border-zinc-400'}
-              />
+            <div className={'flex items-center justify-center py-12 text-center'}>
+              <LoaderCircle className={'size-4 animate-spin text-zinc-600 dark:text-zinc-400'} strokeWidth={2} />
             </div>
           ) : error ? (
             <div className={'py-12 text-center text-sm text-red-600'}>{t('files.loadError')}</div>

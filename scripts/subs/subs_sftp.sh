@@ -57,6 +57,21 @@ ensure_sftp_group() {
   if ! getent group "$SFTP_GROUP" &>/dev/null; then
     groupadd "$SFTP_GROUP"
   fi
+
+  # Configure sshd for chroot SFTP if not already done
+  if ! grep -q "Match Group ${SFTP_GROUP}" /etc/ssh/sshd_config 2>/dev/null; then
+    cat >> /etc/ssh/sshd_config << SSHD_EOF
+
+# Remnant SFTP chroot configuration
+Match Group ${SFTP_GROUP}
+    ForceCommand internal-sftp
+    ChrootDirectory %h
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTunnel no
+SSHD_EOF
+    systemctl restart sshd 2>/dev/null || systemctl restart ssh 2>/dev/null || true
+  fi
 }
 
 # Sets up the chroot directory structure with symlinks to allowed paths.

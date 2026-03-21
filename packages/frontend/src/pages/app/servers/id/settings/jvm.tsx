@@ -220,11 +220,13 @@ function JvmConfigSection({ serverId }: JvmConfigSectionProps) {
               </div>
             </div>
             <div className={'rounded-lg border border-black/6 bg-zinc-50/50 p-4 dark:border-white/6 dark:bg-zinc-800/50'}>
-              <Label className={'flex cursor-pointer items-center gap-3'}>
-                <Switch checked={hasAikarFlags} onCheckedChange={(checked) => handleToggleAikarFlags(checked === true)} />
-                <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.useAikarFlags')}</span>
+              <Label className={'mt-1 flex cursor-pointer items-center gap-3'}>
+                <Switch checked={hasAikarFlags} onCheckedChange={(checked) => handleToggleAikarFlags(checked)} />
+                <div>
+                  <span className={'text-sm font-medium text-zinc-700 dark:text-zinc-300'}>{t('settings.useAikarFlags')}</span>
+                  <p className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.aikarDescription')}</p>
+                </div>
               </Label>
-              <p className={'pl-9 text-sm text-zinc-600 dark:text-zinc-400'}>{t('settings.aikarDescription')}</p>
             </div>
             <div>
               <Label className={'mb-1.5 block text-sm text-zinc-600 dark:text-zinc-400'}>

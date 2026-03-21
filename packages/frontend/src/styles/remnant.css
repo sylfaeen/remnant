@@ -116,7 +116,7 @@
               border-color: var(--border);
             }
 
-            @media (min-width: 1280px) {
+            @media (min-width: 960px) {
               position: sticky;
               top: 0;
               z-index: 30;

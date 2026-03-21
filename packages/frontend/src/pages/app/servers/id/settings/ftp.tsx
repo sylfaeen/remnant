@@ -217,9 +217,7 @@ function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
         <div className={'min-w-0'}>
           <div className={'flex items-center gap-2'}>
             <span className={'font-jetbrains text-sm font-semibold text-zinc-800 dark:text-zinc-200'}>{account.username}</span>
-            <Badge variant={isReadOnly ? 'secondary' : 'default'} className={'font-semibold'}>
-              {isReadOnly ? t('settings.ftp.accounts.readOnly') : t('settings.ftp.accounts.readWrite')}
-            </Badge>
+            <Badge>{isReadOnly ? t('settings.ftp.accounts.readOnly') : t('settings.ftp.accounts.readWrite')}</Badge>
           </div>
           <div className={'mt-0.5 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400'}>
             <span>{pathsLabel}</span>

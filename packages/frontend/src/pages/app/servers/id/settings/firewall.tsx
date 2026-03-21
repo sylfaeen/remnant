@@ -23,12 +23,6 @@ import { PageContent } from '@remnant/frontend/pages/app/features/page_content';
 import type { Protocol } from '@remnant/frontend/pages/app/servers/features/firewall_card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@remnant/frontend/features/ui/shadcn/tooltip';
 
-const PROTOCOL_BADGE_VARIANT: Record<Protocol, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  tcp: 'default',
-  udp: 'secondary',
-  both: 'secondary',
-};
-
 const PROTOCOL_LABELS: Record<Protocol, string> = {
   tcp: 'TCP',
   udp: 'UDP',
@@ -183,7 +177,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
         <div
           className={cn(
             'flex size-8 shrink-0 items-center justify-center rounded-lg transition-opacity',
-            rule.enabled ? 'bg-green-600 text-white' : 'bg-zinc-300'
+            rule.enabled ? 'bg-blue-600 text-white' : 'bg-zinc-300'
           )}
         >
           <Shield className={'size-4'} strokeWidth={2} />
@@ -193,9 +187,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
             <span className={'font-jetbrains text-sm font-semibold text-zinc-800 tabular-nums dark:text-zinc-200'}>
               {rule.port}
             </span>
-            <Badge variant={PROTOCOL_BADGE_VARIANT[rule.protocol]} className={'font-semibold'}>
-              {PROTOCOL_LABELS[rule.protocol]}
-            </Badge>
+            <Badge>{PROTOCOL_LABELS[rule.protocol]}</Badge>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{rule.label}</span>
             {!rule.enabled && <Badge variant={'secondary'}>{t('settings.firewall.disabled')}</Badge>}
           </div>
