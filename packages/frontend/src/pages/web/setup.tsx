@@ -15,7 +15,6 @@ import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { Input } from '@remnant/frontend/features/ui/shadcn/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@remnant/frontend/features/ui/shadcn/form';
 import { cn } from '@remnant/frontend/lib/cn';
-import { getDetectedLanguage } from '@remnant/frontend/lib/lang';
 import { getPasswordStrength } from '@remnant/frontend/lib/password';
 
 type SetupStep = 'account' | 'security' | 'complete';
@@ -168,7 +167,7 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(getDetectedLanguage);
+  const [selectedLang, setSelectedLang] = useState('en');
 
   const watchedPassword = form.watch('password');
   const strength = getPasswordStrength(watchedPassword);
