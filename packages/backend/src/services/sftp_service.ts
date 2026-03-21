@@ -59,6 +59,13 @@ function runSftpScript(args: Array<string>): Promise<CommandResult> {
   });
 }
 
+function formatAllowedPathsArg(allowedPaths: Array<string>): string {
+  if (allowedPaths.length === 0 || (allowedPaths.length === 1 && allowedPaths[0] === '/')) {
+    return '/';
+  }
+  return allowedPaths.join(',');
+}
+
 function formatAccount(account: typeof sftpAccounts.$inferSelect): SftpAccountResponse {
   let allowedPaths: Array<string> = [];
   try {
@@ -109,7 +116,8 @@ export class SftpService {
       })
       .returning();
 
-    const result = await runSftpScript(['create-user', data.username, data.password, server.path]);
+    const allowedPathsArg = formatAllowedPathsArg(data.allowedPaths);
+    const result = await runSftpScript(['create-user', data.username, data.password, server.path, allowedPathsArg]);
 
     if (!result.success) {
       await db.delete(sftpAccounts).where(eq(sftpAccounts.id, account.id));
@@ -156,6 +164,9 @@ export class SftpService {
 
     if (data.allowedPaths) {
       updateData.allowed_paths = JSON.stringify(data.allowedPaths);
+      const allowedPathsArg = formatAllowedPathsArg(data.allowedPaths);
+      const pathsResult = await runSftpScript(['update-paths', existing.username, server.path, allowedPathsArg]);
+      if (!pathsResult.success) throw new Error(pathsResult.error || 'Failed to update SFTP allowed paths on the system');
     }
 
     const [updated] = await db.update(sftpAccounts).set(updateData).where(eq(sftpAccounts.id, data.id)).returning();

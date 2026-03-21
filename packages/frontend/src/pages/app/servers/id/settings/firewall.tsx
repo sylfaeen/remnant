@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Clock, Info, Plus, Power, PowerOff, Shield, Trash2 } from 'lucide-react';
+import { Clock, Info, Plus, Shield, Trash2 } from 'lucide-react';
 import { cn } from '@remnant/frontend/lib/cn';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { Button } from '@remnant/frontend/features/ui/shadcn/button';
 import { Badge } from '@remnant/frontend/features/ui/shadcn/badge';
+import { Switch } from '@remnant/frontend/features/ui/shadcn/switch';
 import { FeatureCard } from '@remnant/frontend/pages/app/features/card';
 import { useServer } from '@remnant/frontend/hooks/use_servers';
 import {
@@ -166,6 +167,16 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
   const [toggleConfirm, setToggleConfirm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
+  function handleToggleChange() {
+    if (toggleConfirm) return;
+    setToggleConfirm(true);
+  }
+
+  function handleToggleConfirm() {
+    onToggle(rule.id);
+    setToggleConfirm(false);
+  }
+
   return (
     <FeatureCard.Row interactive className={'items-center gap-8 py-3'}>
       <div className={cn('flex items-center gap-3', !rule.enabled && 'opacity-50')}>
@@ -197,10 +208,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
             <Button
               variant={rule.enabled ? 'secondary' : 'success'}
               size={'xs'}
-              onClick={() => {
-                onToggle(rule.id);
-                setToggleConfirm(false);
-              }}
+              onClick={handleToggleConfirm}
             >
               {t('common.yes')}
             </Button>
@@ -223,23 +231,12 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant={rule.enabled ? 'ghost' : 'success'}
-                    size={rule.enabled ? 'icon-sm' : 'sm'}
-                    onClick={() => setToggleConfirm(true)}
-                    className={cn(
-                      rule.enabled && 'text-zinc-600 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-400'
-                    )}
-                  >
-                    {rule.enabled ? (
-                      <PowerOff className={'size-4'} />
-                    ) : (
-                      <>
-                        <Power className={'size-4'} />
-                        {t('settings.firewall.enable')}
-                      </>
-                    )}
-                  </Button>
+                  <div className={'flex items-center'}>
+                    <Switch
+                      checked={rule.enabled}
+                      onCheckedChange={handleToggleChange}
+                    />
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>
                   {rule.enabled ? t('rules.tooltipDisable') : t('rules.tooltipEnable')}

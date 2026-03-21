@@ -3,7 +3,7 @@
 ## Story
 
 **As a** administrateur,
-**I want** une page dédiée pour visualiser et modifier les variables d'environnement,
+**I want** une page dédiée avec un éditeur Monaco pour visualiser et modifier le fichier .env,
 **So that** je puisse configurer le panel de manière intuitive depuis l'interface.
 
 ## Status
@@ -15,41 +15,41 @@ done
 - Epic: 16 - Gestion de l'Environnement (.env)
 - Dependencies: Story 16.1 (API backend)
 - Fichiers clés:
-  - Créer: `packages/frontend/src/pages/app/environment/environment.tsx`
-  - Modifier: `packages/frontend/src/routes.tsx` — ajouter route `/app/environment`
-  - Modifier: `packages/frontend/src/pages/app/features/layouts/main_layout.tsx` — ajouter nav item
+  - Créer: `packages/frontend/src/pages/app/settings/environment.tsx`
+  - Modifier: `packages/frontend/src/routes.tsx` — ajouter route `/app/settings/environment`
   - Modifier: `packages/frontend/src/i18n/locales/en.json` et `fr.json`
-- Utiliser les composants existants: `PageContent`, `FeatureCard`, `Input`, `Button`, `Badge`
+- Approche: éditeur Monaco (code editor) affichant le contenu brut du .env, avec bouton Save
 - Un bandeau d'avertissement permanent indique qu'un redémarrage est nécessaire pour appliquer les changements
 
 ## Acceptance Criteria
 
 ### AC1: Route et navigation
-**Given** la sidebar principale
-**When** je regarde les items de navigation
-**Then** une entrée "Environment" est visible avec une icône appropriée
-**And** cliquer dessus navigue vers `/app/environment`
+**Given** la page Settings
+**When** je regarde les sous-pages
+**Then** une entrée "Environment" est visible
+**And** cliquer dessus navigue vers `/app/settings/environment`
 
-### AC2: Affichage des variables
+### AC2: Éditeur Monaco
 **Given** la page Environment est chargée
-**When** les données sont récupérées via `env.getAll`
-**Then** toutes les variables sont affichées en liste avec clé et valeur
+**When** les données sont récupérées via `env.getContent`
+**Then** le contenu brut du .env est affiché dans un éditeur Monaco
+**And** la coloration syntaxique est adaptée au format .env
 
 ### AC3: Bandeau de redémarrage
 **Given** la page Environment
 **When** elle est affichée
 **Then** un bandeau d'avertissement en haut indique qu'un redémarrage du panel est nécessaire pour appliquer les modifications
 
-### AC4: Édition d'une variable
-**Given** une variable affichée
-**When** je modifie sa valeur et je sauvegarde
-**Then** la mutation `env.update` est appelée
-**And** un toast de succès confirme la modification
+### AC4: Sauvegarde du fichier
+**Given** le contenu a été modifié dans l'éditeur
+**When** je clique sur le bouton Save
+**Then** la mutation `env.saveContent` est appelée avec le contenu complet
+**And** un toast de succès confirme la sauvegarde
 
 ### AC5: État de chargement
 **Given** la page Environment
 **When** les données sont en cours de chargement
-**Then** des skeletons sont affichés
+**Then** un skeleton est affiché à la place de l'éditeur
 
 ### AC6: i18n
 - [x] Tous les textes UI utilisent `t()`
@@ -61,45 +61,40 @@ done
 - [x] Task 1: Créer la page `environment.tsx` (AC: #2, #3, #5)
   - [x] `PageContent` avec titre, description et `DocsLink`
   - [x] Bandeau d'avertissement (icône `TriangleAlert`, fond amber) : redémarrage nécessaire
-  - [x] `FeatureCard` avec liste de `FeatureCard.Row` pour chaque variable
-  - [x] Skeletons pendant le chargement
+  - [x] Éditeur Monaco avec le contenu brut du .env
+  - [x] Skeleton pendant le chargement
 
-- [x] Task 2: Implémenter l'édition inline (AC: #4)
-  - [x] Clic sur une variable ouvre un mode édition (input + boutons sauvegarder/annuler)
-  - [x] Appel mutation `env.update` à la sauvegarde
+- [x] Task 2: Implémenter la sauvegarde (AC: #4)
+  - [x] Bouton Save appelle `env.saveContent` avec le contenu complet de l'éditeur
   - [x] Toast succès/erreur
   - [x] Invalidation du cache ts-rest après mutation
 
 - [x] Task 3: Route et navigation (AC: #1)
-  - [x] Ajouter route `/app/environment` dans `routes.tsx` sous `mainLayoutRoute`
-  - [x] Ajouter nav item dans `main_layout.tsx` (icône `FileCode`, position avant docs/settings)
+  - [x] Ajouter route `/app/settings/environment` dans `routes.tsx`
+  - [x] Navigation accessible depuis la page Settings
 
 - [x] Task 4: Traductions i18n (AC: #6)
   - [x] Clés `environment.*` dans `en.json`
   - [x] Clés `environment.*` dans `fr.json`
-  - [x] Titre, description, bandeau, boutons, toasts, placeholders
+  - [x] Titre, description, bandeau, boutons, toasts
 
 ## Dev Agent Record
 
 ### Implementation Plan
-- Page suit le pattern exact de Settings page (FeatureCard.Stack > FeatureCard > Header > Body > Row)
-- Édition inline avec Input + Check/X buttons, support Enter/Escape
+- Éditeur Monaco affichant le contenu brut du .env (pas de FeatureCard list)
+- Bouton Save pour sauvegarder le fichier complet
 - Bandeau amber avec TriangleAlert pour l'avertissement de redémarrage
-- Valeurs en font-jetbrains (monospace)
-- Nav item avec FileCode icon, positionné avant docs/settings dans le bottom group
+- Nav item accessible depuis Settings
 
 ### Completion Notes
-- ✅ Page environment.tsx créée avec compound components
-- ✅ Édition inline avec mutation ts-rest + toast + invalidation cache
-- ✅ Route /app/environment ajoutée dans routes.tsx
-- ✅ Nav item ajouté avec icône FileCode
-- ✅ Traductions EN/FR ajoutées (environment.*, toast.env*, nav.environment)
-- ✅ Aucune erreur TypeScript dans les fichiers modifiés
+- Page environment.tsx créée avec éditeur Monaco
+- Sauvegarde complète avec mutation ts-rest + toast + invalidation cache
+- Route /app/settings/environment ajoutée dans routes.tsx
+- Traductions EN/FR ajoutées (environment.*, toast.env*, nav.environment)
 
 ## File List
 
-- `packages/frontend/src/pages/app/environment/environment.tsx` — nouveau : page Environment complète
+- `packages/frontend/src/pages/app/settings/environment.tsx` — nouveau : page Environment avec Monaco editor
 - `packages/frontend/src/routes.tsx` — modifié : ajout route environmentRoute
-- `packages/frontend/src/pages/app/features/layouts/main_layout.tsx` — modifié : ajout nav item FileCode
 - `packages/frontend/src/i18n/locales/en.json` — modifié : ajout clés environment.*, toast.env*, nav.environment
 - `packages/frontend/src/i18n/locales/fr.json` — modifié : ajout clés environment.*, toast.env*, nav.environment

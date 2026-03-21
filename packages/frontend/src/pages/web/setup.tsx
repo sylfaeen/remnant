@@ -174,8 +174,8 @@ function AccountStep({ accountData, setupError, onChange, onSetupError, onComple
   const strength = getPasswordStrength(watchedPassword);
 
   const languages = [
-    { code: 'fr', name: 'Fran\u00e7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
     { code: 'en', name: 'English', flag: '\uD83C\uDDEC\uD83C\uDDE7' },
+    { code: 'fr', name: 'Fran\u00e7ais', flag: '\uD83C\uDDEB\uD83C\uDDF7' },
   ];
 
   const handleLanguageChange = (code: string) => {

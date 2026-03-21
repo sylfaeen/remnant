@@ -58,7 +58,7 @@ Le projet Remnant a ete developpe avec succes en 8 epics, livrant un panel de ge
 - **Buffer limite** pour les messages console evite les problemes de memoire
 
 ### Decisions techniques cles
-- WebSocket au lieu de Socket.io - moins de overhead, natif Fastify
+- @fastify/websocket (WebSocket natif) - moins de overhead, intégré nativement à Fastify
 - EventEmitter pour la communication interne du ProcessManager
 
 ---

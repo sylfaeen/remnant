@@ -57,7 +57,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 | **Deployment** | Linux natif OU Docker (choix admin) | Docker = utilisateur avancé, pas de hand-holding |
 | **Multi-serveurs** | Requiert Docker pour les instances MC | Si Linux natif + multi → Docker requis |
 | **Database** | SQLite | Tables users, permissions, config, sessions |
-| **Runtime** | Node.js LTS | ES modules, écosystème mature (Fastify, Socket.io) |
+| **Runtime** | Node.js LTS | ES modules, écosystème mature (Fastify, @fastify/websocket) |
 | **Nginx** | Obligatoire (natif) ou intégré (Docker) | TLS termination, reverse proxy |
 | **Auth model** | Multi-user + permissions directes | Permission list par user, admin par défaut |
 
@@ -109,7 +109,7 @@ remnant/
 ├── turbo.json                # Turborepo task configuration
 ├── tsconfig.base.json        # Shared TypeScript config
 ├── packages/
-│   ├── backend/              # Fastify + WebSocket natif + SQLite
+│   ├── backend/              # Fastify + @fastify/websocket + SQLite
 │   │   ├── src/
 │   │   │   ├── index.ts
 │   │   │   ├── routes/
@@ -118,10 +118,10 @@ remnant/
 │   │   │   └── db/
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   ├── frontend/             # React + Vite + Tailwind
+│   ├── frontend/             # React + Vite + Tailwind + shadcn/ui
 │   │   ├── src/
 │   │   │   ├── main.tsx
-│   │   │   ├── components/
+│   │   │   ├── features/
 │   │   │   ├── pages/
 │   │   │   ├── hooks/
 │   │   │   └── lib/
@@ -130,19 +130,18 @@ remnant/
 │   │   │   ├── sw.js
 │   │   │   └── icon.svg
 │   │   ├── package.json
-│   │   ├── tailwind.config.js
-│   │   ├── vite.config.ts
+│   │   ├── vite.config.js
 │   │   └── tsconfig.json
 │   └── shared/               # Types partagés
 │       ├── src/
 │       │   ├── index.ts
 │       │   ├── types/
+│       │   ├── contract/     # ts-rest contract definitions
 │       │   └── constants/
 │       ├── package.json
 │       └── tsconfig.json
 ├── scripts/
 │   └── remnant-cli.sh        # CLI tool
-└── docs/                     # VitePress documentation
 ```
 
 ### Initialization Commands
@@ -198,7 +197,7 @@ pnpm install
 - Tailwind CSS avec PostCSS
 - Configuration JIT (Just-In-Time)
 - Utilitaire `cn()` pour les classes dynamiques (clsx + tailwind-merge)
-  - Import: `import { cn } from '@remnant/frontend/lib/cn'`
+  - Import: `import { cn } from '@/lib/utils'`
   - Usage obligatoire pour tout className conditionnel
   - Exemple: `className={cn('base-class', condition && 'conditional-class')}`
   - Ne jamais utiliser de template literals: `` className={`base ${condition}`} ``
@@ -272,8 +271,15 @@ pnpm install
 ```
 users (id, username, password_hash, permissions[], token_version, locale, created_at, updated_at)
 sessions (id, user_id, refresh_token, expires_at, created_at)
-servers (id, name, path, config_json, is_active)
-scheduled_tasks (id, server_id, type, cron_expression, config_json)
+servers (id, name, path, jar_file, min_ram, max_ram, jvm_flags, java_port, java_path, auto_start, created_at, updated_at)
+scheduled_tasks (id, server_id, name, type, cron_expression, enabled, config, last_run, next_run, created_at, updated_at)
+audit_logs (id, user_id, username, action, resource_type, resource_id, details, ip, created_at)
+custom_domains (id, server_id, domain, port, type, ssl_enabled, ssl_expires_at, created_at)
+firewall_rules (id, server_id, port, protocol, label, enabled, created_at)
+recovery_codes (id, user_id, code_hash, used_at, created_at)
+sftp_accounts (id, server_id, username, password, permissions, allowed_paths, created_at, updated_at)
+task_executions (id, task_id, status, output, error, duration_ms, created_at)
+user_totp (id, user_id, encrypted_secret, verified, created_at)
 ```
 
 ---
@@ -322,7 +328,14 @@ Request → Helmet → CORS → Rate Limit → JWT Verify → Permission Guard �
   ├── plugins    # list, delete
   ├── tasks      # list, create, update, delete, toggle
   ├── settings   # get, update, checkVersion
-  └── java       # detectVersions
+  ├── java       # detectVersions
+  ├── firewall   # list, create, update, delete, toggle
+  ├── onboarding # getStatus, setupAdmin
+  ├── totp       # generate, verify, disable, status
+  ├── audit      # list, getByResource
+  ├── env        # get, update
+  ├── domains    # list, create, update, delete
+  └── sftp       # list, create, update, delete
 ```
 
 **REST Routes (file uploads/downloads):**
@@ -350,24 +363,28 @@ Request → Helmet → CORS → Rate Limit → JWT Verify → Permission Guard �
 | **State Management** | Zustand | latest | Léger (~1KB), API simple |
 | **Routing** | TanStack Router | v1 | Type-safe, intégration TanStack Query |
 | **Data Fetching** | TanStack Query | v5 | Caching, loading states |
-| **Components** | Feature-based | N/A | Intuitif pour ce projet |
+| **Components** | shadcn/ui + Feature-based | N/A | Intuitif pour ce projet |
 
 **Project Structure:**
 ```
 src/
 ├── features/
-│   ├── layout/        # Sidebar, MobileNav, AppShell, MainLayout
-│   ├── auth/          # Auth store, login hook
-│   └── i18n/          # i18n config, locales (en.json, fr.json)
+│   ├── layouts/       # Sidebar, MobileNav, AppShell, MainLayout
+│   ├── ui/shadcn/     # shadcn/ui components (Button, Card, Dialog, Input, etc.)
+│   ├── auth_initializer.tsx  # Auth initialization
+│   └── totp/          # TOTP setup & login steps
 ├── pages/
+│   ├── web/           # Login, setup (public pages)
 │   └── app/
-│       ├── dashboard/
-│       ├── servers/    # Server pages + features (header, section compounds)
+│       ├── features/  # Shared app features (sidebar, card, docs_link)
+│       ├── servers/   # Server pages + features (header, section compounds)
 │       ├── users/
-│       └── settings/
+│       ├── settings/
+│       └── docs/      # In-app documentation
+├── stores/             # Zustand stores (auth_store.ts, etc.)
 ├── hooks/              # use_auth, use_servers, use_files, etc.
-├── components/ui/      # Button, Card, Dialog, Input, etc. (Radix UI)
-└── lib/                # Utils (cn), ts-rest client, API client
+├── i18n/               # i18n config, locales (en.json, fr.json)
+└── lib/                # Utils (cn), ts-rest client (api.ts), query client
 ```
 
 **Frontend Routes:**
@@ -387,7 +404,7 @@ src/
 | `/app/servers/$id/settings` | ServerSettingsPage | Paramètres serveur |
 
 **UI Components:**
-- Composants Radix UI (Button, Card, Dialog, Input, Select, etc.)
+- shadcn/ui composants (Button, Card, Dialog, Input, Select, etc.) dans `src/features/ui/shadcn/`
 - Éditeur de code intégré pour l'édition de fichiers serveur
 - Pattern Compound Component utilisé pour `ServerPageHeader` et `ServerSection`
 
@@ -513,7 +530,7 @@ packages/{package}/
 **Imports — Tous absolus:**
 ```typescript
 // Alias configurés dans tsconfig
-import { Button } from '@remnant/frontend/components/ui/button'
+import { Button } from '@/features/ui/shadcn/button'
 import { useServerStore } from '@remnant/frontend/stores/server_store'
 import { ServerStatus } from '@remnant/shared'
 ```
@@ -876,19 +893,40 @@ remnant/
 │   │   │   │   │   ├── users.ts      # Users table
 │   │   │   │   │   ├── sessions.ts   # Sessions table
 │   │   │   │   │   ├── servers.ts    # Servers table
-│   │   │   │   │   └── tasks.ts      # Scheduled tasks table
+│   │   │   │   │   ├── tasks.ts      # Scheduled tasks + task executions tables
+│   │   │   │   │   ├── audit_logs.ts # Audit logs table
+│   │   │   │   │   ├── custom_domains.ts # Custom domains table
+│   │   │   │   │   ├── firewall_rules.ts # Firewall rules table
+│   │   │   │   │   ├── recovery_codes.ts # Recovery codes table
+│   │   │   │   │   ├── sftp_accounts.ts  # SFTP accounts table
+│   │   │   │   │   └── user_totp.ts      # User TOTP table
 │   │   │   │   └── migrations/       # Drizzle migrations
 │   │   │   │
-│   │   │   ├── routes/
+│   │   │   ├── api/                   # ts-rest route handlers
 │   │   │   │   ├── index.ts          # ts-rest Fastify plugin registration
-│   │   │   │   ├── middlewares/
-│   │   │   │   │   └── auth.ts       # protectedRoute middleware
-│   │   │   │   └── handlers/
-│   │   │   │       ├── auth.ts       # login, logout, refresh, me
-│   │   │   │       ├── users.ts      # list, byId, create, update, delete
-│   │   │   │       ├── servers.ts    # list, byId, CRUD, start/stop/restart
-│   │   │   │       ├── files.ts      # list, read, write, delete, mkdir, rename
-│   │   │   │       ├── jars.ts       # getVersions, getBuilds, download, list
+│   │   │   │   ├── auth.ts           # login, logout, refresh, me
+│   │   │   │   ├── users.ts          # list, byId, create, update, delete
+│   │   │   │   ├── servers.ts        # list, byId, CRUD, start/stop/restart
+│   │   │   │   ├── files.ts          # list, read, write, delete, mkdir, rename
+│   │   │   │   ├── jars.ts           # getVersions, getBuilds, download, list
+│   │   │   │   ├── plugins.ts        # list, delete
+│   │   │   │   ├── tasks.ts          # list, create, update, delete, toggle
+│   │   │   │   ├── settings.ts       # get, update, checkVersion
+│   │   │   │   ├── java.ts           # detectVersions
+│   │   │   │   ├── firewall.ts       # list, create, update, delete, toggle
+│   │   │   │   ├── onboarding.ts     # getStatus, setupAdmin
+│   │   │   │   ├── totp.ts           # generate, verify, disable, status
+│   │   │   │   ├── audit.ts          # list, getByResource
+│   │   │   │   ├── env.ts            # get, update
+│   │   │   │   ├── domains.ts        # list, create, update, delete
+│   │   │   │   └── sftp.ts           # list, create, update, delete
+│   │   │   │
+│   │   │   ├── routes/
+│   │   │   │   ├── index.ts          # REST routes registration (uploads, downloads)
+│   │   │   │   ├── plugins.ts        # Plugin upload route
+│   │   │   │   ├── files.ts          # File upload/download routes
+│   │   │   │   ├── backups.ts        # Backup routes
+│   │   │   │   └── websocket.ts      # WebSocket route (@fastify/websocket)
 │   │   │   │
 │   │   │   ├── services/
 │   │   │   │   ├── auth_service.ts   # JWT, password hashing, token versioning
@@ -899,8 +937,8 @@ remnant/
 │   │   │   │   ├── task_service.ts   # Scheduled task execution
 │   │   │   │   └── metrics_service.ts# System metrics collection
 │   │   │   │
-│   │   │   ├── socket/
-│   │   │   │   ├── index.ts          # Socket.io setup + auth middleware
+│   │   │   ├── websocket/
+│   │   │   │   ├── index.ts          # @fastify/websocket setup + auth middleware
 │   │   │   │   └── handlers/
 │   │   │   │       ├── console_handler.ts   # console:* events
 │   │   │   │       ├── server_handler.ts    # server:* events
@@ -938,81 +976,75 @@ remnant/
 │   ├── frontend/
 │   │   ├── package.json
 │   │   ├── tsconfig.json             # Extends tsconfig.base.json
-│   │   ├── vite.config.ts            # Vite config + alias
-│   │   ├── tailwind.config.js        # Tailwind configuration
+│   │   ├── vite.config.js             # Vite config + alias
+│   │   ├── components.json           # shadcn/ui configuration
 │   │   ├── postcss.config.js         # PostCSS config
 │   │   ├── index.html                # HTML entry point
 │   │   ├── src/
 │   │   │   ├── main.tsx              # React entry point
-│   │   │   ├── components/auth_initializer.tsx  # Auth initialization
 │   │   │   ├── routes.tsx            # TanStack Router configuration
 │   │   │   ├── globals.css           # Tailwind imports + global styles
 │   │   │   │
-│   │   │   ├── pages/
-│   │   │   │   ├── login.tsx         # Login page
-│   │   │   │   ├── dashboard.tsx     # Main dashboard
-│   │   │   │   ├── console.tsx       # Console page
-│   │   │   │   ├── files.tsx         # File browser page
-│   │   │   │   ├── plugins.tsx       # Plugins management page
-│   │   │   │   ├── settings.tsx      # Server settings page
-│   │   │   │   ├── tasks.tsx         # Scheduled tasks page
-│   │   │   │   └── users.tsx         # User management page
-│   │   │   │
-│   │   │   ├── components/
-│   │   │   │   ├── ui/               # Composants UI génériques
+│   │   │   ├── features/
+│   │   │   │   ├── auth_initializer.tsx  # Auth initialization
+│   │   │   │   │
+│   │   │   │   ├── ui/shadcn/        # shadcn/ui components
 │   │   │   │   │   ├── button.tsx
 │   │   │   │   │   ├── input.tsx
-│   │   │   │   │   ├── modal.tsx
-│   │   │   │   │   ├── toast.tsx
+│   │   │   │   │   ├── dialog.tsx
+│   │   │   │   │   ├── card.tsx
+│   │   │   │   │   ├── select.tsx
+│   │   │   │   │   ├── tooltip.tsx
 │   │   │   │   │   ├── skeleton.tsx
-│   │   │   │   │   └── dropdown.tsx
-│   │   │   │   │
-│   │   │   │   ├── layout/
+│   │   │   │   │   ├── dropdown-menu.tsx
 │   │   │   │   │   ├── sidebar.tsx
-│   │   │   │   │   ├── header.tsx
-│   │   │   │   │   └── main_layout.tsx
+│   │   │   │   │   └── ...           # All shadcn/ui primitives
 │   │   │   │   │
-│   │   │   │   ├── console/
-│   │   │   │   │   ├── console_output.tsx
-│   │   │   │   │   └── command_input.tsx
+│   │   │   │   ├── layouts/          # Layout components
+│   │   │   │   │   └── app_shell.tsx
 │   │   │   │   │
-│   │   │   │   ├── files/
-│   │   │   │   │   ├── file_tree.tsx
-│   │   │   │   │   ├── file_editor.tsx  # Éditeur de code intégré
-│   │   │   │   │   └── upload_zone.tsx
-│   │   │   │   │
-│   │   │   │   ├── server/
-│   │   │   │   │   ├── server_controls.tsx
-│   │   │   │   │   ├── server_status.tsx
-│   │   │   │   │   └── server_config_form.tsx
-│   │   │   │   │
-│   │   │   │   ├── monitoring/
-│   │   │   │   │   ├── resource_chart.tsx
-│   │   │   │   │   └── players_list.tsx
-│   │   │   │   │
-│   │   │   │   ├── plugins/
-│   │   │   │   │   ├── plugin_list.tsx
-│   │   │   │   │   └── plugin_upload.tsx
-│   │   │   │   │
-│   │   │   │   └── settings/
-│   │   │   │       ├── jvm_flags_form.tsx
-│   │   │   │       └── port_config_form.tsx
+│   │   │   │   └── totp/             # TOTP authentication
+│   │   │   │       ├── totp_login_step.tsx
+│   │   │   │       ├── totp_onboarding_step.tsx
+│   │   │   │       └── totp_setup_display.tsx
+│   │   │   │
+│   │   │   ├── pages/
+│   │   │   │   ├── web/
+│   │   │   │   │   ├── login.tsx     # Login page
+│   │   │   │   │   └── setup.tsx     # Onboarding setup page
+│   │   │   │   └── app/
+│   │   │   │       ├── features/     # Shared app features
+│   │   │   │       │   ├── sidebar.tsx
+│   │   │   │       │   ├── card.tsx
+│   │   │   │       │   └── docs_link.tsx
+│   │   │   │       ├── servers/      # Server pages + dialogs + features
+│   │   │   │       ├── users/        # User management pages + dialogs
+│   │   │   │       ├── settings/     # App settings pages
+│   │   │   │       └── docs/         # In-app documentation
 │   │   │   │
 │   │   │   ├── stores/
-│   │   │   │   ├── use_auth_store.ts      # Auth state + actions
-│   │   │   │   ├── use_server_store.ts    # Server state + status
-│   │   │   │   ├── use_console_store.ts   # Console logs buffer
-│   │   │   │   └── use_ui_store.ts        # UI state (sidebar, theme)
+│   │   │   │   ├── auth_store.ts          # Auth state + actions
+│   │   │   │   ├── server_store.ts        # Server state + status
+│   │   │   │   ├── console_store.ts       # Console logs buffer
+│   │   │   │   └── ui_store.ts            # UI state (sidebar, theme)
 │   │   │   │
 │   │   │   ├── hooks/
-│   │   │   │   ├── use_socket.ts          # Socket.io connection hook
-│   │   │   │   ├── use_server_status.ts   # Server status subscription
-│   │   │   │   └── use_metrics.ts         # Metrics subscription
+│   │   │   │   ├── use_auth.ts            # Auth hook
+│   │   │   │   ├── use_servers.ts         # Server data hook
+│   │   │   │   ├── use_backups.ts         # Backups hook
+│   │   │   │   ├── use_domains.ts         # Domains hook
+│   │   │   │   ├── use_files.ts           # Files hook
+│   │   │   │   ├── use_jars.ts            # JARs hook
+│   │   │   │   ├── use_plugins.ts         # Plugins hook
+│   │   │   │   ├── use_sftp.ts            # SFTP accounts hook
+│   │   │   │   ├── use_tasks.ts           # Scheduled tasks hook
+│   │   │   │   ├── use_users.ts           # Users hook
+│   │   │   │   └── use-mobile.ts          # Mobile detection hook
 │   │   │   │
 │   │   │   ├── lib/
 │   │   │   │   ├── api.ts                 # ts-rest client typé
-│   │   │   │   ├── cn.ts                  # Tailwind class merge utility
-│   │   │   │   ├── socket_client.ts       # Socket.io client setup
+│   │   │   │   ├── utils.ts               # Tailwind class merge utility (cn)
+│   │   │   │   ├── websocket_client.ts    # WebSocket client setup
 │   │   │   │   └── query_client.ts        # TanStack Query setup
 │   │   │   │
 │   │   │   ├── i18n/                      # Internationalization (MANDATORY)
@@ -1040,12 +1072,28 @@ remnant/
 │       ├── src/
 │       │   ├── index.ts               # Public exports
 │       │   │
+│       │   ├── contract/              # ts-rest contract definitions
+│       │   │   ├── index.ts           # Contract exports
+│       │   │   ├── auth.ts            # Auth contract
+│       │   │   ├── servers.ts         # Servers contract
+│       │   │   ├── files.ts           # Files contract
+│       │   │   ├── users.ts           # Users contract
+│       │   │   ├── jars.ts            # JARs contract
+│       │   │   ├── plugins.ts         # Plugins contract
+│       │   │   ├── tasks.ts           # Tasks contract
+│       │   │   ├── firewall.ts        # Firewall contract
+│       │   │   ├── domains.ts         # Domains contract
+│       │   │   ├── sftp.ts            # SFTP contract
+│       │   │   ├── totp.ts            # TOTP contract
+│       │   │   ├── audit.ts           # Audit contract
+│       │   │   └── env.ts             # Environment contract
+│       │   │
 │       │   ├── types/
 │       │   │   ├── index.ts           # Type exports
 │       │   │   ├── user.ts            # User, Permission types
 │       │   │   ├── server.ts          # Server, ServerConfig types
 │       │   │   ├── api.ts             # ApiResponse, ApiError types
-│       │   │   └── socket.ts          # Socket event types
+│       │   │   └── websocket.ts       # WebSocket event types
 │       │   │
 │       │   ├── schemas/
 │       │   │   ├── index.ts           # Schema exports
@@ -1057,7 +1105,7 @@ remnant/
 │       │       ├── index.ts           # Constants exports
 │       │       ├── error_codes.ts     # ErrorCodes enum
 │       │       ├── permissions.ts     # Permission constants
-│       │       └── socket_events.ts   # Socket event names
+│       │       └── websocket_events.ts # WebSocket event names
 │       │
 │       └── tests/
 │           └── schemas/
@@ -1083,6 +1131,13 @@ remnant/
 | `/api/jars/*` | JAR management (ts-rest) | Protected |
 | `/api/plugins/*` | Plugin list/delete/upload (ts-rest) | Protected |
 | `/api/tasks/*` | Scheduled tasks (ts-rest) | Protected |
+| `/api/firewall/*` | Firewall rules (ts-rest) | Protected |
+| `/api/onboarding/*` | Onboarding setup (ts-rest) | Public (setup), Protected (status) |
+| `/api/totp/*` | TOTP 2FA (ts-rest) | Protected |
+| `/api/audit/*` | Audit logs (ts-rest) | Protected |
+| `/api/env/*` | Environment config (ts-rest) | Protected |
+| `/api/domains/*` | Custom domains (ts-rest) | Protected |
+| `/api/sftp/*` | SFTP accounts (ts-rest) | Protected |
 | `/ws/console` | Real-time console | JWT in query params |
 
 **Component Boundaries:**
@@ -1091,8 +1146,8 @@ remnant/
 |-------|----------------|----------------------|
 | **ts-rest Handlers** | API route handlers, Zod validation | Calls Services |
 | **Services** | Business logic | Calls DB, external APIs |
-| **WebSocket Handlers** | Console streaming | Uses Services, emits to clients |
-| **Middlewares** | Auth (protectedRoute) | Fastify hooks chain |
+| **WebSocket Handlers** | Console streaming via @fastify/websocket | Uses Services, emits to clients |
+| **Fastify Hooks** | Auth (protectedRoute), permission guards | Fastify hooks chain |
 | **DB Schema** | Data structure | Used by Services via Drizzle |
 
 **Data Boundaries:**
@@ -1103,58 +1158,80 @@ remnant/
 | Sessions | SQLite `sessions` | Service → Drizzle → SQLite |
 | Server Config | SQLite `servers` | Service → Drizzle → SQLite |
 | Server Files | Filesystem | Service → fs/promises → Disk |
-| Console Logs | Memory buffer | Service → Socket.io → Clients |
-| Metrics | Memory (polling) | Service → Socket.io → Clients |
+| Console Logs | Memory buffer | Service → WebSocket → Clients |
+| Metrics | Memory (polling) | Service → WebSocket → Clients |
 
 ---
 
 ### Requirements to Structure Mapping
 
 **Epic: Authentication & Authorization**
-- Routes: `backend/src/routes/handlers/auth.ts`, `backend/src/routes/handlers/users.ts`
-- Middleware: `backend/src/routes/middlewares/auth.ts` (protectedRoute)
+- API: `backend/src/api/auth.ts`, `backend/src/api/users.ts`, `backend/src/api/totp.ts`
 - Services: `backend/src/services/auth_service.ts`, `backend/src/services/user_service.ts`
-- DB: `backend/src/db/schema/users.ts`, `backend/src/db/schema/sessions.ts`
-- Frontend: `frontend/src/pages/login.tsx`, `frontend/src/pages/users.tsx`
+- DB: `backend/src/db/schema/users.ts`, `backend/src/db/schema/sessions.ts`, `backend/src/db/schema/user_totp.ts`, `backend/src/db/schema/recovery_codes.ts`
+- Frontend: `frontend/src/pages/web/login.tsx`, `frontend/src/pages/app/users/`
 - Hooks: `frontend/src/hooks/use_auth.ts`, `frontend/src/hooks/use_users.ts`
 - Stores: `frontend/src/stores/auth_store.ts`
 
 **Epic: Server Management**
-- Routes: `backend/src/routes/handlers/servers.ts`
+- API: `backend/src/api/servers.ts`
 - Services: `backend/src/services/server_service.ts`
 - DB: `backend/src/db/schema/servers.ts`
-- Frontend: `frontend/src/pages/dashboard.tsx`, `frontend/src/pages/servers.tsx`
+- Frontend: `frontend/src/pages/app/servers/`
 - Hooks: `frontend/src/hooks/use_servers.ts`
 
 **Epic: Real-time Console**
-- WebSocket: `backend/src/routes/websocket.ts`
+- WebSocket: `backend/src/routes/websocket.ts` (@fastify/websocket)
 - Services: `backend/src/services/server_process_manager.ts` (stdin/stdout)
-- Frontend: `frontend/src/pages/console.tsx`
+- Frontend: `frontend/src/pages/app/servers/features/server_console.tsx`
 - Hooks: `frontend/src/hooks/use_console.ts`
 
 **Epic: File Management**
-- Routes: `backend/src/routes/handlers/files.ts`
+- API: `backend/src/api/files.ts`
+- Routes: `backend/src/routes/files.ts` (uploads/downloads)
 - Services: `backend/src/services/file_service.ts`
-- Frontend: `frontend/src/pages/files.tsx`, `frontend/src/pages/file_editor.tsx`
+- Frontend: `frontend/src/pages/app/servers/id/files.tsx`, `frontend/src/pages/app/servers/id/file_editor.tsx`
 - Hooks: `frontend/src/hooks/use_files.ts`
 
 **Epic: JAR Management**
-- Routes: `backend/src/routes/handlers/jars.ts`
+- API: `backend/src/api/jars.ts`
 - Services: `backend/src/services/jar_service.ts`
-- Frontend: `frontend/src/pages/server_settings.tsx`
+- Frontend: `frontend/src/pages/app/servers/id/settings/jars.tsx`
 - Hooks: `frontend/src/hooks/use_jars.ts`
 
 **Epic: Plugin Management**
-- Routes: `backend/src/routes/handlers/plugins.ts`
-- Frontend: `frontend/src/pages/plugins.tsx`
+- API: `backend/src/api/plugins.ts`
+- Routes: `backend/src/routes/plugins.ts` (upload)
+- Frontend: `frontend/src/pages/app/servers/id/plugins.tsx`
 - Hooks: `frontend/src/hooks/use_plugins.ts`
 
 **Epic: Scheduled Tasks**
-- Routes: `backend/src/routes/handlers/tasks.ts`
+- API: `backend/src/api/tasks.ts`
 - Services: `backend/src/services/task_scheduler.ts`
-- DB: `backend/src/db/schema/scheduled_tasks.ts`
-- Frontend: `frontend/src/pages/tasks.tsx`
+- DB: `backend/src/db/schema/tasks.ts`
+- Frontend: `frontend/src/pages/app/servers/id/tasks.tsx`
 - Hooks: `frontend/src/hooks/use_tasks.ts`
+
+**Epic: Firewall Management**
+- API: `backend/src/api/firewall.ts`
+- DB: `backend/src/db/schema/firewall_rules.ts`
+- Frontend: `frontend/src/pages/app/servers/id/settings/firewall.tsx`
+
+**Epic: Custom Domains**
+- API: `backend/src/api/domains.ts`
+- DB: `backend/src/db/schema/custom_domains.ts`
+- Frontend: `frontend/src/pages/app/servers/id/settings/domains.tsx`
+- Hooks: `frontend/src/hooks/use_domains.ts`
+
+**Epic: SFTP Accounts**
+- API: `backend/src/api/sftp.ts`
+- DB: `backend/src/db/schema/sftp_accounts.ts`
+- Frontend: `frontend/src/pages/app/servers/id/settings/ftp.tsx`
+- Hooks: `frontend/src/hooks/use_sftp.ts`
+
+**Epic: Audit Logs**
+- API: `backend/src/api/audit.ts`
+- DB: `backend/src/db/schema/audit_logs.ts`
 
 ---
 
@@ -1168,7 +1245,7 @@ remnant/
 **Error Handling:**
 - Constants: `shared/src/constants/error_codes.ts`
 - Backend handler: `backend/src/plugins/error_handler.ts`
-- Frontend display: `frontend/src/components/ui/toast.tsx`
+- Frontend display: toast notifications (sonner)
 
 **Logging:**
 - Backend: `backend/src/utils/logger.ts` (pino)
@@ -1208,8 +1285,8 @@ User Action → React Component → Zustand Store → ts-rest hook
     → Response → TanStack Cache → Zustand → Component Re-render
 
 Real-time Console:
-MC Process stdout → Server Service → WebSocket Handler
-    → Frontend Socket Client → Console Store → Console Component
+MC Process stdout → Server Service → WebSocket Handler (@fastify/websocket)
+    → Frontend WebSocket Client → Console Store → Console Component
 ```
 
 ---
@@ -1251,7 +1328,7 @@ turbo lint
 
 **Decision Compatibility:**
 - ✅ Turborepo + pnpm workspaces fonctionnent parfaitement ensemble
-- ✅ Fastify + Socket.io : compatibilité native via @fastify/websocket
+- ✅ Fastify + @fastify/websocket : WebSocket natif intégré nativement
 - ✅ Drizzle ORM + SQLite : combinaison recommandée, types inférés
 - ✅ React + Vite + Tailwind : stack mature et bien intégré
 - ✅ Zustand + TanStack Query : pas de conflit, responsabilités complémentaires
@@ -1278,13 +1355,13 @@ turbo lint
 |-------------|----------------------|
 | Server Start/Stop/Restart | `server_service.ts` + child process management |
 | Auto-start systemd | Documentation + scripts (hors panel) |
-| Console temps réel | Socket.io `console:*` events + handlers |
+| Console temps réel | @fastify/websocket `console:*` events + handlers |
 | File browser + editor | Routes `files.ts` + éditeur de code intégré |
 | JAR management | `server_service.ts` + PaperMC API integration |
 | JVM flags config | `servers` table + settings page |
 | Plugin upload | Routes `plugins.ts` + upload handling |
 | Scheduled tasks | `tasks.ts` routes/service + cron execution |
-| Monitoring CPU/RAM | `metrics_service.ts` + Socket.io broadcast |
+| Monitoring CPU/RAM | `metrics_service.ts` + WebSocket broadcast |
 | Players list | `server_service.ts` via RCON ou log parsing |
 | Multi-user + permissions | `users` table + permission guards |
 

@@ -54,7 +54,8 @@ To generate all epics with their stories based on the approved epics_list, follo
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Generate stories collaboratively with user input
-- 💾 Append epics and stories to {outputFile} following template
+- 💾 For each story, append it to the epic's `N-0-epic-*.md` file in the stories table
+- 💾 Do NOT write story details into {outputFile} (epics.md) — it is only a Coverage Map index
 - 📖 Process epics one at a time in sequence
 - 🚫 FORBIDDEN to skip any epic or rush through stories
 
@@ -179,11 +180,12 @@ After writing each story:
 - "Is the scope appropriate for a single dev session?"
 - "Are the acceptance criteria complete and testable?"
 
-#### E. Append to Document
+#### E. Update Epic File
 
 When story is approved:
 
-- Append it to {outputFile} following template structure
+- Add a row to the stories table in the epic's `N-0-epic-*.md` file: `| N.M | Story Title | [N-M-story-slug.md](N-M-story-slug.md) |`
+- The story file itself will be created later via the `create-story` workflow — at this stage, only the epic's stories table is updated
 - Use correct numbering (Epic N, Story M)
 - Maintain proper markdown formatting
 
@@ -209,19 +211,21 @@ After all epics and stories are generated:
 - Confirm all FRs are covered
 - Check formatting consistency
 
-## TEMPLATE STRUCTURE COMPLIANCE:
+## OUTPUT STRUCTURE COMPLIANCE:
 
-The final {outputFile} must follow this structure exactly:
+The output is split across multiple files:
 
+**`{outputFile}` (epics.md)** — lightweight index containing only:
 1. **Overview** section with project name
-2. **Requirements Inventory** with all three subsections populated
-3. **FR Coverage Map** showing requirement to epic mapping
-4. **Epic List** with approved epic structure
-5. **Epic sections** for each epic (N = 1, 2, 3...)
-   - Epic title and goal
-   - All stories for that epic (M = 1, 2, 3...)
-     - Story title and user story
-     - Acceptance Criteria using Given/When/Then format
+2. **Implementation Standards**
+3. **Coverage Map** table with FR → Epic links (each Epic column links to `{implementation_artifacts}/N-0-epic-*.md`)
+
+**`{implementation_artifacts}/N-0-epic-*.md`** — one file per epic containing:
+1. Epic title and goal
+2. FRs covered
+3. Stories table with links to story files
+
+**Story details** (ACs, user story, tasks) are NOT written at this stage — they are created via the `create-story` workflow later.
 
 ### 7. Present FINAL MENU OPTIONS
 

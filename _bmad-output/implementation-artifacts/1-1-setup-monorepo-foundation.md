@@ -61,7 +61,7 @@ done
 - [x] Task 3: Créer le package frontend (AC: #2)
   - [x] Utiliser `pnpm create vite` avec template react-ts
   - [x] Installer Tailwind CSS + PostCSS
-  - [x] Installer socket.io-client, @monaco-editor/react
+  - [x] Installer @monaco-editor/react
   - [x] Installer Zustand, TanStack Query, TanStack Router
   - [x] Configurer Tailwind (tailwind.config.js, postcss.config.js)
   - [x] Créer tsconfig.json avec strict mode
@@ -111,7 +111,6 @@ Cette story implémente le **Starter Template** défini dans l'architecture:
     "@fastify/cookie": "^10",
     "@fastify/cors": "^10",
     "@fastify/websocket": "^11",
-    "socket.io": "^4",
     "drizzle-orm": "^0.35",
     "better-sqlite3": "^11",
     "bcrypt": "^5",
@@ -139,7 +138,6 @@ Cette story implémente le **Starter Template** défini dans l'architecture:
     "@tanstack/react-router": "^1",
     "@tanstack/react-query": "^5",
     "zustand": "^5",
-    "socket.io-client": "^4",
     "@monaco-editor/react": "^4"
   },
   "devDependencies": {

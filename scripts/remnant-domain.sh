@@ -9,8 +9,6 @@ set -euo pipefail
 # === Constants ===
 SITES_AVAILABLE="/etc/nginx/sites-available"
 SITES_ENABLED="/etc/nginx/sites-enabled"
-STREAMS_AVAILABLE="/etc/nginx/streams-available"
-STREAMS_ENABLED="/etc/nginx/streams-enabled"
 DOMAIN_REGEX='^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$'
 MIN_PORT=1024
 MAX_PORT=65535
@@ -170,46 +168,6 @@ server {
 VHOST
 }
 
-check_stream_module() {
-  if nginx -V 2>&1 | grep -q "with-stream"; then
-    return 0
-  fi
-  json_error "Nginx stream module (ngx_stream_module) is not available. Install it with: apt install libnginx-mod-stream"
-}
-
-ensure_stream_dirs() {
-  # Only set up stream dirs if the module is available
-  if ! nginx -V 2>&1 | grep -q "with-stream"; then
-    return 1
-  fi
-
-  mkdir -p "$STREAMS_AVAILABLE" "$STREAMS_ENABLED"
-
-  # Ensure nginx.conf includes streams
-  if ! grep -q "streams-enabled" /etc/nginx/nginx.conf 2>/dev/null; then
-    if grep -q "^stream {" /etc/nginx/nginx.conf 2>/dev/null; then
-      return 0
-    fi
-    cat >> /etc/nginx/nginx.conf << 'STREAM_INCLUDE'
-
-stream {
-    include /etc/nginx/streams-enabled/*;
-}
-STREAM_INCLUDE
-  fi
-}
-
-generate_tcp_stream() {
-  local domain="$1" port="$2"
-  cat <<STREAM
-# TCP proxy for ${domain} -> 127.0.0.1:${port}
-server {
-    listen ${port};
-    proxy_pass 127.0.0.1:${port};
-}
-STREAM
-}
-
 # === Actions ===
 action_add() {
   local domain="$1" port="$2" type="$3"
@@ -255,10 +213,6 @@ action_remove() {
   # Remove HTTP vhost
   rm -f "${SITES_ENABLED}/${filename}"
   rm -f "${SITES_AVAILABLE}/${filename}"
-
-  # Remove TCP stream (if exists)
-  rm -f "${STREAMS_ENABLED}/${filename}" 2>/dev/null || true
-  rm -f "${STREAMS_AVAILABLE}/${filename}" 2>/dev/null || true
 
   nginx_test_and_reload || true
 

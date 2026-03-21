@@ -138,8 +138,8 @@ development_status:
   epic-13: done
   13-1-shared-schemas-onboarding: done
   13-2-backend-needs-setup: done
-  13-3-backend-system-check-service: done
-  13-4-backend-system-check-endpoint: done
+  13-3-backend-system-check-service: cancelled
+  13-4-backend-system-check-endpoint: cancelled
   13-5-backend-setup-endpoint: done
   13-6-backend-remove-seed: done
   13-7-frontend-hooks-onboarding: done

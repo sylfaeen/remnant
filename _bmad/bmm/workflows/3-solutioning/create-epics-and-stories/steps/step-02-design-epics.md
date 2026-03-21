@@ -119,20 +119,30 @@ For each proposed epic:
 
 **Step C: Create the epics_list**
 
-Format the epics_list as:
+For each epic, create a dedicated file in `{implementation_artifacts}/` with the naming convention `N-0-epic-<slug>.md` (e.g., `1-0-epic-foundation-auth.md`). This ensures epics sort before their stories (`1-1-*`, `1-2-*`, etc.).
+
+Each epic file contains:
+
+```markdown
+# Epic N: [Epic Title]
+
+[Epic goal statement - what users can accomplish]
+
+**FRs couverts:** FR1, FR2, FR3, etc.
+
+## Stories
+
+| Story | Titre | Fichier |
+|-------|-------|---------|
+```
+
+The stories table starts empty — it will be populated in Step 3 as stories are created.
+
+Then update the Coverage Map in `{outputFile}` (epics.md) with links to each epic file:
 
 ```
-## Epic List
-
-### Epic 1: [Epic Title]
-[Epic goal statement - what users can accomplish]
-**FRs covered:** FR1, FR2, FR3, etc.
-
-### Epic 2: [Epic Title]
-[Epic goal statement - what users can accomplish]
-**FRs covered:** FR4, FR5, FR6, etc.
-
-[Continue for all epics]
+| FR1 | [Epic 1](../implementation-artifacts/1-0-epic-<slug>.md) | Description |
+| FR2 | [Epic 1](../implementation-artifacts/1-0-epic-<slug>.md) | Description |
 ```
 
 ### 4. Present Epic List for Review
@@ -180,13 +190,13 @@ If user wants changes:
 - Re-present for approval
 - Repeat until approval is received
 
-## CONTENT TO UPDATE IN DOCUMENT:
+## CONTENT TO UPDATE:
 
-After approval, update {outputFile}:
+After approval:
 
-1. Replace {{epics_list}} placeholder with the approved epic list
-2. Replace {{requirements_coverage_map}} with the coverage map
-3. Ensure all FRs are mapped to epics
+1. Create one `N-0-epic-<slug>.md` file per epic in `{implementation_artifacts}/`
+2. Update `{outputFile}` (epics.md): replace `{{requirements_coverage_map}}` with the Coverage Map table containing links to each epic file
+3. Ensure all FRs are mapped to epics in the Coverage Map
 
 ### 8. Present MENU OPTIONS
 

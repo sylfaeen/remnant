@@ -16,8 +16,8 @@ json_error()   { echo "{\"success\":false,\"error\":\"$1\"}" >&2; exit 1; }
 # === Input validation ===
 validate_action() {
   local action="$1"
-  if ! [[ "$action" =~ ^(create-user|update-password|update-permissions|delete-user)$ ]]; then
-    json_error "Invalid action: must be create-user, update-password, update-permissions, or delete-user"
+  if ! [[ "$action" =~ ^(create-user|update-password|update-permissions|update-paths|delete-user)$ ]]; then
+    json_error "Invalid action: must be create-user, update-password, update-permissions, update-paths, or delete-user"
   fi
 }
 
@@ -63,9 +63,65 @@ ensure_sftp_group() {
   fi
 }
 
+# === Path setup ===
+# Sets up the chroot directory structure with symlinks to allowed paths.
+# If allowed_paths is empty or contains only "/", the entire server directory is linked.
+# Otherwise, individual subdirectories are symlinked.
+setup_allowed_paths() {
+  local username="$1" server_path="$2" allowed_paths="$3"
+  local chroot_dir="/home/${username}"
+
+  # Remove any existing server symlinks/dirs inside chroot
+  rm -rf "${chroot_dir}/server"
+
+  if [ -z "$allowed_paths" ] || [ "$allowed_paths" = '/' ] || [ "$allowed_paths" = '["/"]' ] || [ "$allowed_paths" = '[]' ]; then
+    # Full access: symlink entire server directory
+    ln -sfn "$server_path" "${chroot_dir}/server"
+  else
+    # Restricted access: create server dir and symlink only allowed subpaths
+    mkdir -p "${chroot_dir}/server"
+    chown root:root "${chroot_dir}/server"
+    chmod 755 "${chroot_dir}/server"
+
+    # Parse comma-separated paths (passed as "path1,path2,path3")
+    IFS=',' read -ra PATHS <<< "$allowed_paths"
+    for subpath in "${PATHS[@]}"; do
+      # Trim whitespace
+      subpath=$(echo "$subpath" | xargs)
+      # Strip leading slash
+      subpath="${subpath#/}"
+
+      if [ -z "$subpath" ]; then
+        # Root path means full access
+        rm -rf "${chroot_dir}/server"
+        ln -sfn "$server_path" "${chroot_dir}/server"
+        return
+      fi
+
+      # Block path traversal
+      if [[ "$subpath" == *".."* ]]; then
+        continue
+      fi
+
+      local target="${server_path}/${subpath}"
+      if [ -e "$target" ]; then
+        # Create parent directories if needed
+        local parent
+        parent=$(dirname "${chroot_dir}/server/${subpath}")
+        mkdir -p "$parent"
+        ln -sfn "$target" "${chroot_dir}/server/${subpath}"
+      fi
+    done
+  fi
+
+  # Set permissions on the server path for the SFTP user
+  chown -R "${username}:${SFTP_GROUP}" "$server_path"
+  chmod -R 775 "$server_path"
+}
+
 # === Actions ===
 action_create_user() {
-  local username="$1" password="$2" server_path="$3"
+  local username="$1" password="$2" server_path="$3" allowed_paths="${4:-}"
 
   validate_username "$username"
   validate_path "$server_path"
@@ -89,13 +145,8 @@ action_create_user() {
   # Set password
   echo "${username}:${password}" | chpasswd
 
-  # Create the server data directory inside chroot and symlink to actual server path
-  local data_dir="${chroot_dir}/server"
-  ln -sfn "$server_path" "$data_dir"
-
-  # Set permissions on the server path for the SFTP user
-  chown -R "${username}:${SFTP_GROUP}" "$server_path"
-  chmod -R 775 "$server_path"
+  # Set up allowed paths (symlinks into chroot)
+  setup_allowed_paths "$username" "$server_path" "$allowed_paths"
 
   json_success "create-user"
 }
@@ -150,6 +201,21 @@ action_update_permissions() {
   json_success "update-permissions"
 }
 
+action_update_paths() {
+  local username="$1" server_path="$2" allowed_paths="${3:-}"
+
+  validate_username "$username"
+  validate_path "$server_path"
+
+  if ! id "$username" &>/dev/null; then
+    json_error "System user '${username}' does not exist"
+  fi
+
+  setup_allowed_paths "$username" "$server_path" "$allowed_paths"
+
+  json_success "update-paths"
+}
+
 action_delete_user() {
   local username="$1"
 
@@ -185,8 +251,9 @@ case "$ACTION" in
     USERNAME="${2:-}"
     PASSWORD="${3:-}"
     SERVER_PATH="${4:-}"
-    [ -n "$USERNAME" ] && [ -n "$PASSWORD" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 create-user <username> <password> <server_path>"
-    action_create_user "$USERNAME" "$PASSWORD" "$SERVER_PATH"
+    ALLOWED_PATHS="${5:-}"
+    [ -n "$USERNAME" ] && [ -n "$PASSWORD" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 create-user <username> <password> <server_path> [allowed_paths]"
+    action_create_user "$USERNAME" "$PASSWORD" "$SERVER_PATH" "$ALLOWED_PATHS"
     ;;
   update-password)
     USERNAME="${2:-}"
@@ -200,6 +267,13 @@ case "$ACTION" in
     PERMISSIONS="${4:-}"
     [ -n "$USERNAME" ] && [ -n "$SERVER_PATH" ] && [ -n "$PERMISSIONS" ] || json_error "Usage: $0 update-permissions <username> <server_path> <permissions>"
     action_update_permissions "$USERNAME" "$SERVER_PATH" "$PERMISSIONS"
+    ;;
+  update-paths)
+    USERNAME="${2:-}"
+    SERVER_PATH="${3:-}"
+    ALLOWED_PATHS="${4:-}"
+    [ -n "$USERNAME" ] && [ -n "$SERVER_PATH" ] || json_error "Usage: $0 update-paths <username> <server_path> [allowed_paths]"
+    action_update_paths "$USERNAME" "$SERVER_PATH" "$ALLOWED_PATHS"
     ;;
   delete-user)
     USERNAME="${2:-}"

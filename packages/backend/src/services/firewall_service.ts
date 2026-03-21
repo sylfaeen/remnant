@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { eq, and } from 'drizzle-orm';
 import { db } from '@remnant/backend/db';
 import { firewallRules } from '@remnant/backend/db/schema';
-import type { FirewallProtocol } from '@remnant/shared';
+import { type FirewallProtocol, ErrorCodes } from '@remnant/shared';
 import { APP_DIR } from '@remnant/backend/services/paths';
 
 const SCRIPT_PATH = process.env.FIREWALL_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-firewall.sh');
@@ -42,14 +42,13 @@ export class FirewallService {
   }
 
   async addRule(serverId: number, port: number, protocol: FirewallProtocol, label: string) {
-    // Check for duplicate port+protocol on the same server
     const [existing] = await db
       .select()
       .from(firewallRules)
       .where(and(eq(firewallRules.server_id, serverId), eq(firewallRules.port, port), eq(firewallRules.protocol, protocol)))
       .limit(1);
 
-    if (existing) throw new Error(`Port ${port}/${protocol} is already configured for this server`);
+    if (existing) throw new Error(ErrorCodes.FIREWALL_RULE_EXISTS);
 
     const [rule] = await db
       .insert(firewallRules)
@@ -62,12 +61,11 @@ export class FirewallService {
       })
       .returning();
 
-    // Execute firewall script
     const result = await runFirewallScript(['allow', String(port), protocol]);
 
     if (!result.success) {
       await db.delete(firewallRules).where(eq(firewallRules.id, rule.id));
-      throw new Error(result.error || 'Failed to open port on firewall');
+      throw new Error(ErrorCodes.FIREWALL_SCRIPT_FAILED);
     }
 
     return rule;
@@ -76,12 +74,11 @@ export class FirewallService {
   async removeRule(ruleId: number) {
     const [rule] = await db.select().from(firewallRules).where(eq(firewallRules.id, ruleId)).limit(1);
 
-    if (!rule) throw new Error('Rule not found');
+    if (!rule) throw new Error(ErrorCodes.FIREWALL_RULE_NOT_FOUND);
 
-    // Close port on the firewall if the rule was enabled
     if (rule.enabled) {
       const result = await runFirewallScript(['deny', String(rule.port), rule.protocol]);
-      if (!result.success) throw new Error(result.error || 'Failed to close port on firewall');
+      if (!result.success) throw new Error(ErrorCodes.FIREWALL_SCRIPT_FAILED);
     }
 
     await db.delete(firewallRules).where(eq(firewallRules.id, ruleId));
@@ -92,14 +89,14 @@ export class FirewallService {
   async toggleRule(ruleId: number) {
     const [rule] = await db.select().from(firewallRules).where(eq(firewallRules.id, ruleId)).limit(1);
 
-    if (!rule) throw new Error('Rule not found');
+    if (!rule) throw new Error(ErrorCodes.FIREWALL_RULE_NOT_FOUND);
 
     const newEnabled = !rule.enabled;
     const action = newEnabled ? 'allow' : 'deny';
 
     const result = await runFirewallScript([action, String(rule.port), rule.protocol]);
 
-    if (!result.success) throw new Error(result.error || `Failed to ${action} port on firewall`);
+    if (!result.success) throw new Error(ErrorCodes.FIREWALL_SCRIPT_FAILED);
 
     const [updated] = await db
       .update(firewallRules)
@@ -147,7 +144,6 @@ export class FirewallService {
   async cleanupServerRules(serverId: number) {
     const rules = await db.select().from(firewallRules).where(eq(firewallRules.server_id, serverId));
 
-    // Close all enabled ports before deletion
     for (const rule of rules) {
       if (rule.enabled) {
         await runFirewallScript(['deny', String(rule.port), rule.protocol]);

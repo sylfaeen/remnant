@@ -1,5 +1,5 @@
 import { initServer } from '@ts-rest/fastify';
-import { contract } from '@remnant/shared';
+import { contract, ErrorCodes } from '@remnant/shared';
 import { ServerService } from '@remnant/backend/services/server_service';
 import { firewallService } from '@remnant/backend/services/firewall_service';
 import { auditService } from '@remnant/backend/services/audit_service';
@@ -54,6 +54,17 @@ export const firewallRoutes = s.router(contract.firewall, {
       return { status: 201 as const, body: rule };
     } catch (error: unknown) {
       if (isMiddlewareError(error)) return error;
+      if (error instanceof Error) {
+        if (error.message === ErrorCodes.FIREWALL_RULE_EXISTS) {
+          return { status: 200 as const, body: { message: 'Port/protocol combination already exists for this server' } };
+        }
+        if (error.message === ErrorCodes.FIREWALL_SCRIPT_FAILED) {
+          return { status: 200 as const, body: { message: 'Firewall script failed to open port' } };
+        }
+        if (error.message === ErrorCodes.FIREWALL_PORT_RESERVED) {
+          return { status: 200 as const, body: { message: 'Port is reserved and cannot be used' } };
+        }
+      }
       throw error;
     }
   },
@@ -79,8 +90,15 @@ export const firewallRoutes = s.router(contract.firewall, {
       return { status: 200 as const, body: { message: 'Rule removed' } };
     } catch (error: unknown) {
       if (isMiddlewareError(error)) return error;
-      const message = error instanceof Error ? error.message : 'Failed to remove firewall rule';
-      return { status: 200 as const, body: { message } };
+      if (error instanceof Error) {
+        if (error.message === ErrorCodes.FIREWALL_RULE_NOT_FOUND) {
+          return { status: 200 as const, body: { message: 'Firewall rule not found' } };
+        }
+        if (error.message === ErrorCodes.FIREWALL_SCRIPT_FAILED) {
+          return { status: 200 as const, body: { message: 'Firewall script failed to close port' } };
+        }
+      }
+      return { status: 200 as const, body: { message: 'Failed to remove firewall rule' } };
     }
   },
 

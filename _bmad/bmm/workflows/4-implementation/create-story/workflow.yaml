@@ -46,7 +46,7 @@ input_file_patterns:
     sharded: "{planning_artifacts}/*ux*/*.md"
     load_strategy: "SELECTIVE_LOAD" # Only load if needed
   epics:
-    description: "Enhanced epics+stories file with BDD and source hints"
-    whole: "{planning_artifacts}/*epic*.md"
-    sharded: "{planning_artifacts}/*epic*/*.md"
-    load_strategy: "SELECTIVE_LOAD" # Only load needed epic
+    description: "Epic files live in implementation-artifacts with naming N-0-epic-*.md"
+    whole: "{implementation_artifacts}/*-0-epic-*.md"
+    index: "{planning_artifacts}/epics.md"
+    load_strategy: "SELECTIVE_LOAD" # Only load needed epic file
