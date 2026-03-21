@@ -181,7 +181,7 @@ export const authRoutes = s.router(contract.auth, {
 
   refresh: async ({ request, reply }) => {
     try {
-      checkRateLimit(`ip:${request.ip}:auth.refresh`, 5, 60_000);
+      checkRateLimit(`ip:${request.ip}:auth.refresh`, 10, 60_000);
 
       const authService = new AuthService(request.server);
       const refreshToken = request.cookies[REFRESH_TOKEN_COOKIE_NAME];
