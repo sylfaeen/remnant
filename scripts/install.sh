@@ -509,9 +509,9 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=remnant
 PrivateTmp=true
-ProtectSystem=strict
+ProtectSystem=full
 ProtectHome=false
-ReadWritePaths=${REMNANT_HOME} /etc/nginx /etc/letsencrypt /var/lib/letsencrypt /var/lib/nginx /var/log/nginx /var/log/letsencrypt /run /etc/passwd /etc/shadow /etc/group /etc/gshadow /etc/subuid /etc/subgid /home
+ReadWritePaths=${REMNANT_HOME} /var/lib/letsencrypt /var/lib/nginx /var/log/nginx /var/log/letsencrypt /run /home
 
 [Install]
 WantedBy=multi-user.target
