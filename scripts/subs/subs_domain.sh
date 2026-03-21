@@ -6,18 +6,15 @@
 
 set -euo pipefail
 
-# === Constants ===
 SITES_AVAILABLE="/etc/nginx/sites-available"
 SITES_ENABLED="/etc/nginx/sites-enabled"
 DOMAIN_REGEX='^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$'
 MIN_PORT=1024
 MAX_PORT=65535
 
-# === Helpers ===
 json_success() { echo "{\"success\":true,\"action\":\"$1\",\"domain\":\"$2\"}"; }
 json_error()   { echo "{\"success\":false,\"error\":\"$1\"}" >&2; exit 1; }
 
-# === Input validation ===
 validate_action() {
   local action="$1"
   if ! [[ "$action" =~ ^(add|remove|enable-ssl|dns-check|list|renew|check-expiry|ensure-timer|update-panel|reset-panel)$ ]]; then
@@ -67,7 +64,6 @@ validate_type() {
   fi
 }
 
-# === Safe path construction ===
 safe_vhost_path() {
   local domain="$1"
   local filename
@@ -85,7 +81,6 @@ safe_vhost_path() {
   echo "$path"
 }
 
-# === DNS resolution (pipefail-safe) ===
 resolve_domain() {
   local domain="$1"
   local ip=""
@@ -99,12 +94,10 @@ resolve_domain() {
   echo "$ip"
 }
 
-# === Detect server IP ===
 get_server_ip() {
   hostname -I 2>/dev/null | awk '{print $1}' || echo ""
 }
 
-# === DNS verification ===
 verify_dns() {
   local domain="$1"
   local server_ip
@@ -126,7 +119,6 @@ verify_dns() {
   fi
 }
 
-# === Nginx operations ===
 nginx_test_and_reload() {
   local nginx_bin
   nginx_bin=$(command -v nginx 2>/dev/null || echo "/usr/sbin/nginx")
@@ -168,7 +160,6 @@ server {
 VHOST
 }
 
-# === Actions ===
 action_add() {
   local domain="$1" port="$2" type="$3"
 
@@ -466,7 +457,6 @@ PANEL_VHOST
   echo "{\"success\":true,\"action\":\"reset-panel\"}"
 }
 
-# === Main ===
 ACTION="${1:-}"
 [ -n "$ACTION" ] || json_error "Usage: $0 <add|remove|enable-ssl|dns-check|list|renew|update-panel|reset-panel> [args...]"
 

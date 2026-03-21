@@ -6,14 +6,11 @@
 
 set -euo pipefail
 
-# === Constants ===
 SFTP_GROUP="sftp-users"
 
-# === Helpers ===
 json_success() { echo "{\"success\":true,\"action\":\"$1\"}"; }
 json_error()   { echo "{\"success\":false,\"error\":\"$1\"}" >&2; exit 1; }
 
-# === Input validation ===
 validate_action() {
   local action="$1"
   if ! [[ "$action" =~ ^(create-user|update-password|update-permissions|update-paths|delete-user)$ ]]; then
@@ -56,14 +53,12 @@ validate_permissions() {
   fi
 }
 
-# === Ensure sftp-users group exists ===
 ensure_sftp_group() {
   if ! getent group "$SFTP_GROUP" &>/dev/null; then
     groupadd "$SFTP_GROUP"
   fi
 }
 
-# === Path setup ===
 # Sets up the chroot directory structure with symlinks to allowed paths.
 # If allowed_paths is empty or contains only "/", the entire server directory is linked.
 # Otherwise, individual subdirectories are symlinked.
@@ -119,7 +114,6 @@ setup_allowed_paths() {
   chmod -R 775 "$server_path"
 }
 
-# === Actions ===
 action_create_user() {
   local username="$1" password="$2" server_path="$3" allowed_paths="${4:-}"
 
@@ -240,7 +234,6 @@ action_delete_user() {
   json_success "delete-user"
 }
 
-# === Main ===
 ACTION="${1:-}"
 [ -n "$ACTION" ] || json_error "Usage: $0 <create-user|update-password|update-permissions|delete-user> [args...]"
 

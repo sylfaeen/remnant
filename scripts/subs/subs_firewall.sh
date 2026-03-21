@@ -6,16 +6,13 @@
 
 set -euo pipefail
 
-# === Constants ===
 RESERVED_PORTS="22 80 443 3000 3001"
 MIN_PORT=1024
 MAX_PORT=65535
 
-# === Helpers ===
 json_success() { echo "{\"success\":true,\"action\":\"$1\",\"port\":$2,\"protocol\":\"$3\"}"; }
 json_error()   { echo "{\"success\":false,\"error\":\"$1\"}" >&2; exit 1; }
 
-# === Firewall detection (priority: ufw → firewalld → iptables) ===
 detect_firewall() {
   if command -v ufw &>/dev/null; then
     echo "ufw"
@@ -28,7 +25,6 @@ detect_firewall() {
   fi
 }
 
-# === Input validation ===
 validate_port() {
   local port="$1"
   # Strict numeric check
@@ -59,7 +55,6 @@ validate_action() {
   fi
 }
 
-# === UFW operations ===
 ufw_allow() {
   local port="$1" proto="$2"
   if [ "$proto" = "both" ]; then
@@ -122,7 +117,6 @@ ufw_list() {
   fi
 }
 
-# === firewalld operations ===
 firewalld_allow() {
   local port="$1" proto="$2"
   if [ "$proto" = "both" ]; then
@@ -183,7 +177,6 @@ firewalld_list() {
   echo "[${rules}]"
 }
 
-# === iptables operations ===
 iptables_allow() {
   local port="$1" proto="$2"
   if [ "$proto" = "both" ]; then
@@ -251,7 +244,6 @@ iptables_list() {
   echo "[${rules}]"
 }
 
-# === Main ===
 ACTION="${1:-}"
 PORT="${2:-}"
 PROTOCOL="${3:-}"

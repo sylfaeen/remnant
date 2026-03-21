@@ -1,17 +1,7 @@
 import { useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import {
-  CheckCircle2,
-  ChevronDown,
-  Clock,
-  Loader2,
-  Pencil,
-  Plus,
-  Terminal,
-  Trash2,
-  XCircle,
-} from 'lucide-react';
+import { CheckCircle2, ChevronDown, Clock, Loader2, Pencil, Plus, Terminal, Trash2, XCircle } from 'lucide-react';
 import { PageLoader } from '@remnant/frontend/features/ui/page_loader';
 import { PageError } from '@remnant/frontend/features/ui/page_error';
 import { cn } from '@remnant/frontend/lib/cn';
@@ -303,10 +293,7 @@ function TaskRow({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className={'flex items-center'}>
-                      <Switch
-                        checked={task.enabled}
-                        onCheckedChange={() => onToggleConfirm(task.id)}
-                      />
+                      <Switch checked={task.enabled} onCheckedChange={() => onToggleConfirm(task.id)} />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>

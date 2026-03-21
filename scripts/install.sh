@@ -1,24 +1,6 @@
 #!/bin/bash
-#===============================================================================
-#
-#   Remnant — Game Server Management Panel
-#   One-line installer
-#
-#   Usage:
-#     curl -fsSL https://raw.githubusercontent.com/sylfaeen/remnant/main/install.sh | sudo bash
-#
-#   Structure:
-#     <REMNANT_HOME>/       (default: /opt/remnant)
-#     ├── app/              # Panel application
-#     │   └── data/         # SQLite database
-#     ├── servers/          # Minecraft servers
-#     ├── backups/          # Automatic backups
-#
-#===============================================================================
 
 set -e
-
-# ── Configuration ─────────────────────────────────────────────────────────────
 
 GITHUB_REPO="${REMNANT_REPO:-sylfaeen/remnant}"
 REMNANT_VERSION="${REMNANT_VERSION:-latest}"
@@ -34,16 +16,12 @@ NODE_VERSION="20"
 MIN_RAM_MB=512
 MIN_DISK_MB=500
 
-# ── Terminal colors ───────────────────────────────────────────────────────────
-
 if [[ -t 1 ]]; then
     RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m'
     CYAN='\033[0;36m' WHITE='\033[1;37m' GRAY='\033[0;90m' NC='\033[0m'
 else
     RED='' GREEN='' YELLOW='' BLUE='' CYAN='' WHITE='' GRAY='' NC=''
 fi
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 command_exists() { command -v "$1" &>/dev/null; }
 
@@ -87,7 +65,7 @@ ask_value() {
     fi
 }
 
-# ── OS-specific installers ────────────────────────────────────────────────────
+# OS-specific installers
 
 install_nodejs() {
     local setup_url
@@ -140,7 +118,7 @@ REPO
     done
 }
 
-# ── System detection ──────────────────────────────────────────────────────────
+# System detection
 
 detect_system() {
     if [[ -f /etc/os-release ]]; then
@@ -173,7 +151,7 @@ detect_system() {
     esac
 }
 
-# ── Version resolution ────────────────────────────────────────────────────────
+# Version resolution
 
 resolve_version() {
     if [[ "$REMNANT_VERSION" == "local" ]]; then
@@ -186,7 +164,7 @@ resolve_version() {
     fi
 }
 
-# ── Reinstall prompt ──────────────────────────────────────────────────────────
+# Reinstall prompt
 
 ask_reinstall() {
     [[ -d "$REMNANT_HOME" ]] || return 0
@@ -247,7 +225,7 @@ ask_reinstall() {
     esac
 }
 
-# ── Prompts ───────────────────────────────────────────────────────────────────
+# Prompts
 
 ask_install_paths() {
     local server_ip
@@ -291,7 +269,7 @@ ask_install_paths() {
     fi
 }
 
-# ── Step 1: System check ─────────────────────────────────────────────────────
+# Step 1: System check
 
 check_system() {
     print_step 1 7 "Checking system requirements"
@@ -331,7 +309,7 @@ check_system() {
     [[ $errors -eq 0 ]] || fail "System check failed with ${errors} error(s)"
 }
 
-# ── Step 2: Dependencies ─────────────────────────────────────────────────────
+# Step 2: Dependencies
 
 install_dependencies() {
     print_step 2 7 "Installing dependencies"
@@ -405,7 +383,7 @@ install_dependencies() {
     fi
 }
 
-# ── Step 3: Download & install ────────────────────────────────────────────────
+# Step 3: Download & install
 
 download_remnant() {
     print_step 3 7 "Downloading Remnant"
@@ -453,24 +431,24 @@ download_remnant() {
     print_ok "Dependencies installed"
 
     # CLI
-    cp "$APP_DIR/scripts/remnant-cli.sh" /usr/local/bin/remnant
+    cp "$APP_DIR/scripts/cli/cli.sh" /usr/local/bin/remnant
     chmod +x /usr/local/bin/remnant
     print_ok "CLI installed → remnant"
 
     # Firewall script
-    chmod +x "$APP_DIR/scripts/remnant-firewall.sh"
+    chmod +x "$APP_DIR/scripts/subs/subs_firewall.sh"
 
     # Domain script
-    chmod +x "$APP_DIR/scripts/remnant-domain.sh"
+    chmod +x "$APP_DIR/scripts/subs/subs_domain.sh"
 
     # SFTP script
-    chmod +x "$APP_DIR/scripts/remnant-sftp.sh"
+    chmod +x "$APP_DIR/scripts/subs/subs_sftp.sh"
 
     # Sudoers for scripts and service management
     cat > /etc/sudoers.d/remnant << SUDOERS_EOF
-${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-firewall.sh
-${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-domain.sh
-${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/remnant-sftp.sh
+${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/subs/subs_firewall.sh
+${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/subs/subs_domain.sh
+${SERVICE_USER} ALL=(root) NOPASSWD: ${APP_DIR}/scripts/subs/subs_sftp.sh
 ${SERVICE_USER} ALL=(root) NOPASSWD: /usr/bin/systemctl restart remnant
 ${SERVICE_USER} ALL=(root) NOPASSWD: /usr/bin/systemctl reload remnant
 SUDOERS_EOF
@@ -483,7 +461,7 @@ SUDOERS_EOF
     print_ok "Permissions set"
 }
 
-# ── Step 4: Service ───────────────────────────────────────────────────────────
+# Step 4: Service
 
 configure_service() {
     print_step 4 7 "Configuring service"
@@ -556,7 +534,7 @@ EOF
     fi
 }
 
-# ── Step 5: Nginx ─────────────────────────────────────────────────────────────
+# Step 5: Nginx
 
 configure_nginx() {
     print_step 5 7 "Configuring Nginx"
@@ -603,7 +581,7 @@ NGINX_EOF
     fi
 }
 
-# ── Step 6: Firewall ─────────────────────────────────────────────────────────
+# Step 6: Firewall
 
 configure_firewall() {
     print_step 6 7 "Configuring firewall (iptables whitelist)"
@@ -668,7 +646,7 @@ configure_firewall() {
     print_ok "Rules persisted across reboots"
 }
 
-# ── Step 7: Completion ────────────────────────────────────────────────────────
+# Step 7: Completion
 
 show_complete() {
     print_step 7 7 "Finalizing"
@@ -696,7 +674,7 @@ show_complete() {
     echo ""
 }
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# Main
 
 main() {
     echo ""

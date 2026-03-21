@@ -205,11 +205,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
         {toggleConfirm ? (
           <div className={'flex items-center gap-1.5'}>
             <span className={'text-sm text-zinc-600 dark:text-zinc-400'}>{t('common.confirm')}?</span>
-            <Button
-              variant={rule.enabled ? 'secondary' : 'success'}
-              size={'xs'}
-              onClick={handleToggleConfirm}
-            >
+            <Button variant={rule.enabled ? 'secondary' : 'success'} size={'xs'} onClick={handleToggleConfirm}>
               {t('common.yes')}
             </Button>
             <Button variant={'ghost'} size={'xs'} onClick={() => setToggleConfirm(false)}>
@@ -232,10 +228,7 @@ function RuleRow({ rule, onToggle, onDelete }: RuleRowProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className={'flex items-center'}>
-                    <Switch
-                      checked={rule.enabled}
-                      onCheckedChange={handleToggleChange}
-                    />
+                    <Switch checked={rule.enabled} onCheckedChange={handleToggleChange} />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className={'rounded-lg px-2.5 py-1.5 text-sm'}>

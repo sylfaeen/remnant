@@ -1,20 +1,6 @@
 #!/bin/bash
-#===============================================================================
-#
-#   Remnant Updater — Safe in-place upgrade
-#
-#   Preserves: database, .env, servers, backups, sessions
-#   Replaces:  application code, dependencies, CLI
-#
-#   Usage:
-#     sudo remnant update
-#     sudo REMNANT_VERSION=0.5.0 remnant update
-#
-#===============================================================================
 
 set -e
-
-# ── Configuration ─────────────────────────────────────────────────────────────
 
 GITHUB_REPO="${REMNANT_REPO:-sylfaeen/remnant}"
 REMNANT_VERSION="${REMNANT_VERSION:-latest}"
@@ -22,16 +8,12 @@ REMNANT_HOME="${REMNANT_HOME:-/opt/remnant}"
 APP_DIR="${REMNANT_HOME}/app"
 SERVICE_USER="${REMNANT_USER:-remnant}"
 
-# ── Terminal colors ───────────────────────────────────────────────────────────
-
 if [[ -t 1 ]]; then
     RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m'
     CYAN='\033[0;36m' WHITE='\033[1;37m' GRAY='\033[0;90m' NC='\033[0m'
 else
     RED='' GREEN='' YELLOW='' BLUE='' CYAN='' WHITE='' GRAY='' NC=''
 fi
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 command_exists() { command -v "$1" &>/dev/null; }
 
@@ -59,8 +41,6 @@ print_err()  { printf "  ${RED}✗${NC} %s\n" "$1"; }
 print_warn() { printf "  ${YELLOW}⚠${NC}  %s\n" "$1"; }
 
 print_step() { echo ""; echo -e "${WHITE}[${1}/${2}]${NC} ${3}"; }
-
-# ── Step 1: Pre-flight checks ────────────────────────────────────────────────
 
 preflight() {
     print_step 1 5 "Pre-flight checks"
@@ -106,8 +86,6 @@ preflight() {
     [[ ! $REPLY =~ ^[Nn]$ ]] || { echo -e "\n  Cancelled.\n"; exit 0; }
 }
 
-# ── Step 2: Stop services ────────────────────────────────────────────────────
-
 stop_services() {
     print_step 2 5 "Stopping services"
 
@@ -145,8 +123,6 @@ stop_services() {
 
     print_ok "All processes stopped"
 }
-
-# ── Step 3: Download & replace ────────────────────────────────────────────────
 
 download_and_replace() {
     print_step 3 5 "Downloading & installing v${REMNANT_VERSION}"
@@ -234,8 +210,6 @@ download_and_replace() {
     rm -rf "$staging" /tmp/remnant-env-backup /tmp/remnant-db-backup
 }
 
-# ── Step 4: Restart services ─────────────────────────────────────────────────
-
 restart_services() {
     print_step 4 5 "Restarting services"
 
@@ -261,8 +235,6 @@ restart_services() {
     fi
 }
 
-# ── Step 5: Done ──────────────────────────────────────────────────────────────
-
 show_complete() {
     print_step 5 5 "Finalizing"
 
@@ -276,8 +248,6 @@ show_complete() {
     echo -e "  ${WHITE}Logs:${NC}      remnant logs"
     echo ""
 }
-
-# ── Main ──────────────────────────────────────────────────────────────────────
 
 main() {
     echo ""
