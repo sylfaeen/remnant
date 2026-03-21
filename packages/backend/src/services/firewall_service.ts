@@ -6,7 +6,7 @@ import { firewallRules } from '@remnant/backend/db/schema';
 import { type FirewallProtocol, ErrorCodes } from '@remnant/shared';
 import { APP_DIR } from '@remnant/backend/services/paths';
 
-const SCRIPT_PATH = process.env.FIREWALL_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-firewall.sh');
+const SCRIPT_PATH = process.env.FIREWALL_SCRIPT_PATH || resolve(APP_DIR, 'scripts/subs/subs_firewall.sh');
 
 interface ScriptResult {
   success: boolean;

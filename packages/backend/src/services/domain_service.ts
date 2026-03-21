@@ -8,7 +8,7 @@ import { APP_DIR } from '@remnant/backend/services/paths';
 import { updateEnvVariable } from '@remnant/backend/services/env_service';
 import type { DomainType } from '@remnant/shared';
 
-const SCRIPT_PATH = process.env.DOMAIN_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-domain.sh');
+const SCRIPT_PATH = process.env.DOMAIN_SCRIPT_PATH || resolve(APP_DIR, 'scripts/subs/subs_domain.sh');
 
 export interface ScriptResult {
   success: boolean;

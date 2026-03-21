@@ -22,7 +22,7 @@ function getServerIp(): string {
   }
   return 'localhost';
 }
-const SCRIPT_PATH = process.env.SFTP_SCRIPT_PATH || resolve(APP_DIR, 'scripts/remnant-sftp.sh');
+const SCRIPT_PATH = process.env.SFTP_SCRIPT_PATH || resolve(APP_DIR, 'scripts/subs/subs_sftp.sh');
 
 export interface SftpInfo {
   host: string;
