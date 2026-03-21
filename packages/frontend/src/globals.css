@@ -25,6 +25,8 @@
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
+  --color-input-border: var(--input-border);
+  --color-input-bg: var(--input-bg);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

@@ -26,6 +26,8 @@
   --accent-foreground: #e4e4e7;
   --destructive: oklch(0.577 0.245 27.325);
   --border: rgba(255, 255, 255, 0.08);
+  --input-border: rgba(255, 255, 255, 0.14);
+  --input-bg: oklch(0.205 0 0);
   --input: oklch(0.269 0 0);
   --ring: oklch(0.556 0 0);
 
