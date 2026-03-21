@@ -20,7 +20,7 @@ fail() {
     exit 1
 }
 
-if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" ]]; then
+if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != "root" ]]; then
     fail "This script must be run as root (not via sudo). Log in as root first: su -"
 fi
 

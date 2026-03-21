@@ -45,7 +45,7 @@ print_step() { echo ""; echo -e "${WHITE}[${1}/${2}]${NC} ${3}"; }
 preflight() {
     print_step 1 5 "Pre-flight checks"
 
-    if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" ]]; then
+    if [[ $EUID -ne 0 ]] || [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != "root" ]]; then
         fail "This script must be run as root (not via sudo). Log in as root first: su -"
     fi
     [[ -d "$APP_DIR" ]] || fail "Remnant is not installed in ${REMNANT_HOME}. Run the installer first."
